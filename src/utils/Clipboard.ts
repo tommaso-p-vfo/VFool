@@ -1,4 +1,4 @@
-import { toast } from 'react-toastify';
+export type CopyToClipboardResponse = { message: string; success: boolean }
 
 /**
  * Copia un testo negli appunti e mostra un toast di conferma.
@@ -8,12 +8,11 @@ import { toast } from 'react-toastify';
  * Se la copia fallisce, l'errore viene scritto in console e viene chiamata
  * `fallbackFunction`, se fornita.
  *
- * Richiede `react-toastify` e un `<ToastContainer />` montato nell'applicazione.
  *
  * @param data - Testo da copiare. I numeri vengono convertiti in stringa.
  * @param dataName - Nome del dato, mostrato nel messaggio (es. `'Codice fiscale'`).
  * @param fallbackFunction - Chiamata con `data` se la copia non riesce.
- * @returns `true` se la copia è riuscita, altrimenti `false`.
+ * @returns un oggetto con un message e un success flag - `true` se la copia è riuscita, altrimenti `false`.
  *
  * @example
  * ```ts
@@ -30,18 +29,17 @@ export async function copyToClipboard(
     data: string | number,
     dataName?: string,
     fallbackFunction?: (data: string) => void,
-): Promise<boolean> {
+): Promise<CopyToClipboardResponse> {
     const text = String(data);
     try {
         await navigator.clipboard.writeText(text);
-        toast.success(dataName ? `${dataName} copiato negli appunti!` : 'Copiato negli appunti!');
-        return true;
+        return { message: dataName ? `${dataName} copiato negli appunti!` : 'Copiato negli appunti!', success: true };
     } catch (error) {
         console.error(
             dataName ? `${dataName}: errore durante la copia` : 'Errore durante la copia',
             error,
         );
         fallbackFunction?.(text);
-        return false;
+        return { message: 'copyToClipboard failed!', success: false };
     }
 }
