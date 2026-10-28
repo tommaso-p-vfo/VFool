@@ -42,6 +42,7 @@ import TableTopBar from "./components/table-top-bar/TableTopBar";
 
 import type { TableAttributes } from "./types/TableAttributes";
 import { type TableCustomFilter } from "./types/TableCustomFilter";
+import { TableCustomSetting } from "./types/TableCustomSettings";
 
 import type { ColumnState } from "./types/TableColumn";
 
@@ -51,7 +52,7 @@ import type { ColumnState } from "./types/TableColumn";
 
 import { buildPath } from "../../utils/Path";
 import { getFromSession } from "../../utils/StorageHelper";
-import { getTranslation } from "../../utils/TranslationHelper";
+import { getTranslation } from "../../locales/TranslationHelper";
 import { isEmptyObject } from "../../utils/Guards";
 import { formatAs } from "../../utils/Format";
 
@@ -81,9 +82,8 @@ import { useTableContext } from "./hooks/useTableContext";
 
 
 import { UiHelper } from "../../../core/helpers/UiHelper";
-import { type MenuItem } from "../../../types/system/MenuItem";
 import { IdsColor } from "../../../types/system/IdsColor";
-import type { UserGridSetting } from "../../../types/dto/UserGridSetting";
+
 
 
 
@@ -107,8 +107,12 @@ export const GenericTable =
             gridApi: () => gridApiRef.current
         }));
 
-        const t = useTranslations();
-        const user = useSelector((state) => state?.user?.data) ?? {} as User;
+        // const t = useTranslations();
+        // const user = useSelector((state) => state?.user?.data) ?? {} as User;
+
+
+        //TRANSLATIONS
+        const t = metadata?.t ?? {};
 
         //DOMAIN
         const [domain, setDomain] = useState<AgGridDomainType>();
@@ -126,7 +130,7 @@ export const GenericTable =
         const [activeFilter, setActiveFilter] = useState<TableCustomFilter>();
 
         //PREFERENZE COLONNA CORRENTI
-        const [gridSettings, setGridSettings] = useState<UserGridSetting>();
+        const [gridSettings, setGridSettings] = useState<TableCustomSetting>();
 
         //SOMMARIO - totali tabella ecc.
         const [summary, setSummary] = useState<any|undefined>(undefined);
@@ -155,7 +159,6 @@ export const GenericTable =
         
         //TABLE ICON AND NAME        
         const tableNameRef = useRef<string>('');
-        const [menuItem, setMenuItem] = useState<MenuItem>({} as MenuItem);
         const [customTitle, setCustomTitle] = useState<string | null>(null);
         const [gridDetails, setGridDetails] = useState<GridDetails | null>(null);
         const [hideTitle, setHideTitle] = useState<boolean>(false);
@@ -458,19 +461,6 @@ export const GenericTable =
             return { variant: "primary" };
         }, []);
 
-        const getMenuItem = () => {
-
-            let item = {} as MenuItem;
-            let iconSize = 40;
-
-            let feature = UiHelper.getMenuFeatureByDomain(agGridDomainRef.current);
-            if (feature)
-                item = UiHelper.getMenuItem(feature, t, iconSize);
-
-            return item;
-
-        }
-
         // Memoizzazione degli headers per evitare ricalcoli non necessari
         const _handleColumnDefinitions = useCallback((items: any) => {
 
@@ -510,9 +500,7 @@ export const GenericTable =
             //reset colonne per visualizzare il caricamento
             setColumnDefs([]);
 
-            tableNameRef.current = getTranslation(t, _domain + '.name');
-            let _menuItem = getMenuItem(_domain);
-            setMenuItem(_menuItem);
+            tableNameRef.current = t?.title ?? '';
 
             preFilterRef.current = metadata?.preFilter ?? null;
 
@@ -734,14 +722,14 @@ export const GenericTable =
                     <Container fluid className="ids-generic-table-container w-100 mt-3">
                         {!hideTitle &&
                             <h1 className="text-start d-flex align-items-center m-0 mt-2 mb-2 ms-2">
-                                <span className="me-2 pb-2">{menuItem.icon}</span>
+                                <span className="me-2 pb-2">{metadata.icon}</span>
                                 <span>{tableNameRef.current}</span>
                             </h1>
                         }
 
-                        {!hideTitle && menuItem.descritpion &&
+                        {!hideTitle && t.subTitle &&
                             <p className="mb-4 mt-0 ms-2 pt-2 fst-italic">
-                                {menuItem.descritpion}
+                                {t.subTitle}
                             </p>
                         }
 

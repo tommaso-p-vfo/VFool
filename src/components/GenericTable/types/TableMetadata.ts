@@ -3,11 +3,16 @@ import type { PageRequest } from "../../../../types/dto/PageTypes";
 import type { FilterModel } from "../../../../types/system/api/FilterModel";
 import type { ActionsConfig } from "../components/actions/types/ActionsConfig";
 import type { TableContextType } from "../contexts/TableContext";
+import { TableTranslation } from "./TableTranslation";
 
 /**
  * metadata pubblico da utilizzare per costruire nuove GenericTable
 */
 export type TableMetadata<T> = {
+
+    icon?:ReactElement;
+    t?: TableTranslation;
+
     domain: string; // Service Domain - Identificatore univoco della tabella (vd. DOMAIN e SUBDOMAIN)
     defaultPageRequest?: PageRequest; // Richiesta di pagina predefinita per la tabella
     searchFilterColumns?: string[]; //nome colonne del filtro di ricerca testuale rapido - default 'name' se non impostato.
