@@ -49,26 +49,39 @@ import type { ColumnState } from "./types/TableColumn";
 // import type { User } from "../../../types/dto/User";
 
 import { buildPath } from "../../utils/Path";
-import STORAGE from "../../../storage/constants/storage";
+import { getFromSession } from "../../utils/StorageHelper";
+
+import { AG_GRID_STORAGE_KEYS } from "./constants/storageConstants";
+import { 
+    AG_GRID_DEFAULT_PAGE_SIZE, 
+    AG_GRID_PAGE_SIZE_SELECTOR, 
+    AG_GRID_ROW_BLOCK_SIZE 
+} from "./constants/agGridConstants";
+
+import { type ApiRequest } from "../../types/api/ApiRequest";
+
+
+
+
+import TableProvider, { type AgGridDomainType } from "./contexts/TableContext";
 import type { TableInternalMetadata } from "./types/TableInternalMetadata";
 import type { QuickFilterMetadata } from "./components/quick-filter/types/QuickFilterMetadata";
 import type { ActionsMetadata } from "./components/actions/types/ActionsMetadata";
 import type { TableTopBarMetadata } from "./components/table-top-bar/types/TableTopBarMetadata";
 import { Card, CardBody, Container } from "react-bootstrap";
+import type { GridDetails } from "./types/TableMetadata";
+import GenericActionHandler from "./components/actions/GenericActionHandler";
+import ColumnChooserModal from "./components/column-preferences/ColumnChoserModal";
+import { useTableContext } from "./hooks/useTableContext";
+
+
+
 import { UiHelper } from "../../../core/helpers/UiHelper";
 import { type MenuItem } from "../../../types/system/MenuItem";
-import { AG_GRID_DEFAULT_PAGE_SIZE, AG_GRID_PAGE_SIZE_SELECTOR, AG_GRID_ROW_BLOCK_SIZE } from "./constants/agGridConstants";
-import GenericActionHandler from "./components/actions/GenericActionHandler";
-import TableProvider, { type AgGridDomainType } from "./contexts/TableContext";
-import type ApiRequest from "../../../types/system/api/ApiRequest";
 import { IdsColor } from "../../../types/system/IdsColor";
-import type { GridDetails } from "./types/TableMetadata";
 import type { UserCustomFilter } from "../../../types/dto/UserCustomFilter";
-import ColumnChooserModal from "./components/column-preferences/ColumnChoserModal";
 import type { UserGridSetting } from "../../../types/dto/UserGridSetting";
-import { StorageHelper } from "../../../storage/helpers/StorageHelper";
 import { AppHelper } from "../../../core/helpers/AppHelper";
-import { useTableContext } from "./hooks/useTableContext";
 import { IdsFormat } from "../../../types/system/IdsFormat";
 
 
@@ -388,7 +401,7 @@ export const GenericTable =
 
             const saved = Number(
                 sessionStorage.getItem(
-                    buildPath(agGridDomainRef.current, STORAGE.CURRENT_PAGE)
+                    buildPath(agGridDomainRef.current, AG_GRID_STORAGE_KEYS.CURRENT_PAGE)
                 ) ?? 0
             );
 
@@ -559,7 +572,7 @@ export const GenericTable =
             const currentColumnStates = TableHelper.getCurrentColumnStates(agGridDomainRef.current);
             if (currentColumnStates?.length > 0) {
                 const purged = TableHelper.purgeColumnStates(currentColumnStates, _defaultColumnDefs);
-                const currentGridSettings = StorageHelper.getFromSession(buildPath(domain.agGridDomain, STORAGE.COLUMN_PREFERENCES));
+                const currentGridSettings = getFromSession(buildPath(domain.agGridDomain, AG_GRID_STORAGE_KEYS.COLUMN_PREFERENCES));
                 if(currentGridSettings) {
                     setGridSettings({ 
                         ...currentGridSettings,

@@ -5,3 +5,4 @@ export * from './api/ApiResponse';
 export * from './api/FilterModel';
 export * from './api/PageTypes';
 export * from './api/SortModel';
+export * from './api/AuditFields';

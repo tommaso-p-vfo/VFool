@@ -38,7 +38,6 @@ export const AG_GRID_COLUMN_TYPE = {
     LIST: "hdsList", //custom
 }
 
-
 export const AG_GRID_FILTER_TYPE = {
     // ===== TEXT FILTER TYPES =====
     CONTAINS: "contains",
