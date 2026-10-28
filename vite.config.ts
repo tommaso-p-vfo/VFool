@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react';
 import dts from 'vite-plugin-dts';
 import { fileURLToPath } from 'node:url';
 
+const entry = (p: string) => fileURLToPath(new URL(p, import.meta.url));
+
 // tutto ciò che è peer dependency (e i suoi sub-path) NON va nel bundle
 const external = /^(react|react-dom|react-bootstrap|bootstrap)(\/.*)?$/;
 
@@ -16,7 +18,10 @@ export default defineConfig({
     ],
     build: {
         lib: {
-            entry: fileURLToPath(new URL('./src/index.ts', import.meta.url)),
+            entry: {
+                index: entry('./src/index.ts'),
+                'types/index': entry('./src/types/index.ts'),
+            },
             formats: ['es'],
             cssFileName: 'style',          // → dist/style.css
         },
