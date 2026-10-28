@@ -1,4 +1,7 @@
-import type { AgGridFilterType } from "../../../ui/common/tables/constants/agGridConstants";
+// import type { AgGridFilterType } from "../../../ui/common/tables/constants/agGridConstants";
+
+//tmp type
+export type AgGridFilterType = {}
 
 export enum FilterTypeField {
     TEXT = 'text',

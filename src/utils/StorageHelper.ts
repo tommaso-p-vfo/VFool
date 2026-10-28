@@ -1,4 +1,4 @@
-import { AppHelper } from './AppHelper';
+import { isNullEmptyOrUndefined } from './Guards';
 
 // ─── Funzioni interne condivise ───────────────────────────────────────────────
 
@@ -8,7 +8,7 @@ function write(storage: Storage, key: string, data: unknown): void {
 
 function read<T>(storage: Storage, key: string): T {
     const raw = storage.getItem(key);
-    if (AppHelper.isNullEmptyOrUndefined(raw)) return {} as T;
+    if (isNullEmptyOrUndefined(raw)) return {} as T;
     return JSON.parse(raw as string) as T;
 }
 
