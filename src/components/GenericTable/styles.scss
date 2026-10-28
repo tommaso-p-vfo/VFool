@@ -1,0 +1,173 @@
+//SPINNER - GENERIC OVERLAY
+.ids-spinner {
+    display: inline-flex;
+    align-items: center;
+    /* Isola il rendering */
+    will-change: opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+      /* Isola completamente */
+  contain: layout style paint;
+}
+
+.ids-spinner span {
+  animation: dotReveal  1.3s infinite ease-in-out;
+}
+
+@keyframes dotReveal  {
+  0% {
+    clip-path: inset(0 100% 0 0);
+  }
+  33% {
+    clip-path: inset(0 77% 0 0);
+  }
+  66% {
+    clip-path: inset(0 55% 0 0);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+//GENERIC TABLE PAGE
+.ids-table-page-top {
+    width: 100%;
+    height: 10%;
+}
+
+.ids-table-page-content {
+    width: 100%;
+    height: 90%;
+}
+
+//ACTION BAR
+.ids-action-bar {
+    width: 65%;
+}
+
+@media (max-width: 1400px) {
+    .ids-action-bar {
+        width: 60%;
+    }
+}
+
+@media (max-width: 1200px) {
+    .ids-action-bar {
+        width: 40%;
+    }
+
+    .ids-quick-filter {
+        #ids-search-filter {
+            min-width: 40px !important;
+            // max-width: 200px;
+        }
+    }
+}
+
+//TABLE CUSTOM FILTER
+.ids-not-saved-filter {
+    min-width: 300px !important;
+    margin-left: 0;
+    padding-left: 5px;
+}
+
+.ids-not-saved-filter-name {
+    width: 220px;
+
+    &.ids-text-truncate {
+        display: inline-block;
+        max-width: 50ch;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+}
+
+.ids-not-saved-filter-input {
+    min-width: 200px;
+    input {
+        font-size: small;
+    }
+}
+
+.ids-filter-chooser {
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.ids-custom-filter-container {
+    height: 350px;
+    overflow-y: auto;
+}
+
+.ids-custom-filter-row {
+
+    width: 98%;
+    align-items: start;
+
+    select, input.form-control {
+        height: 30px;
+        font-size: 12px;
+        max-width: 30%;
+    }
+}
+
+//TABLE QUICK FILTER
+.ids-quick-filter {
+    position: relative;
+    // max-width: 450px;
+    min-width: 350px;
+    width: auto;
+    margin-right: 0;
+
+    #ids-search-filter {
+        min-width: 70px;
+        // max-width: 200px;
+    }
+}
+
+//TABLE TOP BAR
+.ids-table-top-bar-btn {
+    height: 40px;
+}
+
+.ids-table-top-bar-inputgrp-btn {
+    button {
+        margin: 0 !important;
+    } 
+}
+
+//TABLE
+.ids-generic-table-container {
+    height: 100%;
+}
+
+.ids-generic-table {
+    
+    height: 80% !important;
+    
+    .ag-cell {
+        text-align: start;
+    }
+
+    .ag-center-header {
+        .ag-header-cell-label {
+            justify-content: center;;
+        }
+    }
+    
+}
+
+.ids-generic-table-summary {
+    margin-top: -34px;
+    position: fixed;
+}
+
+@media screen and (max-width:1500px) {
+    .ids-generic-table-summary {
+        margin-top: 0;
+        position: initial;
+    }
+}

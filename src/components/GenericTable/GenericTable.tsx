@@ -107,9 +107,7 @@ export const GenericTable =
             gridApi: () => gridApiRef.current
         }));
 
-        // const t = useTranslations();
-        // const user = useSelector((state) => state?.user?.data) ?? {} as User;
-
+        const user = useSelector((state) => state?.user?.data) ?? {} as User;
 
         //TRANSLATIONS
         const t = metadata?.t ?? {};
