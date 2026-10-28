@@ -96,38 +96,38 @@
 //     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 // }
 
-// /**
-//  * Formatta un valore in base al tipo di formato indicato.
-//  *
-//  * @remarks
-//  * Usata dai componenti generici (es. le colonne di `GenericTable`) quando il formato
-//  * arriva dalla configurazione. Se il formato non è gestito, il valore viene restituito invariato.
-//  *
-//  * @typeParam T - Tipo del valore in ingresso.
-//  * @param data - Valore da formattare.
-//  * @param format - Formato da applicare.
-//  * @returns Il valore formattato come stringa, oppure il valore originale.
-//  *
-//  * @example
-//  * ```ts
-//  * formatAs(0.5, IdsFormat.PERCENTAGE);        // → '0,50%'
-//  * formatAs('2026-10-26', IdsFormat.DATE);     // → '26/10/2026'
-//  * // con un formato non gestito restituisce il valore così com'è
-//  * ```
-//  */
-// export function formatAs<T>(data: T, format: IdsFormatType): string | T {
-//     switch (format) {
-//         case IdsFormat.DATE:
-//             return formatDate(data as string);
-//         case IdsFormat.CURRENCY:
-//             return formatCurrency(data as number);
-//         case IdsFormat.PERCENTAGE:
-//             return formatPercentage(data as number);
-//         case IdsFormat.BOOLEAN:
-//             return formatBoolean(data as boolean);
-//         case IdsFormat.COLOR:
-//             return formatColor(data as string);
-//         default:
-//             return data;
-//     }
-// }
+/**
+ * Formatta un valore in base al tipo di formato indicato.
+ *
+ * @remarks
+ * Usata dai componenti generici (es. le colonne di `GenericTable`) quando il formato
+ * arriva dalla configurazione. Se il formato non è gestito, il valore viene restituito invariato.
+ *
+ * @typeParam T - Tipo del valore in ingresso.
+ * @param data - Valore da formattare.
+ * @param format - Formato da applicare.
+ * @returns Il valore formattato come stringa, oppure il valore originale.
+ *
+ * @example
+ * ```ts
+ * formatAs(0.5, StringFormat.PERCENTAGE);        // → '0,50%'
+ * formatAs('2026-10-26', StringFormat.DATE);     // → '26/10/2026'
+ * // con un formato non gestito restituisce il valore così com'è
+ * ```
+ */
+export function formatAs<T>(data: T, format: StringFormatType): string | T {
+    switch (format) {
+        case StringFormat.DATE:
+            return formatDate(data as string);
+        case StringFormat.CURRENCY:
+            return formatCurrency(data as number);
+        case StringFormat.PERCENTAGE:
+            return formatPercentage(data as number);
+        case StringFormat.BOOLEAN:
+            return formatBoolean(data as boolean);
+        case StringFormat.COLOR:
+            return formatColor(data as string);
+        default:
+            return data;
+    }
+}

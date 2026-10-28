@@ -33,11 +33,9 @@ import {
 } from "ag-grid-community";
 
 import type { PageRequest, PageResponse } from "../../types/api/PageTypes";
-
-import { getTranslation } from "../../utils/TranslationHelper";
+import { DataFormat } from "../../types/DataFormat";
 
 import { SERVICE_ENDPOINT } from "../../constants/apiConstants";
-
 
 import LoadingOverlay from "./components/LoadingOverlay";
 import TableTopBar from "./components/table-top-bar/TableTopBar";
@@ -50,8 +48,12 @@ import type { ColumnState } from "./types/TableColumn";
 // import { useSelector } from "react-redux";
 // import type { User } from "../../../types/dto/User";
 
+
 import { buildPath } from "../../utils/Path";
 import { getFromSession } from "../../utils/StorageHelper";
+import { getTranslation } from "../../utils/TranslationHelper";
+import { isEmptyObject } from "../../utils/Guards";
+import { formatAs } from "../../utils/Format";
 
 import { AG_GRID_STORAGE_KEYS } from "./constants/storageConstants";
 import { 
@@ -82,8 +84,7 @@ import { UiHelper } from "../../../core/helpers/UiHelper";
 import { type MenuItem } from "../../../types/system/MenuItem";
 import { IdsColor } from "../../../types/system/IdsColor";
 import type { UserGridSetting } from "../../../types/dto/UserGridSetting";
-import { AppHelper } from "../../../core/helpers/AppHelper";
-import { IdsFormat } from "../../../types/system/IdsFormat";
+
 
 
 //ag grid - modulo community per caricamento dinamico dei dati
@@ -587,7 +588,7 @@ export const GenericTable =
             // preferenze localStorage
             if (columnState.length === 0) {
                 const localUGS = TableHelper.getUserGridSettingsFromLocalSession(agGridDomainRef.current);
-                if (!AppHelper.isEmptyObject(localUGS)) {
+                if (!isEmptyObject(localUGS)) {
                     const purged = TableHelper.purgeColumnStates(localUGS.settings as ColumnState[], _defaultColumnDefs);
 
                     let _gridSettings = TableHelper.saveCurrentColumnStates(agGridDomainRef.current, purged, true);
@@ -601,7 +602,7 @@ export const GenericTable =
 
             const state: GridState = {
                 pagination: { pageSize: savedPageSize },
-                filter: { filterModel: AppHelper.isEmptyObject(savedFilter) ? (activeFilter ? activeFilter?.definition : {}) : savedFilter },
+                filter: { filterModel: isEmptyObject(savedFilter) ? (activeFilter ? activeFilter?.definition : {}) : savedFilter },
             };
 
             const order = columnState.map(c => c.colId).filter(Boolean);
@@ -834,7 +835,7 @@ export const GenericTableSummary = () => {
 
             if (v.toString().indexOf('.') != -1 || v.toString().indexOf(',') != -1) {
                 //float                
-                return AppHelper.formatAs(v, IdsFormat.CURRENCY);
+                return formatAs(v, DataFormat.CURRENCY);
             }
 
             else v;
@@ -846,7 +847,7 @@ export const GenericTableSummary = () => {
     }
 
     return (<>
-        {!isLoading && !AppHelper.isEmptyObject(summary) && 
+        {!isLoading && !isEmptyObject(summary) && 
         
         <div className="ids-generic-table-summary">
             {Object.entries(summary).map(([k,v], idx) => (
