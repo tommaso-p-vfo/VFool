@@ -41,7 +41,9 @@ import { SERVICE_ENDPOINT } from "../../constants/apiConstants";
 
 import LoadingOverlay from "./components/LoadingOverlay";
 import TableTopBar from "./components/table-top-bar/TableTopBar";
+
 import type { TableAttributes } from "./types/TableAttributes";
+import { type TableCustomFilter } from "./types/TableCustomFilter";
 
 import type { ColumnState } from "./types/TableColumn";
 
@@ -79,7 +81,6 @@ import { useTableContext } from "./hooks/useTableContext";
 import { UiHelper } from "../../../core/helpers/UiHelper";
 import { type MenuItem } from "../../../types/system/MenuItem";
 import { IdsColor } from "../../../types/system/IdsColor";
-import type { UserCustomFilter } from "../../../types/dto/UserCustomFilter";
 import type { UserGridSetting } from "../../../types/dto/UserGridSetting";
 import { AppHelper } from "../../../core/helpers/AppHelper";
 import { IdsFormat } from "../../../types/system/IdsFormat";
@@ -121,7 +122,7 @@ export const GenericTable =
         const preFilterRef = useRef<FilterModel | null>(null);       
         
         //ACTIVE FILTER - filtro avanzato utente preso dalla sessione
-        const [activeFilter, setActiveFilter] = useState<UserCustomFilter>();
+        const [activeFilter, setActiveFilter] = useState<TableCustomFilter>();
 
         //PREFERENZE COLONNA CORRENTI
         const [gridSettings, setGridSettings] = useState<UserGridSetting>();
@@ -364,7 +365,7 @@ export const GenericTable =
                         _isNew: false,
                         _isModified: isCurrentFilterSaved,
                         definition: currentFilter
-                    } as UserCustomFilter;
+                    } as TableCustomFilter;
 
                     setActiveFilter(notSavedFilter);
                     TableHelper.saveCurrentTableFilterDetails(agGridDomainRef.current, notSavedFilter);
