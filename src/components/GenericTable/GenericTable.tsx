@@ -48,7 +48,7 @@ import type { ColumnState } from "./types/TableColumn";
 // import { useSelector } from "react-redux";
 // import type { User } from "../../../types/dto/User";
 
-import { AppPathHelper } from "../../../core/helpers/AppPathHelper";
+import { buildPath } from "../../utils/Path";
 import STORAGE from "../../../storage/constants/storage";
 import type { TableInternalMetadata } from "./types/TableInternalMetadata";
 import type { QuickFilterMetadata } from "./components/quick-filter/types/QuickFilterMetadata";
@@ -84,7 +84,7 @@ if (process.env.NODE_ENV !== 'production') {
     ModuleRegistry.registerModules([ValidationModule]);
 }
 
-const GenericTable =
+export const GenericTable =
 
     <T extends Record<string, any>>({ serviceLocator, metadata, ref }: TableAttributes<T> & { ref?: React.Ref<GridApi> }) => {
 
@@ -197,7 +197,7 @@ const GenericTable =
                     }
 
                     let result = await serviceLocator.callService({
-                        service: AppPathHelper.build(serviceLocatorDomainRef.current, SERVICE_ENDPOINT.LIST),
+                        service: buildPath(serviceLocatorDomainRef.current, SERVICE_ENDPOINT.LIST),
                         data: _pageRequest,
                         finallyCallback: () => { setLoading(false); },
                         metadata: { user: user }
@@ -388,7 +388,7 @@ const GenericTable =
 
             const saved = Number(
                 sessionStorage.getItem(
-                    AppPathHelper.build(agGridDomainRef.current, STORAGE.CURRENT_PAGE)
+                    buildPath(agGridDomainRef.current, STORAGE.CURRENT_PAGE)
                 ) ?? 0
             );
 
@@ -526,7 +526,7 @@ const GenericTable =
             let _pageRequest = { pageNumber: pageNumber, pageSize: 1 } as PageRequest;
 
             let result = await serviceLocator.callService({
-                service: AppPathHelper.build(serviceLocatorDomainRef.current, SERVICE_ENDPOINT.LIST),
+                service: buildPath(serviceLocatorDomainRef.current, SERVICE_ENDPOINT.LIST),
                 data: _pageRequest,
                 finallyCallback: () => { setLoading(false); },
                 metadata: { user: user }
@@ -559,7 +559,7 @@ const GenericTable =
             const currentColumnStates = TableHelper.getCurrentColumnStates(agGridDomainRef.current);
             if (currentColumnStates?.length > 0) {
                 const purged = TableHelper.purgeColumnStates(currentColumnStates, _defaultColumnDefs);
-                const currentGridSettings = StorageHelper.getFromSession(AppPathHelper.build(domain.agGridDomain, STORAGE.COLUMN_PREFERENCES));
+                const currentGridSettings = StorageHelper.getFromSession(buildPath(domain.agGridDomain, STORAGE.COLUMN_PREFERENCES));
                 if(currentGridSettings) {
                     setGridSettings({ 
                         ...currentGridSettings,
@@ -661,7 +661,7 @@ const GenericTable =
             let quickFilterMetadata = {} as QuickFilterMetadata;
             quickFilterMetadata.searchFilterColumns = metadata?.searchFilterColumns;
             quickFilterMetadata.translatedSearchFilterColumns = metadata?.searchFilterColumns?.map(col => {
-                return getTranslation(t, AppPathHelper.build(agGridDomainRef.current, 'columns', col));
+                return getTranslation(t, buildPath(agGridDomainRef.current, 'columns', col));
             });
             quickFilterMetadata.domain = agGridDomainRef.current;
 
@@ -801,8 +801,6 @@ const GenericTable =
         );
     };
 
-export default GenericTable;
-
 
 export const GenericTableSummary = () => {
 
@@ -840,7 +838,7 @@ export const GenericTableSummary = () => {
             {Object.entries(summary).map(([k,v], idx) => (
                 <>
                     {!excludes.includes(k) && <span className="small ms-3">
-                        <span >{getTranslation(t, AppPathHelper.build(domain?.agGridDomain, 'summary', k))}:</span>
+                        <span >{getTranslation(t, buildPath(domain?.agGridDomain, 'summary', k))}:</span>
                         <span className="ms-1 me-2 fw-bold">{formatValue(v)}</span>
 
                     </span>}

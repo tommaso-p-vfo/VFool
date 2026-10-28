@@ -1,0 +1,1 @@
+export { GenericTable } from './GenericTable';
