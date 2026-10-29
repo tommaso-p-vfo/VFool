@@ -2,6 +2,23 @@ import type ApiRequest from '../types/api/ApiRequest';
 import type ApiResponse from '../types/api/ApiResponse';
 import type { IServiceLocator } from '../service-locator/IServiceLocator';
 
+// le chiamate interne a GenericTable passano sempre l'utente loggato. Nella libreria viene rimosso. Starà all'implementazione del serviceLocator ottenere questa info quando necessario
+// usato anche in tableHelper dentro internalMetadata per ricavare l'autorizzazione alle system columns            
+
+            // let result = await serviceLocator.callService({
+            //     service: buildPath(serviceLocatorDomainRef.current, SERVICE_ENDPOINT.LIST),
+            //     data: _pageRequest,
+            //     finallyCallback: () => { setLoading(false); },
+            //     metadata: { user: user }
+            // } as ApiRequest);
+
+
+            //TableHelper.ts
+            // const systemColumns = metadata?.systemColumns ?? [];
+            // if (!systemColumns.includes(colId) && protectedColumns.includes(colId) && !PermissionHelper.isAdmin(internalMetadata?.user)) {
+            //     return null; //salta le colonne protette
+            // }
+
 /**
  * Chiama un servizio backend tramite il service locator.
  *

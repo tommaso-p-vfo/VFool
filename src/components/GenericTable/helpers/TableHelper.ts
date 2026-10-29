@@ -238,10 +238,10 @@ export class TableHelper {
          * le colonne protette sono sempre visibili per gli utenti con role amministratore 
          */
         const protectedColumns = metadata?.protectedColumns ?? [];
-        const systemColumns = metadata?.systemColumns ?? [];
-        if (!systemColumns.includes(colId) && protectedColumns.includes(colId) && !PermissionHelper.isAdmin(internalMetadata?.user)){
-            return null; //salta le colonne protette
-        }
+        // const systemColumns = metadata?.systemColumns ?? [];
+        // if (!systemColumns.includes(colId) && protectedColumns.includes(colId) && !PermissionHelper.isAdmin(internalMetadata?.user)){
+        //     return null; //salta le colonne protette
+        // }
         // END - protectedColumns VS systemColumns
 
         let colDef = {} as ColDef;

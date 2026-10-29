@@ -37,7 +37,6 @@ import { DataFormat } from "../../types/DataFormat";
 
 import { SERVICE_ENDPOINT } from "../../constants/apiConstants";
 
-import LoadingOverlay from "./components/LoadingOverlay";
 import TableTopBar from "./components/table-top-bar/TableTopBar";
 
 import type { TableAttributes } from "./types/TableAttributes";
@@ -46,10 +45,7 @@ import { TableCustomSetting } from "./types/TableCustomSettings";
 
 import type { ColumnState } from "./types/TableColumn";
 
-// import { useSelector } from "react-redux";
-// import type { User } from "../../../types/dto/User";
-
-
+import LoadingOverlay from "../../utils/components/LoadingOverlay";
 import { buildPath } from "../../utils/Path";
 import { getFromSession } from "../../utils/StorageHelper";
 import { getTranslation } from "../../locales/TranslationHelper";
@@ -106,8 +102,6 @@ export const GenericTable =
         useImperativeHandle(ref, () => ({
             gridApi: () => gridApiRef.current
         }));
-
-        const user = useSelector((state) => state?.user?.data) ?? {} as User;
 
         //TRANSLATIONS
         const t = metadata?.t ?? {};
@@ -215,8 +209,7 @@ export const GenericTable =
                     let result = await serviceLocator.callService({
                         service: buildPath(serviceLocatorDomainRef.current, SERVICE_ENDPOINT.LIST),
                         data: _pageRequest,
-                        finallyCallback: () => { setLoading(false); },
-                        metadata: { user: user }
+                        finallyCallback: () => { setLoading(false); }
                     } as ApiRequest);
 
                     if (result.success) {
@@ -258,7 +251,7 @@ export const GenericTable =
 
             return dataSource;
 
-        }, [serviceLocator, metadata, user]);
+        }, [serviceLocator, metadata]);
 
         const onGridReady = useCallback((params: GridReadyEvent) => {
             if (typeof params.api.setGridOption === 'function') {
@@ -460,21 +453,11 @@ export const GenericTable =
         }, []);
 
         // Memoizzazione degli headers per evitare ricalcoli non necessari
-        const _handleColumnDefinitions = useCallback((items: any) => {
-
-            let columnDefinitions = [] as ColDef[];
-            columnDefinitions = _loadDefaultColumns(items[0]);
-
-            return columnDefinitions;
-
-        }, [metadata, t, user, domain]);
-
         const _loadDefaultColumns = useCallback((item: any) => {
             let internalMetadata = {
                 agGridDomain: TableHelper._getDomainForAgGrid(agGridDomainRef.current),
                 tableName: tableNameRef.current,
                 t: t,
-                user: user,
                 gridApi: gridApiRef?.current,
                 actionHandlerRef: actionHandlerRef
             } as TableInternalMetadata;
@@ -483,6 +466,15 @@ export const GenericTable =
 
             return columnDefinitions;
         }, [metadata]);
+
+        const _handleColumnDefinitions = useCallback((items: any) => {
+
+            let columnDefinitions = [] as ColDef[];
+            columnDefinitions = _loadDefaultColumns(items[0]);
+
+            return columnDefinitions;
+
+        }, [_loadDefaultColumns]);
 
         //init - set domain
         useEffect(() => {
@@ -505,6 +497,27 @@ export const GenericTable =
         }, [metadata, t]);
         
         //init - quando il domain è settato
+        const _fetchColumnDefinitions = useCallback(async () => {
+
+            if (!serviceLocatorDomainRef.current) return;
+
+            const pageNumber = 1;
+            let _pageRequest = { pageNumber: pageNumber, pageSize: 1 } as PageRequest;
+
+            let result = await serviceLocator.callService({
+                service: buildPath(serviceLocatorDomainRef.current, SERVICE_ENDPOINT.LIST),
+                data: _pageRequest,
+                finallyCallback: () => { setLoading(false); }
+            } as ApiRequest);
+
+            if (result.success) {
+                let pageResponse = result.data as PageResponse<T>;
+                let colDefs = _handleColumnDefinitions(pageResponse.items);
+                setColumnDefs(colDefs);
+            }
+
+        }, [domain]);
+
         useEffect(() => {
 
             //fetch first row per ricavare le colDefs e costruire la tabella 
@@ -517,28 +530,6 @@ export const GenericTable =
             setCustomTitle(metadata?.customTitle ?? null);
             setGridDetails(metadata?.gridDetails ?? null);
     
-        }, [domain]);
-
-        const _fetchColumnDefinitions = useCallback(async () => {
-
-            if (!serviceLocatorDomainRef.current) return;
-
-            const pageNumber = 1;
-            let _pageRequest = { pageNumber: pageNumber, pageSize: 1 } as PageRequest;
-
-            let result = await serviceLocator.callService({
-                service: buildPath(serviceLocatorDomainRef.current, SERVICE_ENDPOINT.LIST),
-                data: _pageRequest,
-                finallyCallback: () => { setLoading(false); },
-                metadata: { user: user }
-            } as ApiRequest);
-
-            if (result.success) {
-                let pageResponse = result.data as PageResponse<T>;
-                let colDefs = _handleColumnDefinitions(pageResponse.items);
-                setColumnDefs(colDefs);
-            }
-
         }, [domain]);
 
         //INITIAL STATE CONFIG
