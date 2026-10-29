@@ -1,1 +1,13 @@
 @import '../../theme/bootstrap-deps';
+@import '../../theme/tokens';
+
+.vfo-modal {
+    // .btn-close {
+    //     --bs-btn-close-color: var(--vfo-color-primary-contrast);
+    // }
+
+    .modal-header {
+        background-color: var(--vfo-color-primary);
+        color: var(--vfo-color-primary-contrast);
+    }
+}

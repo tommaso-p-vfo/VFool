@@ -1,6 +1,7 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState, type ReactElement } from 'react';
+import React, { CSSProperties, forwardRef, useEffect, useImperativeHandle, useRef, useState, type ReactElement } from 'react';
 import { Modal, Button, Container } from 'react-bootstrap';
 import LoadingOverlay from '../../utils/components/LoadingOverlay';
+import { toCssColor } from '../../utils/Color';
 
 // Definisci il tipo per l'handle esposto
 export interface GenericModalHandle {
@@ -69,7 +70,7 @@ export const GenericModal = forwardRef<GenericModalHandle, GenericModalProps>((p
     };
 
     return (
-        <Modal show={openModal} onHide={close} size={size ?? 'lg'} style={{ maxHeight: '90vh' }} className={className}>
+        <Modal show={openModal} onHide={close} size={size ?? 'lg'} style={{ maxHeight: '90vh' }} className={`vfo-modal ${className}`}>
             <Modal.Header closeButton>
                 <Modal.Title><span className='me-1'>{icon}</span>{title}</Modal.Title>
             </Modal.Header>

@@ -1,0 +1,25 @@
+// Valori predefiniti basati su Bootstrap: ogni progetto può sovrascriverli
+:root {
+  --vfo-color-primary: var(--bs-primary);
+  --vfo-color-on-primary: var(--bs-white);                 // testo sopra il primary
+  --vfo-color-primary-text: var(--bs-primary-text-emphasis); // primary usato come testo
+
+  --vfo-color-secondary: var(--bs-secondary);
+  --vfo-color-success: var(--bs-success);
+  --vfo-color-danger: var(--bs-danger);
+  --vfo-color-warning: var(--bs-warning);
+  --vfo-color-info: var(--bs-info);
+  --vfo-color-primary-contrast: var(--bs-white);
+
+  --vfo-color-red: var(--bs-red);
+  --vfo-color-green: var(--bs-green);
+  --vfo-color-blue: var(--bs-blue);
+  --vfo-color-light-blue: var(--bs-cyan);
+  --vfo-color-orange: var(--bs-orange);
+  --vfo-color-yellow: var(--bs-yellow);
+  --vfo-color-gray: var(--bs-gray);
+  --vfo-color-light-gray: var(--bs-gray-300);
+  --vfo-color-black: var(--bs-black);
+  --vfo-color-white: var(--bs-white);
+  --vfo-color-transparent: transparent;
+}
