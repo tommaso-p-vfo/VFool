@@ -26,7 +26,7 @@ export type ThemeColorName = (typeof ThemeColor)[keyof typeof ThemeColor];
  * Un colore del tema oppure un qualsiasi colore CSS (`#hex`, `rgb()`, `var(--x)`…).
  * `string & {}` mantiene l'autocompletamento dei nomi del tema.
  */
-export type ColorValue = ThemeColorName | (string & {});
+export type ThemeColor = ThemeColorName | (string & {});
 
 const THEME_COLORS = new Set<string>(Object.values(ThemeColor));
 
@@ -46,7 +46,7 @@ const THEME_COLORS = new Set<string>(Object.values(ThemeColor));
  * toCssColor('#E63946'); // → '#E63946'
  * ```
  */
-export function toCssColor(color?: ColorValue): string {
+export function toCssColor(color?: ThemeColor): string {
     if (!color) return 'var(--vfo-color-primary)';
     return THEME_COLORS.has(color) ? `var(--vfo-color-${color})` : color;
 }
@@ -64,7 +64,7 @@ export function toCssColor(color?: ColorValue): string {
  * // → 'color-mix(in srgb, var(--vfo-color-primary) 15%, transparent)'
  * ```
  */
-export function withAlpha(color: ColorValue, alpha = 1): string {
+export function withAlpha(color: ThemeColor, alpha = 1): string {
     const pct = Math.round(Math.min(Math.max(alpha, 0), 1) * 100);
     return `color-mix(in srgb, ${toCssColor(color)} ${pct}%, transparent)`;
 }

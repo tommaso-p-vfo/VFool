@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
-// import useTranslations from "../../../locales/hooks/useTranslations";
 import { TableHelper } from "./helpers/TableHelper";
 
 //Ag grid
@@ -61,9 +60,6 @@ import {
 
 import { type ApiRequest } from "../../types/api/ApiRequest";
 
-
-
-
 import TableProvider, { type AgGridDomainType } from "./contexts/TableContext";
 import type { TableInternalMetadata } from "./types/TableInternalMetadata";
 import type { QuickFilterMetadata } from "./components/quick-filter/types/QuickFilterMetadata";
@@ -75,12 +71,7 @@ import GenericActionHandler from "./components/actions/GenericActionHandler";
 import ColumnChooserModal from "./components/column-preferences/ColumnChoserModal";
 import { useTableContext } from "./hooks/useTableContext";
 
-
-
-import { UiHelper } from "../../../core/helpers/UiHelper";
-import { IdsColor } from "../../../types/system/IdsColor";
-
-
+import { ThemeColor, toCssColor } from "../../utils/Color";
 
 
 //ag grid - modulo community per caricamento dinamico dei dati
@@ -737,7 +728,7 @@ export const GenericTable =
                         {gridDetails &&
                             <Card className="mb-1 mt-0 ms-0 w-100">
                                 <CardBody className="small">
-                                    {gridDetails.title && (<span className="fw-bold pe-1" style={{color: UiHelper.getColor(IdsColor.PRIMARY).color}}>{gridDetails.title}</span>)}
+                                        {gridDetails.title && (<span className="fw-bold pe-1" style={{ color: toCssColor(ThemeColor.PRIMARY)}}>{gridDetails.title}</span>)}
                                     <span className="fst-italic">{gridDetails.content}</span>
                                 </CardBody>
                             </Card>

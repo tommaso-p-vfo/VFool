@@ -1,15 +1,26 @@
-import { TranslationHelper } from "../../../../locales/helpers/TranslationHelper";
+//TODO - gestione PERMISSION HELPER system e protected columns
+
+import { getTranslation } from "../../../locales/TranslationHelper";
+
+import { AG_GRID_STORAGE_KEYS } from "../constants/storageConstants";
+import { getFromSession, getFromLocalSession, saveInSession, saveInLocalSession } from "../../../utils/StorageHelper";
+
+import { buildPath } from '../../../utils/Path';
+import { isEmptyObject } from '../../../utils/Guards';
+
+import type { FilterModel } from "../../../types/api/FilterModel";
+
 
 import type { CellClickedEvent, ColDef, ColumnState, GridApi, ITextFilterParams } from 'ag-grid-community';
 import { AG_GRID_COLUMN_TYPE, AG_GRID_FILTER_TYPE, COL_EMPTY_PLACEHOLDER, COL_MIN_WIDTH, DEFAULT_COLUMN_FILTER, DEFAULT_COLUMN_SORTABLE, type AgGridColumnType, type AgGridFilterType } from "../constants/agGridConstants";
 import ActionsCellRenderer from "../components/actions/ActionCellRenderer";
-import { PermissionHelper } from "../../../../core/auth/helpers/PermissionHelper";
+
 import type { InternalTableColumnMetadata, TableColumnMetadata, TableMetadata } from "../types/TableMetadata";
-import STORAGE from "../../../../storage/constants/storage";
-import { AppPathHelper } from "../../../../core/helpers/AppPathHelper";
 import type { TableInternalMetadata } from "../types/TableInternalMetadata";
 import ColorCellRenderer, { ColorHeader } from "../components/cell-renderers/ColorCellRenderer";
+
 import type { ActionsMetadata } from "../components/actions/types/ActionsMetadata";
+
 import BoxedTextCellRenderer from "../components/cell-renderers/BoxedTextCellRenderer";
 import BoxedNumberCellRenderer from "../components/cell-renderers/BoxedNumberCellRenderer";
 import HighlightedTextCellRenderer from "../components/cell-renderers/HighlightedTextCellRenderer";
@@ -21,14 +32,12 @@ import ProgressBarCellRenderer from "../components/cell-renderers/ProgressBarCel
 import CountabilityNumberCellRenderer from "../components/cell-renderers/CountabilityNumberCellRenderer";
 import BoxedComboboxCellRenderer from "../components/cell-renderers/BoxedComboboxCellRenderer";
 import CopyWrapperCellRenderer from "../components/cell-renderers/CopyWrapperCellRenderer";
-import type { FilterModel } from "../../../../types/system/api/FilterModel";
-import { SUBDOMAIN } from "../../../../core/constants/domains";
 import BooleanCellRenderer from "../components/cell-renderers/BooleanCellRenderer";
 import ListCellRenderer from "../components/cell-renderers/ListCellRenderer";
-import type { UserCustomFilter } from "../../../../types/dto/UserCustomFilter";
-import type { UserGridSetting } from "../../../../types/dto/UserGridSetting";
-import { StorageHelper } from "../../../../storage/helpers/StorageHelper";
-import { AppHelper } from "../../../../core/helpers/AppHelper";
+
+import { type TableCustomFilter } from "../types/TableCustomFilter";
+import { TableCustomSetting } from "../types/TableCustomSettings";
+
 import { ArrayIncludesFilter } from "../components/filters/ArrayIncludesFilter";
 
 export type CellRendererStrategyResponse = { cellRenderer: any, wrappedCellRenderer: any | undefined }
@@ -68,7 +77,7 @@ export class TableHelper {
                 return TableHelper._getAgGridColumnDef({ colId: colId } as ColumnState, metadata, internalMetadata);
             });
         } else {
-            let columnsFromLocale = TranslationHelper.getProperty(internalMetadata.t, AppPathHelper.build(internalMetadata?.agGridDomain, 'columns'));
+            let columnsFromLocale = getTranslation(internalMetadata.t, buildPath(internalMetadata?.agGridDomain, 'columns'));
             headers = Object.keys(columnsFromLocale).map(colId => {
                 return TableHelper._getAgGridColumnDef({ colId: colId } as ColumnState, metadata, internalMetadata);
             });
@@ -258,10 +267,11 @@ export class TableHelper {
         let hide = column ? column.hide ?? false : globalHide;
 
         const translationColumnsPath = internalMetadata?.agGridDomain + '.columns';
-        const columnNames = TranslationHelper.getProperty(internalMetadata.t, translationColumnsPath);
+        const columnNames = getTranslation(internalMetadata.t, translationColumnsPath);
 
         //determina la visibilità della colonna a prescindere da filtri e scelta utente
-        let colHide = systemColumns.includes(colId) ? true : PermissionHelper.isAdmin(internalMetadata?.user) ? false : (protectedColumns.includes(colId) || hide);
+        // let colHide = systemColumns.includes(colId) ? true : PermissionHelper.isAdmin(internalMetadata?.user) ? false : (protectedColumns.includes(colId) || hide);
+        let colHide = protectedColumns.includes(colId) || hide;
 
         //basic settings
         colDef = {
@@ -329,12 +339,7 @@ export class TableHelper {
 
         if(!domain) return;
 
-        const _path = domain
-            ?.split('.')
-            .filter(segment => segment !== SUBDOMAIN.ONLY_MINE_FILTER)
-            .join('.');
-
-        return _path;
+        return domain;
     }
 
     /**
@@ -346,10 +351,10 @@ export class TableHelper {
     static getCurrentColumnStates = (domain: string) => {
 
         let currentColumnStates = [] as ColumnState[];
-        let columnPreferencesPath = AppPathHelper.build(domain, STORAGE.COLUMN_PREFERENCES);
+        let columnPreferencesPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_PREFERENCES);
 
-        let columnPref = StorageHelper.getFromSession(columnPreferencesPath);
-        if (!AppHelper.isEmptyObject(columnPref)) {
+        let columnPref = getFromSession(columnPreferencesPath);
+        if (!isEmptyObject(columnPref)) {
     
             let sessionColumnStates = columnPref.settings as ColumnState[] | null;
             if (sessionColumnStates != null && sessionColumnStates.length > 0) {
@@ -384,16 +389,16 @@ export class TableHelper {
      * @param domain il dominio della tabella (es. 'users', 'products', ecc.) - usato per costruire la chiave di storage
      * @returns le preferenze correnti delle colonne salvate in localStorage - empty altrimenti 
      */
-    static getUserGridSettingsFromLocalSession = (domain: string): UserGridSetting => {
+    static getUserGridSettingsFromLocalSession = (domain: string): TableCustomSetting => {
 
-        let columnPreferencesPath = AppPathHelper.build(domain, STORAGE.COLUMN_PREFERENCES);
+        let columnPreferencesPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_PREFERENCES);
 
-        let columnPref = StorageHelper.getFromLocalSession(columnPreferencesPath);
-        if (!AppHelper.isEmptyObject(columnPref)) {            
+        let columnPref = getFromLocalSession(columnPreferencesPath);
+        if (!isEmptyObject(columnPref)) {            
             return { ...columnPref };
         }
 
-        return {} as UserGridSetting;
+        return {} as TableCustomSetting;
 
     }
 
@@ -403,32 +408,32 @@ export class TableHelper {
      * @param columnStates 
      * @param saveInLocalStorage - salva anche in local - default false
      */
-    static saveCurrentColumnStates = (domain: string, columnStates: ColumnState[], isInit: boolean = false ): UserGridSetting => {
-        let columnPreferencesPath = AppPathHelper.build(domain, STORAGE.COLUMN_PREFERENCES);
+    static saveCurrentColumnStates = (domain: string, columnStates: ColumnState[], isInit: boolean = false): TableCustomSetting => {
+        let columnPreferencesPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_PREFERENCES);
         //salvo in sessione
-        let gridSettings = {} as UserGridSetting;
+        let gridSettings = {} as TableCustomSetting;
 
-        let columnPref = StorageHelper.getFromLocalSession(columnPreferencesPath);
-        if (!AppHelper.isEmptyObject(columnPref)) {
+        let columnPref = getFromLocalSession(columnPreferencesPath);
+        if (!isEmptyObject(columnPref)) {
             
             gridSettings = {
                 ...columnPref,
                 settings: columnStates,
                 _isModified: !isInit
-            } as UserGridSetting;
+            } as TableCustomSetting;
         } else {
             gridSettings = {
                 id: -1,
                 entityName: domain,
                 settings: columnStates,
                 _isModified: !isInit
-            } as UserGridSetting;
+            } as TableCustomSetting;
         }
 
-        StorageHelper.saveInSession(columnPreferencesPath, gridSettings);
+        saveInSession(columnPreferencesPath, gridSettings);
 
         if (isInit) {
-            StorageHelper.saveInLocalSession(columnPreferencesPath, gridSettings);
+            saveInLocalSession(columnPreferencesPath, gridSettings);
         }
 
         return gridSettings;
@@ -440,7 +445,7 @@ export class TableHelper {
      * @param pageSize 
      */
     static getCurrentTablePageSize = (domain: string, defaultPageSize: number) => {
-        let pageSizePath = AppPathHelper.build(domain, STORAGE.PAGESIZE_PREFERENCE);
+        let pageSizePath = buildPath(domain, AG_GRID_STORAGE_KEYS.PAGESIZE_PREFERENCE);
         //ricavo dalla sessione
         let pageSize = sessionStorage.getItem(pageSizePath);
         if(pageSize)
@@ -455,13 +460,13 @@ export class TableHelper {
      * @param pageSize 
      */
     static saveCurrentTablePageSize = (domain: string, pageSize: number) => {
-        let pageSizePath = AppPathHelper.build(domain, STORAGE.PAGESIZE_PREFERENCE);
+        let pageSizePath = buildPath(domain, AG_GRID_STORAGE_KEYS.PAGESIZE_PREFERENCE);
         //salvo in sessione
         sessionStorage.setItem(pageSizePath, JSON.stringify(pageSize));
     }
 
     static getCurrentTablePage = (domain: string, defaultPageNumber: number) => {
-        let pageNumberPath = AppPathHelper.build(domain, STORAGE.CURRENT_PAGE);
+        let pageNumberPath = buildPath(domain, AG_GRID_STORAGE_KEYS.CURRENT_PAGE);
         //ricavo dalla sessione
         let pageNumber = sessionStorage.getItem(pageNumberPath);
         if (pageNumber)
@@ -471,12 +476,12 @@ export class TableHelper {
     }
 
     static resetCurrentTablePage = (domain: string) => {
-        let pagePath = AppPathHelper.build(domain, STORAGE.CURRENT_PAGE);
+        let pagePath = buildPath(domain, AG_GRID_STORAGE_KEYS.CURRENT_PAGE);
         sessionStorage.setItem(pagePath, JSON.stringify(0));
     }
 
     static saveCurrentTablePage = (domain: string, pageNumber: number) => {
-        let pagePath = AppPathHelper.build(domain, STORAGE.CURRENT_PAGE);
+        let pagePath = buildPath(domain, AG_GRID_STORAGE_KEYS.CURRENT_PAGE);
         sessionStorage.setItem(pagePath, JSON.stringify(pageNumber));
     }
 
@@ -485,7 +490,7 @@ export class TableHelper {
      * @param domain 
      */
     static getCurrentTableFilter = (domain: string) => {
-        let filterPath = AppPathHelper.build(domain, STORAGE.COLUMN_FILTER_PREFERENCES);
+        let filterPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_FILTER_PREFERENCES);
         //ricavo dalla sessione
         let filter = sessionStorage.getItem(filterPath);
         if (filter)
@@ -502,7 +507,7 @@ export class TableHelper {
      */
     static getCurrentTableFilterDetails = (domain: string) => {
 
-        let filterPath = AppPathHelper.build(domain, STORAGE.COLUMN_FILTER_DETAILS);
+        let filterPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_FILTER_DETAILS);
 
         let filter = sessionStorage.getItem(filterPath);
         if (filter)
@@ -517,7 +522,7 @@ export class TableHelper {
      * @param domain 
      */
     static getCurrentQuickTableFilter = (domain: string) => {
-        let quickFilterPath = AppPathHelper.build(domain, STORAGE.COLUMN_CURRENT_QUICK_FILTER);
+        let quickFilterPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_CURRENT_QUICK_FILTER);
         //ricavo dalla sessione
         let filter = sessionStorage.getItem(quickFilterPath);
         if (filter)
@@ -533,11 +538,11 @@ export class TableHelper {
      */
     static saveCurrentTableFilter = (domain: string, filter: any, quickSearchText?: string) => {
 
-        let filterPath = AppPathHelper.build(domain, STORAGE.COLUMN_FILTER_PREFERENCES);
+        let filterPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_FILTER_PREFERENCES);
         //salvo in sessione
         sessionStorage.setItem(filterPath, JSON.stringify(filter));
 
-        let quickFilterPath = AppPathHelper.build(domain, STORAGE.COLUMN_CURRENT_QUICK_FILTER);
+        let quickFilterPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_CURRENT_QUICK_FILTER);
         if (quickSearchText && quickSearchText !== '' &&  quickSearchText !== undefined) {
             sessionStorage.setItem(quickFilterPath, quickSearchText);
         }
@@ -549,9 +554,9 @@ export class TableHelper {
      * @param id
      * @param name - opzionale - default 'default' 
      */
-    static saveCurrentTableFilterDetails = (domain: string, filter?: UserCustomFilter) => {
+    static saveCurrentTableFilterDetails = (domain: string, filter?: TableCustomFilter) => {
 
-        let filterPath = AppPathHelper.build(domain, STORAGE.COLUMN_FILTER_DETAILS);
+        let filterPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_FILTER_DETAILS);
         //salvo in sessione
         sessionStorage.setItem(filterPath, JSON.stringify({ ...filter, definition: undefined }));
 
@@ -562,12 +567,12 @@ export class TableHelper {
      * @param domain rimuove dal sessionStorage la selected row
      */
     static removeCurrentTableFilter = (domain: string) => {
-        let filterPath = AppPathHelper.build(domain, STORAGE.COLUMN_FILTER_PREFERENCES);
+        let filterPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_FILTER_PREFERENCES);
         //rimuovo dalla sessione
         sessionStorage.removeItem(filterPath);
 
         //pulizia dei dettagli del filtro
-        let filterDetailsPath = AppPathHelper.build(domain, STORAGE.COLUMN_FILTER_DETAILS);
+        let filterDetailsPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_FILTER_DETAILS);
         sessionStorage.removeItem(filterDetailsPath);
     }
 
@@ -577,7 +582,7 @@ export class TableHelper {
      * @param domain rimuove dal sessionStorage la selected row
      */
     static removeCurrentQuickTableFilter = (domain: string) => {
-        let selectedRowPath = AppPathHelper.build(domain, STORAGE.COLUMN_CURRENT_QUICK_FILTER);
+        let selectedRowPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_CURRENT_QUICK_FILTER);
         //rimuovo dalla sessione
         sessionStorage.removeItem(selectedRowPath);
     }
@@ -589,7 +594,7 @@ export class TableHelper {
  * @param domain ricava dal sessionStorage la riga selezionata(selected row)
  */
     static getSelectedRow = (domain: string) => {
-        let selected = AppPathHelper.build(domain, STORAGE.SELECTED_ROW);
+        let selected = buildPath(domain, AG_GRID_STORAGE_KEYS.SELECTED_ROW);
         //ricavo dalla sessione
         let selectedRow = sessionStorage.getItem(selected);
         if (selectedRow)
@@ -604,7 +609,7 @@ export class TableHelper {
      * @param selectedRow 
      */
     static saveSelectedRow = (domain: string, selectedRow: number) => {
-        let selectedRowPath = AppPathHelper.build(domain, STORAGE.SELECTED_ROW);
+        let selectedRowPath = buildPath(domain, AG_GRID_STORAGE_KEYS.SELECTED_ROW);
         //salvo in sessione
         sessionStorage.setItem(selectedRowPath, selectedRow);
     }
@@ -614,7 +619,7 @@ export class TableHelper {
      * @param domain rimuove dal sessionStorage la selected row
      */
     static removeSelectedRow = (domain: string) => {
-        let selectedRowPath = AppPathHelper.build(domain, STORAGE.SELECTED_ROW);
+        let selectedRowPath = buildPath(domain, AG_GRID_STORAGE_KEYS.SELECTED_ROW);
         //rimuovo dalla sessione
         sessionStorage.removeItem(selectedRowPath);
     }
@@ -683,7 +688,7 @@ export class TableHelper {
                 // colDef.width = 200;
                 // colDef.maxWidth = 200;
                 // colDef.width = 0;
-                colDef.headerName = TranslationHelper.getProperty(internalMetadata?.t, "configuration.actionsColumn.headerName") || "";
+                colDef.headerName = getTranslation(internalMetadata?.t, "configuration.actionsColumn.headerName") || "";
                 colDef.headerClass = 'ag-center-header';
                 colDef.sortable = false;
                 colDef.cellRenderer = ActionsCellRenderer; // Aggiungi il cell renderer
