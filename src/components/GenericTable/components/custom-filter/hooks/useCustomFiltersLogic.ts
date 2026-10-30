@@ -26,7 +26,7 @@ export type TableCustomFilterHandler = {
     customFilters: TableCustomFilter[];
     updateDefaultFilter: (filterId: number) => Promise<void>;
     applyFilter: (filterId: number) => Promise<void>;
-    isFilterApplied: (filter: TableCustomFilter) => boolean,
+    isFilterApplied: (filter: TableCustomFilter) => boolean;
     existFilter: (filterId: number) => boolean;
     addFilter: (filter: TableCustomFilter) => Promise<TableCustomFilter>;
     updateFilter: (filter: TableCustomFilter) => Promise<void>;
