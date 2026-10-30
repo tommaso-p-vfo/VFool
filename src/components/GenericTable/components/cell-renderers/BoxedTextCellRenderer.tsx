@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { UiHelper } from '../../../../../core/helpers/UiHelper';
 import { Badge } from 'react-bootstrap';
 import { IdsColor } from '../../../../../types/system/IdsColor';
-import { COL_EMPTY_PLACEHOLDER } from '../../constants/agGridConstants';
+import { COL_EMPTY_PLACEHOLDER } from '../../constants/tableConstants';
 
 // /**
 //  *

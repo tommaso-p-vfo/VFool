@@ -15,7 +15,7 @@ import type {
 } from "ag-grid-community";
 
 import { removeFromSession } from "../../../utils/StorageHelper";
-import { AG_GRID_STORAGE_KEYS } from "../constants/storageConstants";
+import { AG_GRID_STORAGE_KEYS } from "../constants/tableStorageConstants";
 
 import { type TableCustomFilter } from "../types/TableCustomFilter";
 import { TableCustomSetting } from "../types/TableCustomSettings";
@@ -24,7 +24,7 @@ import { useCustomFilterLogic, type TableCustomFilterHandler } from "../componen
 import { useGridSettingsLogic, type GridSettingsHandler } from "../components/column-preferences/hooks/useGridSettingsLogic";
 
 import type { PageRequest } from "../../../types/api/PageTypes";
-import { AG_GRID_COLUMN_TYPE } from "../constants/agGridConstants";
+import { AG_GRID_COLUMN_TYPE } from "../constants/tableConstants";
 
 export type AgGridDomainType = {
 
@@ -72,10 +72,11 @@ interface TableProviderProps {
     isLoadingGridData: boolean; //loading data items from server
 }
 
-const TableProvider = ({ children, serviceLocator, metadata, domain, gridApi, isGridReady, activeFilter, setActiveFilter, gridSettings, setGridSettings, summary, setSummary, isLoadingGridData }: TableProviderProps) => {
+const TableProvider = ({ children, serviceLocator, metadata, domain, gridApi, isGridReady, activeFilter, setActiveFilter, gridSettings, setGridSettings, 
+    summary, setSummary, isLoadingGridData }: TableProviderProps) => {
 
-    const customFilterHandler = useCustomFilterLogic({ domain, gridApi, activeFilter, setActiveFilter });
-    const gridSettingsHandler = useGridSettingsLogic(domain, gridSettings, setGridSettings);
+    const customFilterHandler = useCustomFilterLogic({ domain, gridApi, activeFilter, setActiveFilter, serviceLocator });
+    const gridSettingsHandler = useGridSettingsLogic(domain, gridSettings, setGridSettings, serviceLocator);
 
     const [filterData, setFilterData] = useState<FilterModel>(); //filtro che viene applicato a prescindere dalle interazioni utente: es. filtro 'solo mie'
 

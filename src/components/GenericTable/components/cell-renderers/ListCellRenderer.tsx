@@ -3,7 +3,7 @@ import { UiHelper } from '../../../../../core/helpers/UiHelper';
 import { IdsColor } from '../../../../../types/system/IdsColor';
 import useTranslations from '../../../../../locales/hooks/useTranslations';
 import { FaCheck } from 'react-icons/fa';
-import { COL_EMPTY_PLACEHOLDER } from '../../constants/agGridConstants';
+import { COL_EMPTY_PLACEHOLDER } from '../../constants/tableConstants';
 import TooltipComponent from '../../../TooltipComponent';
 import { Overlay, Popover } from 'react-bootstrap';
 

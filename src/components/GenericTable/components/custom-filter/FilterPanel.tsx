@@ -7,7 +7,7 @@ import { IdsVariant } from "../../../../../types/system/IdsVariant";
 import { IdsColor } from "../../../../../types/system/IdsColor";
 import { FaPlusCircle, FaSave } from "react-icons/fa";
 
-export const FilterShower = ({ filter }: { filter?: UserCustomFilter }) => {
+export const FilterPanel = ({ filter }: { filter?: UserCustomFilter }) => {
 
     const tableContext = useTableContext();
     const { addFilter, updateFilter, activeFilter } = tableContext.customFilterHandler;

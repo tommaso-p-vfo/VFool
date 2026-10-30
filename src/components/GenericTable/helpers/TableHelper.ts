@@ -2,7 +2,7 @@
 
 import { getTranslation } from "../../../locales/TranslationHelper";
 
-import { AG_GRID_STORAGE_KEYS } from "../constants/storageConstants";
+import { AG_GRID_STORAGE_KEYS } from "../constants/tableStorageConstants";
 import { getFromSession, getFromLocalSession, saveInSession, saveInLocalSession } from "../../../utils/StorageHelper";
 
 import { buildPath } from '../../../utils/Path';
@@ -12,7 +12,7 @@ import type { FilterModel } from "../../../types/api/FilterModel";
 
 
 import type { CellClickedEvent, ColDef, ColumnState, GridApi, ITextFilterParams } from 'ag-grid-community';
-import { AG_GRID_COLUMN_TYPE, AG_GRID_FILTER_TYPE, COL_EMPTY_PLACEHOLDER, COL_MIN_WIDTH, DEFAULT_COLUMN_FILTER, DEFAULT_COLUMN_SORTABLE, type AgGridColumnType, type AgGridFilterType } from "../constants/agGridConstants";
+import { AG_GRID_COLUMN_TYPE, AG_GRID_FILTER_TYPE, COL_EMPTY_PLACEHOLDER, COL_MIN_WIDTH, DEFAULT_COLUMN_FILTER, DEFAULT_COLUMN_SORTABLE, type AgGridColumnType, type AgGridFilterType } from "../constants/tableConstants";
 import ActionsCellRenderer from "../components/actions/ActionCellRenderer";
 
 import type { InternalTableColumnMetadata, TableColumnMetadata, TableMetadata } from "../types/TableMetadata";

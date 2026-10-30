@@ -23,7 +23,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { type CustomFilterProps, useGridFilter } from 'ag-grid-react';
 import { Button, Form, InputGroup } from 'react-bootstrap';
-import { AG_GRID_FILTER_TYPE } from '../../constants/agGridConstants';
+import { AG_GRID_FILTER_TYPE } from '../../constants/tableConstants';
 import { useTableContext } from '../../hooks/useTableContext';
 import GenericButton from '../../../GenericButton';
 import type { ButtonConfig } from '../../types/TableFormGroup';
