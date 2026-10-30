@@ -7,3 +7,4 @@ export * from './api/FilterModel';
 export * from './api/PageTypes';
 export * from './api/SortModel';
 export * from './api/AuditFields';
+export * from './api/IServiceLocator';

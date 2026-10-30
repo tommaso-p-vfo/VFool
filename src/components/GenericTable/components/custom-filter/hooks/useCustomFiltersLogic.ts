@@ -15,18 +15,19 @@ import useAuth from "../../../../../../core/auth/hooks/useAuth";
 import { TableHelper } from "../../../helpers/TableHelper";
 import { AG_GRID_FILTER_TYPE } from "../../../constants/agGridConstants";
 import type { AgGridDomainType } from "../../../contexts/TableContext";
+import { TableCustomFilter } from "../../../types/TableCustomFilter";
 
-export type UserCustomFilterHandler = {
+export type TableCustomFilterHandler = {
     cols: ColDef[];
-    activeFilter: UserCustomFilter|undefined;
-    customFilters: UserCustomFilter[];
+    activeFilter: TableCustomFilter |undefined;
+    customFilters: TableCustomFilter[];
     updateDefaultFilter: (filterId: number) => Promise<void>;
     applyFilter: (filterId: number) => Promise<void>;
-    isFilterApplied: (filter: UserCustomFilter) => boolean,
+    isFilterApplied: (filter: TableCustomFilter) => boolean,
     existFilter: (filterId: number) => boolean;
-    addFilter: (filter: UserCustomFilter) => Promise<UserCustomFilter>;
-    updateFilter: (filter: UserCustomFilter) => Promise<void>;
-    removeFilter: (filter: UserCustomFilter) => Promise<void>;
+    addFilter: (filter: TableCustomFilter) => Promise<TableCustomFilter>;
+    updateFilter: (filter: TableCustomFilter) => Promise<void>;
+    removeFilter: (filter: TableCustomFilter) => Promise<void>;
     refreshCustomFilters: () => void;
     resetActiveFilter: () => void;
     
@@ -40,14 +41,14 @@ export const useCustomFilterLogic = ({ domain, gridApi, activeFilter, setActiveF
     const appContext = useAppContext();
     const serviceLocator = appContext.serviceLocator;
 
-    const [pendingActivationFilter, setPendingActivationFilter] = useState<UserCustomFilter | undefined>();
-    const [customFilters, setCustomFilters] = useState<UserCustomFilter[]>([]);
+    const [pendingActivationFilter, setPendingActivationFilter] = useState<TableCustomFilter | undefined>();
+    const [customFilters, setCustomFilters] = useState<TableCustomFilter[]>([]);
 
     const cols = useMemo(() => 
         gridApi?.getColumnDefs()?.filter(c => !c?.colId?.startsWith('_')
     ), [gridApi]);
 
-    const isFilterApplied = useCallback((filter: UserCustomFilter): boolean => {
+    const isFilterApplied = useCallback((filter: TableCustomFilter): boolean => {
         return activeFilter?.id === filter.id;
     }, [activeFilter]);
 
@@ -65,7 +66,7 @@ export const useCustomFilterLogic = ({ domain, gridApi, activeFilter, setActiveF
         //Pulisci lista dei filtri temporanei se presenti
     }
 
-    const activateFilter = useCallback((filter?: UserCustomFilter) => {
+    const activateFilter = useCallback((filter?: TableCustomFilter) => {
 
         if (!customFilters) return;
 
@@ -119,7 +120,7 @@ export const useCustomFilterLogic = ({ domain, gridApi, activeFilter, setActiveF
                     _isCandidateForNew: currentFilterDetails._isCandidateForNew ?? false,
                     _isModified: currentFilterDetails._isModified ?? false,
                     definition: currentFilter
-                } as UserCustomFilter);
+                } as TableCustomFilter);
                 setFilterDetails(currentFilterDetails);
                 gridApi?.setFilterModel(currentFilter);
             }
@@ -133,7 +134,7 @@ export const useCustomFilterLogic = ({ domain, gridApi, activeFilter, setActiveF
         
     }
 
-    const addFilter = useCallback(async (filter: UserCustomFilter): Promise<UserCustomFilter> => {
+    const addFilter = useCallback(async (filter: TableCustomFilter): Promise<TableCustomFilter> => {
 
         let service = AppPathHelper.build(DOMAIN.USERS, SUBDOMAIN.USER_CUSTOM_FILTER, SERVICE_ENDPOINT.SAVE);
         
@@ -143,18 +144,18 @@ export const useCustomFilterLogic = ({ domain, gridApi, activeFilter, setActiveF
             isDefault: false, //filter.isDefault,
             name: filter.name,
             definition: JSON.stringify(filter.definition)
-        } as UserCustomFilter;
+        } as TableCustomFilter;
 
         let response = await AppHelper.getDataFromServer(serviceLocator, service, data);
         
         if(response.success){
-            refreshCustomFilters({ id: response.data} as UserCustomFilter);
+            refreshCustomFilters({ id: response.data } as TableCustomFilter);
         }
 
         return response.data;
     }, [serviceLocator, domain]);
 
-    const updateFilter = useCallback(async (filter: UserCustomFilter): Promise<void> => {
+    const updateFilter = useCallback(async (filter: TableCustomFilter): Promise<void> => {
 
         let service = AppPathHelper.build(DOMAIN.USERS, SUBDOMAIN.USER_CUSTOM_FILTER, SERVICE_ENDPOINT.UPDATE);
 
@@ -165,13 +166,13 @@ export const useCustomFilterLogic = ({ domain, gridApi, activeFilter, setActiveF
             isDefault: filter.isDefault,
             name: filter.name,
             definition: JSON.stringify(filter.definition)
-        } as UserCustomFilter;
+        } as TableCustomFilter;
 
         let response = await AppHelper.getDataFromServer(serviceLocator, service, data);
 
         if (response.success) {
             let activeFilterId = activeFilter?.id == filter.id ? activeFilter?.id : undefined;
-            refreshCustomFilters({ id: activeFilterId } as UserCustomFilter, !!activeFilterId);
+            refreshCustomFilters({ id: activeFilterId } as TableCustomFilter, !!activeFilterId);
         }
         
         return response.data;
@@ -181,25 +182,25 @@ export const useCustomFilterLogic = ({ domain, gridApi, activeFilter, setActiveF
         //aggiorna il filtro attivo se è quello modificato
     }, [domain]);
 
-    const removeFilter = async (filter: UserCustomFilter): Promise<void> => {
+    const removeFilter = async (filter: TableCustomFilter): Promise<void> => {
 
         let service = AppPathHelper.build(DOMAIN.USERS, SUBDOMAIN.USER_CUSTOM_FILTER, SERVICE_ENDPOINT.DELETE);
 
         let data = {
             id: filter.id
-        } as UserCustomFilter;
+        } as TableCustomFilter;
 
         let response = await AppHelper.getDataFromServer(serviceLocator, service, data);
 
         if (response.success) {
             let activeFilterId = activeFilter?.id == filter.id ? undefined : activeFilter?.id;
-            refreshCustomFilters({ id: activeFilterId } as UserCustomFilter, !activeFilterId);
+            refreshCustomFilters({ id: activeFilterId } as TableCustomFilter, !activeFilterId);
         }
 
         return response.data;
     }
 
-    const setFilterDetails = useCallback((filter?: UserCustomFilter) => {
+    const setFilterDetails = useCallback((filter?: TableCustomFilter) => {
         TableHelper.saveCurrentTableFilterDetails(domain?.agGridDomain, filter);
     }, [domain]);
 
@@ -210,7 +211,7 @@ export const useCustomFilterLogic = ({ domain, gridApi, activeFilter, setActiveF
             isDefault: false,
             _isTemporary: true,
             definition: {}
-        } as UserCustomFilter;
+        } as TableCustomFilter;
 
         setActiveFilter(_defaultFilter);
         setFilterDetails(_defaultFilter);
@@ -238,14 +239,14 @@ export const useCustomFilterLogic = ({ domain, gridApi, activeFilter, setActiveF
 
         let response = await AppHelper.getDataFromServer(serviceLocator, service, data);
         if (response.success) {
-            let filters = (response.data?.items ?? []) as UserCustomFilter[];
+            let filters = (response.data?.items ?? []) as TableCustomFilter[];
             filters = filters.map(f => ({ ...f, definition: JSON.parse(f.definition) }));
             setCustomFilters(filters);
         }
 
     }, [serviceLocator, domain, user]);
 
-    const refreshCustomFilters = useCallback(async (activeFilter?: UserCustomFilter, forceActiveFilterReset: boolean = true) => {
+    const refreshCustomFilters = useCallback(async (activeFilter?: TableCustomFilter, forceActiveFilterReset: boolean = true) => {
         
         if (forceActiveFilterReset) 
             resetActiveFilter();
@@ -302,6 +303,6 @@ export const useCustomFilterLogic = ({ domain, gridApi, activeFilter, setActiveF
         removeFilter,
         refreshCustomFilters,
         resetActiveFilter
-    } as UserCustomFilterHandler
+    } as TableCustomFilterHandler
 
 }

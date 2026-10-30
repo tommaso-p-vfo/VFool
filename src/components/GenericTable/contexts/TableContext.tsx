@@ -1,23 +1,30 @@
-import React, { createContext, useCallback, useEffect, useMemo, useState, type RefObject } from "react";
+import React, { createContext, useCallback, useEffect, useMemo, useState } from "react";
+
+import { IServiceLocator } from '../../../types/api/IServiceLocator';  
+import { type ApiRequest } from "../../../types/api/ApiRequest";
+import { buildPath } from "../../../utils/Path";
+
 import type { TableMetadata } from "../types/TableMetadata";
 import type { TableComboboxOption } from "../components/cell-renderers/components/TableCombobox";
-import { AG_GRID_COLUMN_TYPE, AG_GRID_FILTER_TYPE } from "../constants/agGridConstants";
-import { useAppContext } from "../../../../core/context/hooks/useAppContext";
-import type ApiRequest from "../../../../types/system/api/ApiRequest";
-import { AppPathHelper } from "../../../../core/helpers/AppPathHelper";
-import { SERVICE_ENDPOINT } from "../../../../core/service-locator/constants/locatorPath";
-import { type FilterModel } from "../../../../types/system/api/FilterModel";
+
+import { SERVICE_ENDPOINT } from "../../../constants/apiConstants";
+import { type FilterModel } from "../../../types/api/FilterModel";
 
 import type {
     GridApi,
 } from "ag-grid-community";
-import { StorageHelper } from "../../../../storage/helpers/StorageHelper";
-import STORAGE from "../../../../storage/constants/storage";
-import type { UserCustomFilter } from "../../../../types/dto/UserCustomFilter";
-import { useCustomFilterLogic, type UserCustomFilterHandler } from "../components/custom-filter/hooks/useCustomFiltersLogic";
+
+import { removeFromSession } from "../../../utils/StorageHelper";
+import { AG_GRID_STORAGE_KEYS } from "../constants/storageConstants";
+
+import { type TableCustomFilter } from "../types/TableCustomFilter";
+import { TableCustomSetting } from "../types/TableCustomSettings";
+
+import { useCustomFilterLogic, type TableCustomFilterHandler } from "../components/custom-filter/hooks/useCustomFiltersLogic";
 import { useGridSettingsLogic, type GridSettingsHandler } from "../components/column-preferences/hooks/useGridSettingsLogic";
-import type { UserGridSetting } from "../../../../types/dto/UserGridSetting";
-import type { PageRequest } from "../../../../types/dto/PageTypes";
+
+import type { PageRequest } from "../../../types/api/PageTypes";
+import { AG_GRID_COLUMN_TYPE } from "../constants/agGridConstants";
 
 export type AgGridDomainType = {
 
@@ -41,7 +48,7 @@ export interface TableContextType {
     gridApi: GridApi | null;
     isGridReady: boolean;
     data: any;
-    customFilterHandler: UserCustomFilterHandler;
+    customFilterHandler: TableCustomFilterHandler;
     gridSettingsHandler: GridSettingsHandler;
     summary: any; //totali tabella da mostrare nel footer
     isLoadingGridData: boolean; //items loading from server
@@ -50,24 +57,22 @@ export interface TableContextType {
 const TableContext = createContext<TableContextType | undefined>(undefined);
 
 interface TableProviderProps {
+    serviceLocator: IServiceLocator;
     children: React.ReactNode;
     metadata: TableMetadata<any>;
     domain?: AgGridDomainType|undefined;
     gridApi: GridApi | null;
     isGridReady: boolean;
-    activeFilter: UserCustomFilter|undefined;
-    setActiveFilter: (filter?: UserCustomFilter) => void; 
-    gridSettings: UserGridSetting|undefined;
-    setGridSettings: (gridSettings?: UserGridSetting) => void;
+    activeFilter: TableCustomFilter |undefined;
+    setActiveFilter: (filter?: TableCustomFilter) => void; 
+    gridSettings: TableCustomSetting |undefined;
+    setGridSettings: (gridSettings?: TableCustomSetting) => void;
     summary: any|undefined; 
     setSummary: (summary: any) => void;
     isLoadingGridData: boolean; //loading data items from server
 }
 
-const TableProvider = ({ children, metadata, domain, gridApi, isGridReady, activeFilter, setActiveFilter, gridSettings, setGridSettings, summary, setSummary, isLoadingGridData }: TableProviderProps) => {
-
-    const appContext = useAppContext();
-    const serviceLocator = appContext.serviceLocator;
+const TableProvider = ({ children, serviceLocator, metadata, domain, gridApi, isGridReady, activeFilter, setActiveFilter, gridSettings, setGridSettings, summary, setSummary, isLoadingGridData }: TableProviderProps) => {
 
     const customFilterHandler = useCustomFilterLogic({ domain, gridApi, activeFilter, setActiveFilter });
     const gridSettingsHandler = useGridSettingsLogic(domain, gridSettings, setGridSettings);
@@ -101,7 +106,7 @@ const TableProvider = ({ children, metadata, domain, gridApi, isGridReady, activ
         if (prevServiceLocatorDomain !== newServiceLocatorDomain) {
             // se cambio dominio/table,
             // pulisco le preferenze di pagina salvate in sessione per evitare di ritrovarmi su pagine non esistenti
-            StorageHelper.removeFromSession(AppPathHelper.build(_domain.agGridDomain, STORAGE.CURRENT_PAGE));
+            removeFromSession(buildPath(_domain.agGridDomain, AG_GRID_STORAGE_KEYS.CURRENT_PAGE));
         }
 
     }, [_domain]);
@@ -127,7 +132,7 @@ const TableProvider = ({ children, metadata, domain, gridApi, isGridReady, activ
                     }
 
 
-                    const apiRequest = { service: AppPathHelper.build(column.domain, SERVICE_ENDPOINT.LIST), data: _request } as ApiRequest;
+                    const apiRequest = { service: buildPath(column.domain, SERVICE_ENDPOINT.LIST), data: _request } as ApiRequest;
                     const list = await serviceLocator.callService(apiRequest);
                     map.set(column.domain, list?.data?.items.map(i => ({ id: i.id ?? '', name: i.name ?? '', raw: i })) ?? []);
                 }
@@ -153,7 +158,7 @@ const TableProvider = ({ children, metadata, domain, gridApi, isGridReady, activ
                 if (column && column.type === AG_GRID_COLUMN_TYPE.BOXED_COMBOBOX) {
                     if (!column.domain) continue;
 
-                    const request = { service: AppPathHelper.build(column.domain, SERVICE_ENDPOINT.LIST) } as ApiRequest;
+                    const request = { service: buildPath(column.domain, SERVICE_ENDPOINT.LIST) } as ApiRequest;
                     const options = await serviceLocator.callService(request);
                     map.set(column.domain, options?.data?.items ?? []);
                 }
