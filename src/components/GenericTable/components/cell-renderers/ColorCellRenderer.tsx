@@ -1,5 +1,5 @@
 import type { CustomHeaderProps } from 'ag-grid-react';
-import { Pipette, Square } from 'lucide-react';
+import { FaEyeDropper, FaSquare } from 'react-icons/fa';
 
 /**
  * 
@@ -11,7 +11,7 @@ import { Pipette, Square } from 'lucide-react';
 const ColorHeader = ({ displayName }: CustomHeaderProps) => {
     return (
         <>
-            <Pipette className='hds-header-icon' />
+            <FaEyeDropper className='hds-header-icon' />
             <span>{displayName}</span>
 
         </>
@@ -30,7 +30,7 @@ const ColorCellRenderer: React.FC<any> = ({ data, field }: {data: any, field: st
     return (
 
         <>
-            <Square color={data?.[field]} fill={data?.[field]} />
+            <FaSquare color={data?.[field]} fill={data?.[field]} />
         </>
 
     );

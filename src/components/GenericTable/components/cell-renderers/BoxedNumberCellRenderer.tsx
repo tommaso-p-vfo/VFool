@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import { UiHelper } from '../../../../../core/helpers/UiHelper';
 import { Badge } from 'react-bootstrap';
-import { IdsColor } from '../../../../../types/system/IdsColor';
 import { COL_EMPTY_PLACEHOLDER } from '../../constants/tableConstants';
+import { ThemeColor, toCssColor } from '../../../../utils/Color';
 
 /**
  *
@@ -29,15 +28,15 @@ const BoxedNumberHeader = ({ displayName }: any) => {
 const BoxedNumberCellRenderer: React.FC<any> = ({ data, colId, defaultColor }: { data: any, colId: string, defaultColor?: string}) => {
 
 
-    const [bgColor, setBgColor] = useState<string>(IdsColor.PRIMARY);
+    const [bgColor, setBgColor] = useState<string>(ThemeColor.PRIMARY);
 
     useEffect(() => {
 
         if(!data) return; 
 
-        let _color = defaultColor ?? IdsColor.PRIMARY;
-        let _bgColor = UiHelper.getColor(_color);
-        setBgColor(_bgColor.color);
+        let _color = defaultColor ?? ThemeColor.PRIMARY;
+        let _bgColor = toCssColor(_color);
+        setBgColor(_bgColor);
 
     }, [data]);
 
@@ -62,3 +61,4 @@ const BoxedNumberCellRenderer: React.FC<any> = ({ data, colId, defaultColor }: {
 
 export default BoxedNumberCellRenderer;
 export { BoxedNumberHeader }
+

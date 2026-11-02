@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { UiHelper } from '../../../../../core/helpers/UiHelper';
-import { IdsColor } from '../../../../../types/system/IdsColor';
+import { ThemeColor, toCssColor } from '../../../../utils/Color';
 import { COL_EMPTY_PLACEHOLDER } from '../../constants/tableConstants';
 
 // /**
@@ -29,15 +28,15 @@ import { COL_EMPTY_PLACEHOLDER } from '../../constants/tableConstants';
 const EmphasizedTextCellRenderer: React.FC<any> = ({ data, colId, defaultColor, className }: { data: any, colId: string, defaultColor?: string, className?: string}) => {
 
 
-    const [color, setColor] = useState<string>(IdsColor.PRIMARY);
+    const [color, setColor] = useState<string>(ThemeColor.PRIMARY);
 
     useEffect(() => {
 
         if(!data) return; 
 
-        let _color = defaultColor ?? IdsColor.BLACK;
-        let _bgColor = UiHelper.getColor(_color);
-        setColor(_bgColor.color);
+        let _color = defaultColor ?? ThemeColor.BLACK;
+        let _bgColor = toCssColor(_color);
+        setColor(_bgColor);
 
     }, [data]);
 

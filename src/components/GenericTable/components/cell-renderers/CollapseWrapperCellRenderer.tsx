@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Overlay, Popover } from 'react-bootstrap';
-import { UiHelper } from '../../../../../core/helpers/UiHelper';
-import { IdsColor } from '../../../../../types/system/IdsColor';
+import { ThemeColor, toCssColor } from '../../../../utils/Color';
 
 interface CollapseWrapperCellRendererProps {
     cellRenderer: React.ComponentType<any>;
@@ -53,7 +52,7 @@ const CollapseWrapperCellRenderer: React.FC<CollapseWrapperCellRendererProps> = 
                 style={{
                     minWidth: 300,
                     maxWidth: 400,
-                    boxShadow: `${UiHelper.getColor(IdsColor.GRAY).color} 2px 3px 10px`
+                    boxShadow: `${toCssColor(ThemeColor.GRAY)} 2px 3px 10px`
                 }}
             >
                 <Popover.Body style={{ maxHeight: '70vh', overflowY: 'auto' }}>

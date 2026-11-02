@@ -1,10 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { UiHelper } from '../../../../../core/helpers/UiHelper';
-import { IdsColor } from '../../../../../types/system/IdsColor';
-import useTranslations from '../../../../../locales/hooks/useTranslations';
-import { FaCheck } from 'react-icons/fa';
+import { ThemeColor, toCssColor } from '../../../../utils/Color';
+
 import { COL_EMPTY_PLACEHOLDER } from '../../constants/tableConstants';
-import TooltipComponent from '../../../TooltipComponent';
 import { Overlay, Popover } from 'react-bootstrap';
 
 export type ListCellRendererProps = {
@@ -32,7 +29,7 @@ const ListCellRenderer: React.FC<ListCellRendererProps> = ({
 }: ListCellRendererProps) => {
 
     const target = useRef(null);
-    const [color, setColor] = useState<string>(defaultColor ?? IdsColor.PRIMARY);
+    const [color, setColor] = useState<string>(defaultColor ?? ThemeColor.PRIMARY);
     const [expanded, setExpanded] = useState<boolean>(false);
 
     const items: string[] = Array.isArray(data?.[colId]) ? data[colId] : [];
@@ -43,9 +40,9 @@ const ListCellRenderer: React.FC<ListCellRendererProps> = ({
     useEffect(() => {
         if (!data) return;
 
-        let _color = defaultColor ?? IdsColor.PRIMARY;
-        let _bgColor = UiHelper.getColor(_color);
-        setColor(_bgColor.color);
+        let _color = defaultColor ?? ThemeColor.PRIMARY;
+        let _bgColor = toCssColor(_color);
+        setColor(_bgColor);
     }, [data]);
 
     return (
@@ -152,12 +149,11 @@ const ListCellRenderer: React.FC<ListCellRendererProps> = ({
                 style={{
                     minWidth: 300,
                     maxWidth: 400,
-                    boxShadow: `${UiHelper.getColor(IdsColor.GRAY).color} 2px 3px 10px`
+                    boxShadow: `${toCssColor(ThemeColor.GRAY)} 2px 3px 10px`
                 }}
             >
             
-            
-                            <Popover.Body style={{ maxHeight: '70vh', overflowY: 'auto' }} className='ids-cell-renderer-list-container'>
+            <Popover.Body style={{ maxHeight: '70vh', overflowY: 'auto' }} className='ids-cell-renderer-list-container'>
                     
 
                 {items.map((item, index) => (

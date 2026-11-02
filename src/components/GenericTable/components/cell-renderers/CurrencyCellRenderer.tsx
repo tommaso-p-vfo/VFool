@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { UiHelper } from '../../../../../core/helpers/UiHelper';
-import { IdsColor } from '../../../../../types/system/IdsColor';
+import { ThemeColor, toCssColor } from '../../../../utils/Color';
 import { COL_EMPTY_PLACEHOLDER } from '../../constants/tableConstants';
 
 /**
@@ -29,15 +28,15 @@ const CurrencyHeader = ({ displayName }: any) => {
 const CurrencyCellRenderer: React.FC<any> = ({ data, colId, defaultColor, defaultCurrency }: { data: any, colId: string, defaultColor?: string, defaultCurrency?: "€|$"}) => {
 
     const [currency, setCurrency] = useState<string>("€");
-    const [color, setColor] = useState<string>(IdsColor.PRIMARY);
+    const [color, setColor] = useState<string>(ThemeColor.PRIMARY);
 
     useEffect(() => {
 
         if (!data) return;
 
-        let _color = defaultColor ?? IdsColor.PRIMARY;
-        let _bgColor = UiHelper.getColor(_color);
-        setColor(_bgColor.color);
+        let _color = defaultColor ?? ThemeColor.PRIMARY;
+        let _bgColor = toCssColor(_color);
+        setColor(_bgColor);
 
         let _currency = defaultCurrency ?? "€";
         setCurrency(_currency);

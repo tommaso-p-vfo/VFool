@@ -1,18 +1,20 @@
+//TODO BoxedCombobox - generalizzare e terminare implementazione
+
 import { useEffect, useRef, useState } from 'react';
-import { UiHelper } from '../../../../../core/helpers/UiHelper';
 import { Badge } from 'react-bootstrap';
-import { IdsColor } from '../../../../../types/system/IdsColor';
 import { COL_EMPTY_PLACEHOLDER } from '../../constants/tableConstants';
-import Combobox from '../../../forms/combobox/Combobox';
-import { AppPathHelper } from '../../../../../core/helpers/AppPathHelper';
-import DOMAIN, { SUBDOMAIN } from '../../../../../core/constants/domains';
-import type { ComboboxOptionConfig } from '../../../../../types/system/ComboboxOptionConfig';
-import TableCombobox from './components/TableCombobox';
-import { useAppContext } from '../../../../../core/context/hooks/useAppContext';
-import type ApiRequest from '../../../../../types/system/api/ApiRequest';
-import { SERVICE_ENDPOINT } from '../../../../../core/service-locator/constants/locatorPath';
+
+// import Combobox from '../../../forms/combobox/Combobox';
+// import DOMAIN, { SUBDOMAIN } from '../../../../../core/constants/domains';
+// import type { ComboboxOptionConfig } from '../../../../../types/system/ComboboxOptionConfig';
+
+// import TableCombobox from './components/TableCombobox';
+
+// import type ApiRequest from '../../../../../types/system/api/ApiRequest';
+// import { SERVICE_ENDPOINT } from '../../../../../core/service-locator/constants/locatorPath';
+
 import { useTableContext } from '../../hooks/useTableContext';
-import useTranslations from '../../../../../locales/hooks/useTranslations';
+import { ThemeColor, toCssColor } from '../../../../utils/Color';
 
 // /**
 //  *
@@ -39,17 +41,15 @@ import useTranslations from '../../../../../locales/hooks/useTranslations';
  */
 const BoxedComboboxCellRenderer: React.FC<any> = ({ data, colId, colName, boxedColorColId, defaultColor }) => {
 
-    const appContxt = useAppContext();
-    const serviceLocator = appContxt.serviceLocator;
-
+    
     const tableContext = useTableContext();
-
-    const t = useTranslations();
+    const serviceLocator = tableContext.serviceLocator;
+    const t = tableContext.t;
 
     const cellContainerRef = useRef<HTMLDivElement>(null);
     const [_data, setData] = useState(data);
 
-    const [bgColor, setBgColor] = useState<string>(IdsColor.PRIMARY);
+    const [bgColor, setBgColor] = useState<string>(ThemeColor.PRIMARY);
     const [isEditing, setIsEditing] = useState(false);
 
     const getRelatedProperties = (
@@ -88,8 +88,8 @@ const BoxedComboboxCellRenderer: React.FC<any> = ({ data, colId, colName, boxedC
     useEffect(() => {
         if (!_data) return;
         let _color = _data?.[boxedColorColId] ?? defaultColor;
-        let _bgColor = UiHelper.getColor(_color);
-        setBgColor(_bgColor.color);
+        let _bgColor = toCssColor(_color);
+        setBgColor(_bgColor);
     }, [_data]);
 
     // 2. Sostituisci l'useEffect esistente con questo
@@ -126,52 +126,53 @@ const BoxedComboboxCellRenderer: React.FC<any> = ({ data, colId, colName, boxedC
                     {_data?.[colId]?.toUpperCase()}
                 </Badge>
             ) : (
-                <TableCombobox
-                    id={'t-0'}
-                    domain={AppPathHelper.build(DOMAIN.TENDERS, SUBDOMAIN.TENDER_STATUSES)}
-                    data={_data}
-                    options={tableContext.comboboxMap.get(AppPathHelper.build(DOMAIN.TENDERS, SUBDOMAIN.TENDER_STATUSES) ?? [])}
-                    selectedValue={data[colId]}
-                    optionConfig={{ placeholder: 'Stato gara' } as ComboboxOptionConfig}
-                    onChange={async (e) => {
-                        let request = {
-                            data: {
-                                id: _data.id,
-                                tenderStatusId: e.target.value
-                            },
-                            service: AppPathHelper.build(DOMAIN.TENDERS, SUBDOMAIN.TENDER_STATUSES, SERVICE_ENDPOINT.UPDATE)
-                        } as ApiRequest;
-                        let response = await serviceLocator.callService(request);
+                // <TableCombobox
+                //     id={'t-0'}
+                //     domain={buildPat(DOMAIN.TENDERS, SUBDOMAIN.TENDER_STATUSES)}
+                //     data={_data}
+                //     options={tableContext.comboboxMap.get(AppPathHelper.build(DOMAIN.TENDERS, SUBDOMAIN.TENDER_STATUSES) ?? [])}
+                //     selectedValue={data[colId]}
+                //     optionConfig={{ placeholder: 'Stato gara' } as ComboboxOptionConfig}
+                //     onChange={async (e) => {
+                //         let request = {
+                //             data: {
+                //                 id: _data.id,
+                //                 tenderStatusId: e.target.value
+                //             },
+                //             service: AppPathHelper.build(DOMAIN.TENDERS, SUBDOMAIN.TENDER_STATUSES, SERVICE_ENDPOINT.UPDATE)
+                //         } as ApiRequest;
+                //         let response = await serviceLocator.callService(request);
 
-                        // let request = {
-                        //     data: {
-                        //         ...data,
-                        //         tenderStatusId: e.target.value
-                        //     },
-                        //     service: AppPathHelper.build(DOMAIN.TENDERS, SERVICE_ENDPOINT.UPDATE)
-                        // } as ApiRequest;
-                        // let response = await serviceLocator.callService(request);
+                //         // let request = {
+                //         //     data: {
+                //         //         ...data,
+                //         //         tenderStatusId: e.target.value
+                //         //     },
+                //         //     service: AppPathHelper.build(DOMAIN.TENDERS, SERVICE_ENDPOINT.UPDATE)
+                //         // } as ApiRequest;
+                //         // let response = await serviceLocator.callService(request);
 
-                        let relatedProps = getRelatedProperties(colId, _data);
+                //         let relatedProps = getRelatedProperties(colId, _data);
                         
-                        setData((prev) => ({
-                            ...prev,
-                            [colId]: e.target.raw.name,
-                            ...(relatedProps.colorKey && { [relatedProps.colorKey]: e.target.raw.color ?? 'yellow' }),
-                            ...(relatedProps.idKey && { [relatedProps.idKey]: e.target.raw.id }),
-                        }));
+                //         setData((prev) => ({
+                //             ...prev,
+                //             [colId]: e.target.raw.name,
+                //             ...(relatedProps.colorKey && { [relatedProps.colorKey]: e.target.raw.color ?? 'yellow' }),
+                //             ...(relatedProps.idKey && { [relatedProps.idKey]: e.target.raw.id }),
+                //         }));
 
-                        // data[colId] = e.target.raw.name;
-                        // data['tenderStatusColor'] = e.target.raw.color ?? 'yellow';
-                        // data['tenderStatusId'] = e.target.raw.id;
+                //         // data[colId] = e.target.raw.name;
+                //         // data['tenderStatusColor'] = e.target.raw.color ?? 'yellow';
+                //         // data['tenderStatusId'] = e.target.raw.id;
 
 
-                        // qui gestisci il cambio valore, es. aggiorna data o chiama una callback
-                        setIsEditing(false);
-                    }}
-                    disabled={false}
-                    required={false}
-                />
+                //         // qui gestisci il cambio valore, es. aggiorna data o chiama una callback
+                //         setIsEditing(false);
+                //     }}
+                //     disabled={false}
+                //     required={false}
+                // />
+                <></>
             )}
         </div>
     );

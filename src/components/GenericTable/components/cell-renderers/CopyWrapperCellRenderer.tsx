@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
-import { toast } from 'react-toastify';
-import useTranslations from '../../../../../locales/hooks/useTranslations';
-import { AppHelper } from '../../../../../core/helpers/AppHelper';
+import { useTableContext } from '../../hooks/useTableContext';
+import { copyToClipboard } from '../../../../utils/Clipboard';
 
 interface CopyWrapperCellRendererProps {
     cellRenderer: React.ComponentType<any>;
@@ -25,7 +24,8 @@ const CopyWrapperCellRenderer: React.FC<CopyWrapperCellRendererProps> = ({
 
     const target = useRef(null);
 
-    const t = useTranslations();
+    const tableContext = useTableContext();
+    const t = tableContext.t;
 
     return (
         <>
@@ -36,7 +36,7 @@ const CopyWrapperCellRenderer: React.FC<CopyWrapperCellRendererProps> = ({
 
                 if (!data || !data[colId]) return;
 
-                AppHelper.copyToClipboard(data[colId], colName);
+                copyToClipboard(data[colId], colName);
 
             }}
             title={`${data && data[colId] ? t.common.actions.copy + ' ' + colName : ''}`}

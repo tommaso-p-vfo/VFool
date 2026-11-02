@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { UiHelper } from '../../../../../core/helpers/UiHelper';
-import { IdsColor } from '../../../../../types/system/IdsColor';
-import useTranslations from '../../../../../locales/hooks/useTranslations';
 import { FaCheck } from 'react-icons/fa';
-import { AppHelper } from '../../../../../core/helpers/AppHelper';
+import { useTableContext } from '../../hooks/useTableContext';
+import { ThemeColor, toCssColor } from '../../../../utils/Color';
+import { isNullEmptyOrUndefined } from '../../../../utils/Guards';
 
 // /**
 //  *
@@ -31,9 +30,10 @@ import { AppHelper } from '../../../../../core/helpers/AppHelper';
 const BooleanCellRenderer: React.FC<any> = ({ value }: {
     value: any }) => {
 
-    const t = useTranslations();
+    const tableContext = useTableContext();
+    const t = tableContext.t;
 
-    const [color, ] = useState<string>(IdsColor.GREEN);
+    const [color,] = useState<string>(ThemeColor.PRIMARY);
 
     (params: any) => params.value ? 
     
@@ -43,15 +43,15 @@ const BooleanCellRenderer: React.FC<any> = ({ value }: {
     return (
 
         <>
-            {value && value != undefined  && (<span className='d-flex align-items-center justify-content-center fw-bold gap-1' style={{ color: UiHelper.getColor(color).color}}>
+            {value && value != undefined  && (<span className='d-flex align-items-center justify-content-center fw-bold gap-1' style={{ color: toCssColor(color)}}>
                 <span>Si</span>
                 <FaCheck size={8} />
                 </span>)}
-            {value !== false && AppHelper.isNullEmptyOrUndefined(value) && (<span className='d-flex align-items-center justify-content-center gap-1'>
+            {value !== false && isNullEmptyOrUndefined(value) && (<span className='d-flex align-items-center justify-content-center gap-1'>
                 <span>-</span>
                 {/* <FaTimes size={8} /> */}
             </span>)}
-            {!value && (<span style={{ color: UiHelper.getColor(IdsColor.RED).color }} className='d-flex align-items-center justify-content-center gap-1'>
+            {!value && (<span style={{ color: toCssColor(ThemeColor.RED) }} className='d-flex align-items-center justify-content-center gap-1'>
                 <span>No</span>
                 {/* <FaTimes size={8} /> */}
             </span>)}
