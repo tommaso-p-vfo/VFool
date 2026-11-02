@@ -38,6 +38,7 @@ export type AgGridDomainType = {
 
 export interface TableContextType {
     domain: AgGridDomainType | undefined;
+    serviceLocator: IServiceLocator;
     metadata: TableMetadata<any> | undefined;
     comboboxMap: Map<string, TableComboboxOption[]>;
     listsMap: Map<string, { id: string, name: string, raw: any }[]>;
@@ -211,6 +212,7 @@ const TableProvider = ({ children, serviceLocator, metadata, domain, gridApi, is
 
     const value = useMemo<TableContextType>(() => ({
         domain,
+        serviceLocator,
         metadata,
         comboboxMap,
         listsMap,
@@ -225,7 +227,7 @@ const TableProvider = ({ children, serviceLocator, metadata, domain, gridApi, is
         gridSettingsHandler,
         summary,
         isLoadingGridData
-    }), [domain, metadata, comboboxMap, listsMap, filterData, isLoadingData, gridApi, isGridReady, data, customFilterHandler, gridSettingsHandler, summary, isLoadingGridData]);
+    }), [domain, serviceLocator, metadata, comboboxMap, listsMap, filterData, isLoadingData, gridApi, isGridReady, data, customFilterHandler, gridSettingsHandler, summary, isLoadingGridData]);
 
     return (
         <TableContext.Provider value={value}>

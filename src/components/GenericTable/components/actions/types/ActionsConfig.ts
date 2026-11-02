@@ -1,5 +1,4 @@
-import type { ActionType } from "../../../../../../core/constants/actions";
-import type { GenericFormViewType } from "../../../../../../types/system/GenericFormView";
+import type { ActionType } from "./Action";
 import type { Action } from "./Action";
 
 export type ActionsConfig<T = any> = {
@@ -15,7 +14,7 @@ export type ActionConfig<T> = {
     actionType: ActionType; //tipo di azione - es. add, edit, delete, view, showComments, etc. - da usare per identificare l'icona di default da associare all'azione e per eventuali callback di default (es. delete)
     title?: string; //titolo da mostrare nell'header del modal associato all'azione - default inferito da dominio + tipo azione
     domain?: string; //se diverso da quello della tabella, permette di indirizzare l'azione verso un dominio specifico (es. per avere un'azione di add che invece di aprire il form di creazione del dominio della tabella, apra quello di un altro dominio - es. add protocollo invece di add tender)
-    view?: GenericFormViewType; //permette di specificare una view per l'azione (es. edit mode o view mode) - default view mode
+    // view?: GenericFormViewType; //permette di specificare una view per l'azione (es. edit mode o view mode) - default view mode
     callback?: (data?: T) => void;
     modalVersion?: boolean;
     icon?: any; //TSX Element
@@ -37,4 +36,10 @@ export type ActionConfig<T> = {
     //la keyword _data permette di effettuare mappature tra valori del data parent e il wrapper. -> es. { customerId:"_data.id" }
     wrappedData?: WrappedData<any>;
     params?: any //utile per il passaggio di oggetti dal parent al componente che gestirà l'azione - es. il ref di una modal da aprire all'esterno
+}
+
+export type ActionsMetadata<T = any> = {
+    domain: string,
+    tableName: string,
+    actionsConfig: ActionsConfig<T>
 }

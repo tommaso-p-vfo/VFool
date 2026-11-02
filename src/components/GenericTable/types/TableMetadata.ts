@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
-import type { PageRequest } from "../../../../types/dto/PageTypes";
-import type { FilterModel } from "../../../../types/system/api/FilterModel";
+import type { PageRequest } from "../../../types/api/PageTypes";
+import type { FilterModel } from "../../../types/api/FilterModel";
+import type { IComponentRegistry } from "../../../types/IComponentRegistry";
 import type { ActionsConfig } from "../components/actions/types/ActionsConfig";
 import type { TableContextType } from "../contexts/TableContext";
 import { TableTranslation } from "./TableTranslation";
@@ -12,6 +13,7 @@ export type TableMetadata<T> = {
 
     icon?:ReactElement;
     t?: TableTranslation;
+    componentRegistry?: IComponentRegistry;
 
     domain: string; // Service Domain - Identificatore univoco della tabella (vd. DOMAIN e SUBDOMAIN)
     defaultPageRequest?: PageRequest; // Richiesta di pagina predefinita per la tabella

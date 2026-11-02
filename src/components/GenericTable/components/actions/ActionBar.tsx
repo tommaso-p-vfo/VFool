@@ -1,7 +1,6 @@
 
-import useTranslations from "../../../../../locales/hooks/useTranslations";
 import { useCallback, useEffect, useRef, useState } from "react";
-import GenericModal from "../../../modals/GenericModal";
+import { GenericModal } from "../../../modals/GenericModal";
 import { ComponentRegistry } from "../../../../../core/registry/ComponentRegistry";
 import ACTIONS from "../../../../../core/constants/actions";
 import { toast } from "react-toastify";
@@ -26,10 +25,10 @@ import type { FilterModel } from "../../../../../types/system/api/FilterModel";
 
 const ActionBar = ({ gridApiRef, metadata, actionBarConfig, openColumnChooser }: { gridApiRef: any, metadata: ActionsMetadata, actionBarConfig: ActionBarConfig, openColumnChooser: (open: boolean) => void }) => {
 
-    const t = useTranslations();
-
+    
     const tableContext = useTableContext();
-    const serviceLocator = useAppContext().serviceLocator;
+    const t = tableContext.metadata?.t;
+    const serviceLocator = tableContext.serviceLocator;
 
     const gridSettingsHandler = tableContext.gridSettingsHandler;
 
