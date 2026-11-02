@@ -1,7 +1,8 @@
 import type { ReactElement } from "react";
 import type { ActionFuncProps } from "../../../../modals/GenericModal";
+import { TABLE_ACTION_NAME } from "../../../constants/tableActionConstants";
 
-export type Action = {
+export type _TableAction = {
 
     name: string;
     icon?: ReactElement;
@@ -9,12 +10,4 @@ export type Action = {
 
 }
 
-export const ACTION_NAME = {
-    ADD: 'add',
-    EDIT: 'edit',
-    DELETE: 'delete',
-    VIEW: 'view',
-    EXPORT: 'export'
-}
-
-export type ActionType = typeof ACTION_NAME[keyof typeof ACTION_NAME];
+export type _TableActionType = typeof TABLE_ACTION_NAME[keyof typeof TABLE_ACTION_NAME];

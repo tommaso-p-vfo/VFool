@@ -6,7 +6,7 @@ import GenericModal from '../../../modals/GenericModal';
 import ACTIONS, { type ActionType } from '../../../../../core/constants/actions';
 import { ComponentRegistry } from '../../../../../core/registry/ComponentRegistry';
 import { toast } from 'react-toastify';
-import type { Action } from './types/Action';
+import type { _TableAction } from './types/Action';
 import { TableHelper } from '../../helpers/TableHelper';
 import { AppPathHelper } from '../../../../../core/helpers/AppPathHelper';
 import type { ActionsMetadata } from './types/ActionsMetadata';
@@ -16,7 +16,7 @@ import GenericButton, { type GenericButtonConfig } from '../../../GenericButton'
 import { IdsColor } from '../../../../../types/system/IdsColor';
 import { IdsVariant } from '../../../../../types/system/IdsVariant';
 import { GenericFormView, type GenericFormViewType } from '../../../../../types/system/GenericFormView';
-import type { ActionConfig } from './types/ActionsConfig';
+import type { _TableActionConfig } from './types/ActionsConfig';
 import { useTableContext } from '../../hooks/useTableContext';
 
 interface ActionsCellRendererProps extends ICellRendererParams {
@@ -50,7 +50,7 @@ const ActionsCellRenderer: React.FC<ActionsCellRendererProps> = ({ metadata, dat
     const [modalName, setModalName] = useState<string>('');
     const [modalSize, setModalSize] = useState<'xs'|'md'|'lg'|'xl'>('lg');
     //lista di azioni da rendere disponibili nella modal
-    const [actions, setActions] = useState<Action[]>([]);
+    const [actions, setActions] = useState<_TableAction[]>([]);
     //readonly per l'intero form legato alle azioni (visualizzazione, modifica, ecc.)
     const [readOnly, setReadOnly] = useState<boolean>(false);
     //componente dinamico della modal - start
@@ -151,7 +151,7 @@ const ActionsCellRenderer: React.FC<ActionsCellRendererProps> = ({ metadata, dat
         return action;
     }, [metadata]);
 
-    const handleAction = useCallback((actionConfig: ActionConfig<any>, data: any) => {
+    const handleAction = useCallback((actionConfig: _TableActionConfig<any>, data: any) => {
 
         //handle wrapped data
         // let _data = data;
@@ -187,14 +187,14 @@ const ActionsCellRenderer: React.FC<ActionsCellRendererProps> = ({ metadata, dat
                     name: t.common.buttons.close,
                     onClick: closeModal
                 }
-            ] as Action[];
+            ] as _TableAction[];
 
             if (actionConfig?.defaultActions !== undefined && !actionConfig?.defaultActions) {
                 //elimina le default actions
                 defaultActions = [];
             }
 
-            defaultActions.unshift(...actionConfig?.customActions ?? [] as Action[]);
+            defaultActions.unshift(...actionConfig?.customActions ?? [] as _TableAction[]);
 
             setActions(defaultActions);
             setReadOnly(true);
@@ -229,9 +229,9 @@ const ActionsCellRenderer: React.FC<ActionsCellRendererProps> = ({ metadata, dat
                     name: t.common.buttons.close,
                     onClick: closeModal
                 }
-            ] as Action[];
+            ] as _TableAction[];
 
-            defaultActions.unshift(...actionConfig?.customActions ?? [] as Action[]);
+            defaultActions.unshift(...actionConfig?.customActions ?? [] as _TableAction[]);
 
             setActions(defaultActions);
             setReadOnly(true);
@@ -267,9 +267,9 @@ const ActionsCellRenderer: React.FC<ActionsCellRendererProps> = ({ metadata, dat
                     name: t.common.buttons.editAndClose,
                     onClick: onEditFormSubmit
                 }
-            ] as Action[];
+            ] as _TableAction[];
 
-            defaultActions.unshift(...actionConfig?.customActions ?? [] as Action[]);
+            defaultActions.unshift(...actionConfig?.customActions ?? [] as _TableAction[]);
 
             setActions(defaultActions);
             setReadOnly(false);
@@ -307,9 +307,9 @@ const ActionsCellRenderer: React.FC<ActionsCellRendererProps> = ({ metadata, dat
                     name: t.common.buttons.cancel,
                     onClick: closeModal
                 }
-            ] as Action[];
+            ] as _TableAction[];
 
-            defaultActions.unshift(...actionConfig?.customActions ?? [] as Action[]);
+            defaultActions.unshift(...actionConfig?.customActions ?? [] as _TableAction[]);
 
             setActions(defaultActions);
             setReadOnly(true);

@@ -8,7 +8,7 @@ import { ComponentRegistry } from '../../../../../core/registry/ComponentRegistr
 import type { Action } from './types/Action';
 import { TableHelper } from '../../helpers/TableHelper';
 import { AppPathHelper } from '../../../../../core/helpers/AppPathHelper';
-import type { ActionConfig, WrappedData } from './types/ActionsConfig';
+import type { _TableActionConfig, WrappedData } from './types/ActionsConfig';
 import { TranslationHelper } from '../../../../../locales/helpers/TranslationHelper';
 import type { GenericFormViewType } from '../../../../../types/system/GenericFormView';
 import { UiHelper } from '../../../../../core/helpers/UiHelper';
@@ -23,7 +23,7 @@ export interface ActionHandlerComponentProps extends ICellRendererParams {
 
 export type GenericActionHandlerCallbacks = {
     handleAction: () => void;
-    setActionConfig: (actionConfig: ActionConfig<any>) => void;
+    setActionConfig: (actionConfig: _TableActionConfig<any>) => void;
     setData: (data: any) => void;
 };
 
@@ -37,12 +37,12 @@ const GenericActionHandler: React.FC<any> = forwardRef((props, ref) => {
     //DATA INIT - start
     //action config e data devono essere passati da chi usa il componente, in modo da rendere il componente riutilizzabile in contesti diversi (es. tabella, drawer, etc.) e non legato ad un singolo dominio o azione
     //attraverso imperative handle - set action config e data da chi usa il componente, in modo da poterli aggiornare dinamicamente in base al contesto (es. azione edit su riga 1, azione view su riga 2, etc.)
-    const actionConfigRef = useRef<ActionConfig<any> | null>(null);
+    const actionConfigRef = useRef<_TableActionConfig<any> | null>(null);
     const dataRef = useRef<any>(null);
 
     const genericModalRef = useRef<any>(null);
     
-    const setActionConfig = (actionConfig: ActionConfig<any>) => {
+    const setActionConfig = (actionConfig: _TableActionConfig<any>) => {
         actionConfigRef.current = actionConfig;
         setView(UiHelper.getViewFromActionType(actionConfig.actionType));
         setDomain(actionConfig.domain ?? '');

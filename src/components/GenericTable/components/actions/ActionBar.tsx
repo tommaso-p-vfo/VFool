@@ -1,12 +1,12 @@
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { GenericModal } from "../../../modals/GenericModal";
-import { ComponentRegistry } from "../../../../../core/registry/ComponentRegistry";
-import ACTIONS from "../../../../../core/constants/actions";
-import { toast } from "react-toastify";
+import { IComponentRegistry } from "../../../../types/IComponentRegistry";
+import { TABLE_ACTION_NAME } from "../../constants/tableActionConstants";
 import type { GridApi } from "ag-grid-community";
 import { TableHelper } from "../../helpers/TableHelper";
-import { AppPathHelper } from "../../../../../core/helpers/AppPathHelper";
+
+// import { AppPathHelper } from "../../../../../core/helpers/AppPathHelper";
 import type { ActionsMetadata } from "./types/ActionsMetadata";
 import { AppHelper } from "../../../../../core/helpers/AppHelper";
 import { FaCog, FaColumns, FaDownload, FaPlusCircle, FaRedo, FaSave } from "react-icons/fa";
@@ -14,7 +14,7 @@ import GenericButton, { type GenericButtonConfig } from "../../../GenericButton"
 import { IdsColor } from "../../../../../types/system/IdsColor";
 import { IdsVariant } from "../../../../../types/system/IdsVariant";
 import { GenericFormView } from "../../../../../types/system/GenericFormView";
-import type { Action } from "./types/Action";
+import type { _TableAction } from "./types/Action";
 import type { ActionBarConfig } from "../../types/TableMetadata";
 import { Form, InputGroup } from "react-bootstrap";
 import { useTableContext } from "../../hooks/useTableContext";
@@ -23,16 +23,29 @@ import type ApiRequest from "../../../../../types/system/api/ApiRequest";
 import { SERVICE_ENDPOINT } from "../../../../../core/service-locator/constants/locatorPath";
 import type { FilterModel } from "../../../../../types/system/api/FilterModel";
 
-const ActionBar = ({ gridApiRef, metadata, actionBarConfig, openColumnChooser }: { gridApiRef: any, metadata: ActionsMetadata, actionBarConfig: ActionBarConfig, openColumnChooser: (open: boolean) => void }) => {
+
+import { toast } from "react-toastify";
+import { _TableActionConfig, _TableActionsConfig } from "./types/ActionsConfig";
+
+const ActionBar = ({ 
+        tableActionsConfig,
+        openColumnChooser 
+    }: { 
+        tableActionsConfig: _TableActionsConfig, 
+        // metadata: ActionsMetadata, 
+        openColumnChooser: (open: boolean) => void 
+    }) => {
 
     
     const tableContext = useTableContext();
     const t = tableContext.metadata?.t;
+    const componentRegistry = tableContext.metadata?.componentRegistry ?? {} as IComponentRegistry;
     const serviceLocator = tableContext.serviceLocator;
-
+    
+    const gridApi = tableContext.gridApi;
     const gridSettingsHandler = tableContext.gridSettingsHandler;
 
-    const [domain, setDomain] = useState<string>(null);
+    // const [domain, setDomain] = useState<string>(tableContext.domain?.serviceLocatorDomain);
 
     // mappa id azione -> stato checked
     const [checkedMap, setCheckedMap] = useState<Record<string, boolean>>({});
@@ -43,33 +56,30 @@ const ActionBar = ({ gridApiRef, metadata, actionBarConfig, openColumnChooser }:
     const [AddComponent, setAddComponent] = useState<any>(null);
 
     //lista di azioni da rendere disponibili nella modal
-    const [actions, setActions] = useState<Action[]>([]);
+    const [actions, setActions] = useState<_TableAction[]>([]);
 
-    const addComponentRef = useRef(null);
+    const addComponentRef = useRef<ReactNode>(null);
+
+    const [leftTableActions, setLeftTableActions] = useState<_TableActionConfig<any>[]>([]);
+    const [rightTableActions, setRightTableActions] = useState<_TableActionConfig<any>[]>([]);
 
     useEffect(() => {
-        const actions = actionBarConfig?.actions;
+        const actions = tableActionsConfig.;
         if (!actions) return;
 
         const initial: Record<string, boolean> = {};
         actions
             .filter(a => a.type === 'switch')
             .forEach(a => {
-                // se vuoi riagganciare la session storage, qui è il punto giusto
-                // if (StorageHelper.existInSession(AppPathHelper.build(domain, a.id))) {
-                //     initial[a.id] = JSON.parse(StorageHelper.getFromSession(AppPathHelper.build(domain, a.id))).checked;
-                // } else {
-                //     initial[a.id] = a.defaultValue ?? false;
-                // }
                 initial[a.id] = a.defaultValue ?? false;
             });
 
         setCheckedMap(initial);
-    }, [actionBarConfig]);
+    }, [tableActionsConfig]);
 
-    useEffect(() => {
-        setDomain(metadata?.domain);
-    }, [metadata]);
+    // useEffect(() => {
+    //     setDomain(tableContext?.domain?.serviceLocatorDomain);
+    // }, [tableContext.domain]);
 
     const _getActionConfig = useCallback((name: string) => {
         let action = metadata?.actionsConfig?.[name] ?? null;
@@ -104,7 +114,7 @@ const ActionBar = ({ gridApiRef, metadata, actionBarConfig, openColumnChooser }:
             if (success) {
 
                 //callback after add
-                let action = _getActionConfig(ACTIONS.ADD);
+                let action = _getActionConfig(TABLE_ACTION_NAME.ADD);
                 if (action && action.enabled && action.callback) {
                     await action.callback(response.apiResponse.data, response.metadata);
                 }
@@ -126,7 +136,7 @@ const ActionBar = ({ gridApiRef, metadata, actionBarConfig, openColumnChooser }:
 
         let preventDefault = false;
 
-        let actionConfig = _getActionConfig(ACTIONS.ADD);
+        let actionConfig = _getActionConfig(TABLE_ACTION_NAME.ADD);
         if (actionConfig && actionConfig.enabled) {
             if (actionConfig.callback && !actionConfig.modalVersion) {
                 preventDefault = true;
@@ -138,8 +148,8 @@ const ActionBar = ({ gridApiRef, metadata, actionBarConfig, openColumnChooser }:
             actionConfig?.callback ? actionConfig?.callback() : null;
         } else {
 
-            let addPath = AppPathHelper.build(actionConfig?.domain ?? metadata?.domain, ACTIONS.ADD);
-            let addComponent = ComponentRegistry[addPath];
+            let addPath = AppPathHelper.build(actionConfig?.domain ?? metadata?.domain, TABLE_ACTION_NAME.ADD);
+            let addComponent = componentRegistry[addPath];
             setAddComponent(addComponent);
 
             let defaultActions = [
@@ -147,9 +157,9 @@ const ActionBar = ({ gridApiRef, metadata, actionBarConfig, openColumnChooser }:
                     name: t.common.buttons.saveAndClose,
                     onClick: () => { onAddFormSubmit(true) }
                 }
-            ] as Action[];
+            ] as _TableAction[];
 
-            defaultActions.unshift(...actionConfig?.customActions ?? [] as Action[]);
+            defaultActions.unshift(...actionConfig?.customActions ?? [] as _TableAction[]);
 
             setActions(defaultActions);
 
@@ -161,7 +171,7 @@ const ActionBar = ({ gridApiRef, metadata, actionBarConfig, openColumnChooser }:
 
         let preventDefault = false;
 
-        let actionConfig = _getActionConfig(ACTIONS.EXPORT);
+        let actionConfig = _getActionConfig(TABLE_ACTION_NAME.EXPORT);
         if (actionConfig && actionConfig.enabled) {
             if (actionConfig.callback && !actionConfig.modalVersion) {
                 preventDefault = true;
@@ -293,7 +303,7 @@ const ActionBar = ({ gridApiRef, metadata, actionBarConfig, openColumnChooser }:
                     className="ids-table-top-bar-btn m-0"
                 />
 
-            {metadata?.actionsConfig?.[ACTIONS.EXPORT]?.enabled &&
+            {metadata?.actionsConfig?.[TABLE_ACTION_NAME.EXPORT]?.enabled &&
                 <GenericButton
                     onClick={handleExport}
                     tooltip={t.common.actions.export}
@@ -306,7 +316,7 @@ const ActionBar = ({ gridApiRef, metadata, actionBarConfig, openColumnChooser }:
                 />
             }
             
-            {metadata?.actionsConfig?.[ACTIONS.ADD]?.enabled &&
+            {metadata?.actionsConfig?.[TABLE_ACTION_NAME.ADD]?.enabled &&
                 <GenericButton
                     onClick={handleAdd}
                     tooltip={t.common.actions.add}

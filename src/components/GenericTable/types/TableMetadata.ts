@@ -2,8 +2,7 @@ import type { ReactElement } from "react";
 import type { PageRequest } from "../../../types/api/PageTypes";
 import type { FilterModel } from "../../../types/api/FilterModel";
 import type { IComponentRegistry } from "../../../types/IComponentRegistry";
-import type { ActionsConfig } from "../components/actions/types/ActionsConfig";
-import type { TableContextType } from "../contexts/TableContext";
+import type { _TableActionsConfig } from "../components/actions/types/ActionsConfig";
 import { TableTranslation } from "./TableTranslation";
 
 /**
@@ -23,16 +22,16 @@ export type TableMetadata<T> = {
     modalVersion?: boolean; //se true usa i modal per i form di visualizzazione/modifica, altrimenti si aspetta un drawer custom
     columns?: {
         [colName: string]: TableColumnMetadata | undefined;
-        _actions?: TableColumnActionMetadata<T>;
+        _actions: boolean;
     },
-    protectedColumns?: string[]; //elenco di nomi di colonne che non devono essere visualizzate in nessun modo dall'utente (a meno che non sia Admin).
-    systemColumns?: string[]; //elenco di nomi di colonne che non devono essere visualizzate dall'utente ma devono essere raggiungibili dalla AG GRID (incluse in tabella) per ragioni di sistema
+    // protectedColumns?: string[]; //elenco di nomi di colonne che non devono essere visualizzate in nessun modo dall'utente (a meno che non sia Admin).
+    // systemColumns?: string[]; //elenco di nomi di colonne che non devono essere visualizzate dall'utente ma devono essere raggiungibili dalla AG GRID (incluse in tabella) per ragioni di sistema
     maxBlocksInCache?: number; // Ag Grid - Numero massimo di blocchi nella cache per la tabella. Da usare per la gestione della memoria e delle performance.
     formContainer?: any; //DOM element dove iniettare i form di visualizzazione/modifica - default GenericModal
     preFilter?: FilterModel; //carica la griglia prefiltrata con il seguente filterModel - si applica al campo di 'ricerca rapida' Quick Search
     customTitle?: string, //da un nome alla tabella custom, a prescindere dal menu item
     gridDetails?: GridDetails, //aggiunge una card alla griglia per dettagliare la vista. es. un filtro per trattativa con i dettagli della trattativa
-    actionBarConfig: ActionBarConfig; //permett di aggiungere azioni custom alla action bar (di fianco ad ADD e Gestione Colonne)
+    actions: _TableActionsConfig<T>; //permett di aggiungere azioni custom alla action bar (di fianco ad ADD e Gestione Colonne)
     contextDataConfig: ContextDataConfig[]; //aggiunge dati serverside al contesto della tabella
     
     summary?: { //sommario - totali restituiti dalle GET LIST lato server
@@ -58,11 +57,15 @@ export type TableColumnMetadata = {
     copyable?: boolean, //rende la cella copiabile negli appunti - mutualmente esclusivo con collapsable
     params?: TableColumnParams; //parametri opzionali da passare alla colonna
     minWidth?: number; //dimensione colonna minima (inizializzazione)
+
+    // TODO spostare qui la logica
+    // protectedColumns?: string[]; //elenco di nomi di colonne che non devono essere visualizzate in nessun modo dall'utente (a meno che non sia Admin).
+    // systemColumns?: string[]; //elenco di nomi di colonne che non devono essere visualizzate dall'utente ma devono essere raggiungibili dalla AG GRID (incluse in tabella) per ragioni di sistema
 }
 
-export type TableColumnActionMetadata<T = any> = Omit<TableColumnMetadata, 'params'> & {
-    params: { actions: ActionsConfig<T> }
-}
+// export type TableColumnActionMetadata<T = any> = Omit<TableColumnMetadata, 'params'> & {
+//     params: { actions: _TableActionsConfig<T> }
+// }
 
 
 export type InternalTableColumnMetadata = TableColumnMetadata & {
@@ -73,28 +76,33 @@ export type InternalTableColumnMetadata = TableColumnMetadata & {
 export type TableColumnParams = {
     defaultColor?: string; //IdsColor
     className?: string;
-    actionConfig?: ActionsConfig;
+    // actionConfig?: _TableActionsConfig;
 
     [key: string]: any;
 }
 
-export type ActionBarConfig = {
-    actions?: ActionBarAction[]; //azioni custom
-}
-
-export type ActionBarAction = {
-    id: string; //id univoco per tabella (dominio) - obbligatorio
-    type: 'button' | 'switch';
-    title: string;
-    defaultValue?: any;
-    onClick: (data: any, gridApi: any, tableContext: TableContextType) => void;
-    icon: any;
-    color: string; //IdsColor
-    disabled?: boolean;
-}
+// export type ActionBarConfig = {
+//     actions?: ActionBarAction[]; //azioni custom
+// }
 
 export type ContextDataConfig = {
     name: string;
     service: string;
     params: any;
 }
+
+
+// export type _Actions = {
+//     actions?: ActionBarAction[]; //azioni custom
+// }
+
+// export type ActionBarAction = {
+//     id: string; //id univoco per tabella (dominio) - obbligatorio
+//     type: 'button' | 'switch';
+//     title: string;
+//     defaultValue?: any;
+//     onClick: (data: any, gridApi: any, tableContext: TableContextType) => void;
+//     icon: any;
+//     color: string; //IdsColor
+//     disabled?: boolean;
+// }
