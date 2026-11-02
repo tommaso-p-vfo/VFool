@@ -47,23 +47,23 @@ import type { ColumnState } from "./types/TableColumn";
 import LoadingOverlay from "../../utils/components/LoadingOverlay";
 import { buildPath } from "../../utils/Path";
 import { getFromSession } from "../../utils/StorageHelper";
-import { getTranslation } from "../../locales/TranslationHelper";
+import { getTranslation } from "../../utils/TranslationHelper";
 import { isEmptyObject } from "../../utils/Guards";
 import { formatAs } from "../../utils/Format";
 
-import { AG_GRID_STORAGE_KEYS } from "./constants/storageConstants";
+import { AG_GRID_STORAGE_KEYS } from "./constants/tableStorageConstants";
 import { 
     AG_GRID_DEFAULT_PAGE_SIZE, 
     AG_GRID_PAGE_SIZE_SELECTOR, 
     AG_GRID_ROW_BLOCK_SIZE 
-} from "./constants/agGridConstants";
+} from "./constants/tableConstants";
 
 import { type ApiRequest } from "../../types/api/ApiRequest";
 
 import TableProvider, { type AgGridDomainType } from "./contexts/TableContext";
 import type { TableInternalMetadata } from "./types/TableInternalMetadata";
 import type { QuickFilterMetadata } from "./components/quick-filter/types/QuickFilterMetadata";
-import type { ActionsMetadata } from "./components/actions/types/ActionsMetadata";
+
 import type { TableTopBarMetadata } from "./components/table-top-bar/types/TableTopBarMetadata";
 import { Card, CardBody, Container } from "react-bootstrap";
 import type { GridDetails } from "./types/TableMetadata";
@@ -123,10 +123,10 @@ export const GenericTable =
         
         //TOP BAR
         const actionHandlerRef = useRef<any>(null);
-        const [topBarMetadata, setTopBarMetadata] = useState({} as TableTopBarMetadata); //set in useEffects
+        const [topBarMetadata, setTopBarMetadata] = useState({} as TableTopBarMetadata<T>); //set in useEffects
         const topBarRef = useRef(null);
         const [openColumnChoser, setOpenColumnChoser] = useState(false);
-        const [columnChooserProps, setColumnChooserProps] = useState({} as ColumnChooserModalProps); //set in useEffects
+        // const [columnChooserProps, setColumnChooserProps] = useState({} as ColumnChooserModalProps); //set in useEffects
         
         //AG GRID
         const gridContext = useRef({ fromButtons: false /** fromButtons - necessario per indicare una interazione utente (click bottone) attraverso componenti custom della griglia. es. BooleanFilter */ });
@@ -636,10 +636,10 @@ export const GenericTable =
             if(!agGridDomainRef.current) return;
             if(!isGridReady) return;
 
-            let actionsMetadata = {} as ActionsMetadata;
-            actionsMetadata.actionsConfig = metadata?.columns?._actions.params?.actions;
-            actionsMetadata.domain = agGridDomainRef.current;
-            actionsMetadata.tableName = tableNameRef.current;
+            // let actionsMetadata = {} as ActionsMetadata;
+            // actionsMetadata.actionsConfig = metadata?.columns?._actions.params?.actions;
+            // actionsMetadata.domain = agGridDomainRef.current;
+            // actionsMetadata.tableName = tableNameRef.current;
 
             let quickFilterMetadata = {} as QuickFilterMetadata;
             quickFilterMetadata.searchFilterColumns = metadata?.searchFilterColumns;
@@ -649,24 +649,24 @@ export const GenericTable =
             quickFilterMetadata.domain = agGridDomainRef.current;
 
             let topBarMetadata = {} as TableTopBarMetadata;
-            topBarMetadata.actionsMetadata = actionsMetadata;
+            // topBarMetadata.actionsMetadata = actionsMetadata;
             topBarMetadata.quickFilterMetadata = quickFilterMetadata;
-            topBarMetadata.actionBarConfig = metadata.actionBarConfig;
+            // topBarMetadata.actionBarConfig = metadata.actionBarConfig;
             setTopBarMetadata(topBarMetadata);
 
-            let _columnChooserProps = {
-                domain: agGridDomainRef.current,
-                tableName: tableNameRef.current,
-                gridApi: gridApiRef?.current,
-                defaultColumnDefs: columnDefs ?? [],
-                shouldOpenModal: openColumnChoser,
-                onCloseModal: () => { setOpenColumnChoser(false); },
-                metadata: {
-                    protectedColumns: metadata.protectedColumns ?? [],
-                    systemColumns: metadata.systemColumns ?? []
-                }
-            } as ColumnChooserModalProps;
-            setColumnChooserProps(_columnChooserProps);
+            // let _columnChooserProps = {
+            //     domain: agGridDomainRef.current,
+            //     tableName: tableNameRef.current,
+            //     gridApi: gridApiRef?.current,
+            //     defaultColumnDefs: columnDefs ?? [],
+            //     shouldOpenModal: openColumnChoser,
+            //     onCloseModal: () => { setOpenColumnChoser(false); },
+            //     metadata: {
+            //         protectedColumns: metadata.protectedColumns ?? [],
+            //         systemColumns: metadata.systemColumns ?? []
+            //     }
+            // } as ColumnChooserModalProps;
+            // setColumnChooserProps(_columnChooserProps);
 
             //ripristino del filter
             const quickSearchFilter = TableHelper.getCurrentQuickTableFilter(agGridDomainRef.current);
@@ -686,6 +686,7 @@ export const GenericTable =
 
             domain && (
                 <TableProvider 
+                    serviceLocator={serviceLocator}
                     metadata={metadata} 
                     domain={{ agGridDomain: agGridDomainRef.current, serviceLocatorDomain: serviceLocatorDomainRef.current }} 
                     gridApi={gridApiState} 
@@ -714,7 +715,7 @@ export const GenericTable =
                         }
 
                         <TableTopBar ref={topBarRef} metadata={topBarMetadata} gridApiRef={gridApiRef} openColumnChooser={() => setOpenColumnChoser(true)}></TableTopBar>
-                        <ColumnChooserModal
+                        {/* <ColumnChooserModal
                             domain={columnChooserProps.domain}
                             tableName={columnChooserProps.tableName}
                             gridApi={columnChooserProps.gridApi}
@@ -723,7 +724,7 @@ export const GenericTable =
                             shouldOpenModal={columnChooserProps.shouldOpenModal}
                             onCloseModal={() => { columnChooserProps.onCloseModal(); }}
                             >
-                        </ColumnChooserModal>
+                        </ColumnChooserModal> */}
 
                         {gridDetails &&
                             <Card className="mb-1 mt-0 ms-0 w-100">
@@ -789,7 +790,7 @@ export const GenericTableSummary = () => {
 
     const tableContext = useTableContext();
     const summary = tableContext.summary;
-    const t = useTranslations();
+    const t = tableContext.;
     const domain = tableContext.domain;
     const meta = tableContext.metadata;
 

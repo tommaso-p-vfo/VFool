@@ -1,6 +1,6 @@
 //TODO - gestione PERMISSION HELPER system e protected columns
 
-import { getTranslation } from "../../../locales/TranslationHelper";
+import { getTranslation } from "../../../utils/TranslationHelper";
 
 import { AG_GRID_STORAGE_KEYS } from "../constants/tableStorageConstants";
 import { getFromSession, getFromLocalSession, saveInSession, saveInLocalSession } from "../../../utils/StorageHelper";

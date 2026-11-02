@@ -7,7 +7,7 @@ import { buildPath } from "../../../utils/Path";
 import type { TableMetadata } from "../types/TableMetadata";
 import type { TableComboboxOption } from "../components/cell-renderers/components/TableCombobox";
 
-import { SERVICE_ENDPOINT } from "../../../constants/apiConstants";
+import { SERVICE_ENDPOINT } from "../../../types/api/ApiEndpoints";
 import { type FilterModel } from "../../../types/api/FilterModel";
 
 import type {
@@ -25,6 +25,7 @@ import { useGridSettingsLogic, type GridSettingsHandler } from "../components/co
 
 import type { PageRequest } from "../../../types/api/PageTypes";
 import { AG_GRID_COLUMN_TYPE } from "../constants/tableConstants";
+import { TableTranslation } from "../types/TableTranslation";
 
 export type AgGridDomainType = {
 
@@ -36,10 +37,12 @@ export type AgGridDomainType = {
     serviceLocatorDomain: string | null; //dominio puro necessario al service locator
 }
 
-export interface TableContextType {
+export interface TableContextHandler {
     domain: AgGridDomainType | undefined;
     serviceLocator: IServiceLocator;
-    metadata: TableMetadata<any> | undefined;
+    t: TableTranslation;
+
+    // metadata: TableMetadata<any> | undefined;
     comboboxMap: Map<string, TableComboboxOption[]>;
     listsMap: Map<string, { id: string, name: string, raw: any }[]>;
     fetchLists: (request?: PageRequest) => Promise<void>;
@@ -55,11 +58,11 @@ export interface TableContextType {
     isLoadingGridData: boolean; //items loading from server
 }
 
-const TableContext = createContext<TableContextType | undefined>(undefined);
+const TableContext = createContext<TableContextHandler | undefined>(undefined);
 
 interface TableProviderProps {
-    serviceLocator: IServiceLocator;
     children: React.ReactNode;
+    serviceLocator: IServiceLocator;
     metadata: TableMetadata<any>;
     domain?: AgGridDomainType|undefined;
     gridApi: GridApi | null;
@@ -89,6 +92,8 @@ const TableProvider = ({ children, serviceLocator, metadata, domain, gridApi, is
     const [_domain, setDomain] = useState<AgGridDomainType | undefined>();
 
     const [isLoadingData, setIsLoadingData] = useState(false);
+
+    const t = metadata?.t ?? {} as TableTranslation;
 
     useEffect(() => {
       
@@ -210,9 +215,10 @@ const TableProvider = ({ children, serviceLocator, metadata, domain, gridApi, is
         fetchData();
     }, [fetchDropdowns, fetchData]);
 
-    const value = useMemo<TableContextType>(() => ({
+    const value = useMemo<TableContextHandler>(() => ({
         domain,
         serviceLocator,
+        t,
         metadata,
         comboboxMap,
         listsMap,

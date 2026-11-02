@@ -1,5 +1,6 @@
 export * from './BulkItem';
 export * from './DataFormat';
+export * from './IComponentRegistry';
 export * from './api/ApiError';
 export * from './api/ApiRequest';
 export * from './api/ApiResponse';

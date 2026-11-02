@@ -21,8 +21,8 @@ export type TableMetadata<T> = {
     // events?: TableEvents<T>, //eventi custom associati alla tabella
     modalVersion?: boolean; //se true usa i modal per i form di visualizzazione/modifica, altrimenti si aspetta un drawer custom
     columns?: {
-        [colName: string]: TableColumnMetadata | undefined;
-        _actions: boolean;
+        [colName: string]: TableColumnMetadata;
+        // _actions: boolean;
     },
     // protectedColumns?: string[]; //elenco di nomi di colonne che non devono essere visualizzate in nessun modo dall'utente (a meno che non sia Admin).
     // systemColumns?: string[]; //elenco di nomi di colonne che non devono essere visualizzate dall'utente ma devono essere raggiungibili dalla AG GRID (incluse in tabella) per ragioni di sistema
