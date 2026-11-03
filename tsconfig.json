@@ -13,5 +13,5 @@
     "noEmit": true
   },
   "include": ["src", "vite.config.ts"],
-  "exclude": ["src/components/GenericTable", "src/components/ServiceLocator"]
+  "exclude": []
 }

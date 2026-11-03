@@ -13,7 +13,7 @@ export default defineConfig({
         react(),
         dts({
             tsconfigPath: './tsconfig.build.json',
-            exclude: ['src/components/GenericTable/**', 'src/components/ServiceLocator/**'],
+            exclude: [],
         }),
     ],
     build: {
