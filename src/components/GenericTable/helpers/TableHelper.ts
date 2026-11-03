@@ -79,7 +79,7 @@ export class TableHelper {
                 return TableHelper._getAgGridColumnDef({ colId: colId } as ColumnState, metadata, internalMetadata);
             });
         } else {
-            let columnsFromLocale = getTranslation(internalMetadata.t, buildPath(internalMetadata?.agGridDomain, 'columns'));
+            let columnsFromLocale = getTranslation(internalMetadata.t, 'columns');
             headers = Object.keys(columnsFromLocale).map(colId => {
                 return TableHelper._getAgGridColumnDef({ colId: colId } as ColumnState, metadata, internalMetadata);
             });
@@ -268,8 +268,7 @@ export class TableHelper {
         }
         let hide = column ? column.hide ?? false : globalHide;
 
-        const translationColumnsPath = internalMetadata?.agGridDomain + '.columns';
-        const columnNames = getTranslation(internalMetadata.t, translationColumnsPath);
+        const columnNames = getTranslation(internalMetadata.t, 'columns');
 
         //determina la visibilità della colonna a prescindere da filtri e scelta utente
         // let colHide = systemColumns.includes(colId) ? true : PermissionHelper.isAdmin(internalMetadata?.user) ? false : (protectedColumns.includes(colId) || hide);

@@ -171,3 +171,109 @@
         position: initial;
     }
 }
+
+
+/* AG GRID - START */
+// .ids-generic-table {
+//   // === COLORI DI BASE ===
+//   // --ag-foreground-color: #{$secondary} !important;
+//   // --ag-background-color:  #{$ids-light-contrast} !important;
+//   // --ag-secondary-foreground-color: #{$transparent} !important;
+//   // --ag-data-color: #000;
+//   // --ag-header-foreground-color: #000;
+//   // --ag-header-background-color: #f5f7f7;
+//   // --ag-disabled-foreground-color: rgba(0, 0, 0, 0.38);
+  
+//   // === BORDI ===
+//   --ag-border-color: #{$primary-30};
+//   --ag-row-border-color: #e2e5e6;
+//   --ag-cell-horizontal-border: none; //solid 1px;
+  
+//   // === RIGHE ===
+//   --ag-odd-row-background-color: #{$primary-10};
+//   --ag-even-row-background-color: #{$primary-10};
+//   --ag-row-hover-color: #{$secondary-10};
+//   --ag-selected-row-background-color:  #{$secondary-15};
+  
+//   // === HEADER ===
+//   --ag-header-cell-hover-background-color: #{$transparent}; //#ebedef;
+//   --ag-header-cell-moving-background-color: #{$primary-30};
+  
+//   // === FOCUS E SELEZIONE ===
+//   --ag-range-selection-background-color: #{$transparent};
+//   --ag-range-selection-border-color: #{$transparent};
+//   --ag-cell-focus-border: #{$transparent};
+  
+//   // === ICONE E BOTTONI ===
+//   --ag-icon-button-hover-color: #{$primary};// rgba(0, 0, 0, 0.1);
+//   --ag-icon-button-active-color: #{$primary}; // #1976d2;
+//   --ag-checkbox-checked-color: #{$primary};// #1976d2;
+//   --ag-checkbox-unchecked-color: #{$primary};// #999;
+  
+//   // === FILTRI ===
+//   --ag-focus-shadow: #{$primary};//
+//   --ag-accent-color: #{$primary};//
+//   --ag-input-focus-border-color: #{$primary-30};// #f5f5f5;
+//   --ag-input-border-color: #{$primary-30};// #f5f5f5;
+//   --ag-input-background-color:#{$ids-contrast-05};// #fff;
+//   --ag-input-disabled-background-color:#{$secondary-20};// #f5f5f5;
+  
+//   // === MENU E DROPDOWN ===
+//   --ag-popup-shadow: 0 4px 12px #{$primary-10};//;
+//   --ag-menu-option-hover-color: #{$primary};//;
+//   --ag-menu-separator-color: #{$primary};//;
+  
+//   // === SCROLLBAR ===
+//   --ag-scroll-spacer-border: 1px solid #{$secondary};//;
+  
+//   // === COLONNE ===
+//   --ag-column-drop-color: #{$transparent};//;
+//   --ag-column-select-indent-size: 18px;
+  
+//   // === PAGINAZIONE ===
+//   --ag-control-panel-background-color: #{$secondary};//;
+  
+//   // === COLORI DI STATO ===
+//   --ag-invalid-color: $danger;
+//   --ag-value-change-delta-up-color: #43a047;
+//   --ag-value-change-delta-down-color: $danger;
+//   --ag-value-change-value-highlight-background-color: rgba(22, 160, 133, 0.5);
+
+//   .ag-row.ag-row-even {
+//     background-color: white;
+//   }
+
+//   .ag-row.ag-row-odd {
+//     background-color: $primary-05;
+//   }
+
+//   // riga selezionata (selection via checkbox / click se abilitato)
+//   .ag-row.ag-row-selected,
+//   .ag-row.ag-row-selected.ag-row-hover {
+//     background-color: var(--ag-row-hover-color) !important;
+//     // color: $white;
+//   }
+
+//   // riga con focus (cella focussata)
+//   .ag-row-focus,
+//   .ag-row.ag-row-focus {
+//     background-color: var(--ag-row-hover-color) !important;
+//     // color: $white;
+//   }
+  
+// }
+
+.ag-grid-center-cell {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* 2. PUNTO CHIAVE: Forza il wrapper interno di AG Grid a prendersi tutto lo spazio */
+.ag-grid-center-cell div {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+/// AG GRID - END

@@ -1,4 +1,6 @@
+import { GridApi } from "ag-grid-community";
 import type { TableMetadata } from "./TableMetadata";
+import { TableContextHandler } from "../contexts/TableContext";
 
 /**
  * Interfaccia per definire gli attributi di una tabella attraverso React
@@ -10,8 +12,11 @@ import type { TableMetadata } from "./TableMetadata";
  * 
  */
 export interface TableAttributes<T> {
-    gridApiRef?: any;
-    serviceLocator: any; // Dipendenze per il servizio di backend
+    serviceLocator: any;
     metadata: TableMetadata<T>;
-    t: any;
+}
+
+
+export type TableHandler = {
+    context: TableContextHandler | null;
 }

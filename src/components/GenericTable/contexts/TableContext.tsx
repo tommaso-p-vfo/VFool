@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useEffect, useMemo, useState } from "react";
+import React, { createContext, forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from "react";
 
 import { IServiceLocator } from '../../../types/api/IServiceLocator';  
 import { type ApiRequest } from "../../../types/api/ApiRequest";
@@ -79,8 +79,8 @@ interface TableProviderProps {
     isLoadingGridData: boolean; //loading data items from server
 }
 
-const TableProvider = ({ children, serviceLocator, metadata, domain, gridApi, isGridReady, activeFilter, setActiveFilter, gridSettings, setGridSettings, 
-    summary, setSummary, isLoadingGridData }: TableProviderProps) => {
+const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({ children, serviceLocator, metadata, domain, gridApi, isGridReady, activeFilter, setActiveFilter, gridSettings, setGridSettings, 
+    summary, setSummary, isLoadingGridData }: TableProviderProps, ref) => {
 
     //TODO fix useCustomFilterLogic e useGridSettingsLogic
     const customFilterHandler = {}; // useCustomFilterLogic({ domain, gridApi, activeFilter, setActiveFilter, serviceLocator });
@@ -151,7 +151,7 @@ const TableProvider = ({ children, serviceLocator, metadata, domain, gridApi, is
 
             setListsMap(map);
         } catch (err) {
-            console.error("Failed to fetch dropdown options", err);
+            console.error("Failed to fetch list column info", err);
         } finally {
             setIsLoadingData(false);
         }
@@ -217,7 +217,7 @@ const TableProvider = ({ children, serviceLocator, metadata, domain, gridApi, is
         fetchLists();
         fetchDropdowns();
         fetchData();
-    }, [fetchDropdowns, fetchData]);
+    }, [fetchDropdowns, fetchLists, fetchData]);
 
     const value = useMemo<TableContextHandler>(() => ({
         domain,
@@ -239,12 +239,17 @@ const TableProvider = ({ children, serviceLocator, metadata, domain, gridApi, is
         isLoadingGridData
     }), [domain, serviceLocator, metadata, comboboxMap, listsMap, filterData, isLoadingData, gridApi, isGridReady, data, customFilterHandler, gridSettingsHandler, summary, isLoadingGridData]);
 
+
+    useImperativeHandle(ref, () => {
+        return value;
+    }, [value]);
+
     return (
         <TableContext.Provider value={value}>
             {children}
         </TableContext.Provider>
     );
-};
+});
 
 export { TableContext };
 export default TableProvider;

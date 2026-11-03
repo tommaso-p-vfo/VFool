@@ -1,3 +1,5 @@
+import "./styles.scss";
+
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { TableHelper } from "./helpers/TableHelper";
 
@@ -38,7 +40,7 @@ import { SERVICE_ENDPOINT } from "../../types/api/ApiEndpoints";
 
 // import TableTopBar from "./components/table-top-bar/TableTopBar";
 
-import type { TableAttributes } from "./types/TableAttributes";
+import type { TableAttributes, TableHandler } from "./types/TableAttributes";
 import { type TableCustomFilter } from "./types/TableCustomFilter";
 import { TableCustomSetting } from "./types/TableCustomSettings";
 
@@ -60,7 +62,7 @@ import {
 
 import { type ApiRequest } from "../../types/api/ApiRequest";
 
-import TableProvider, { type AgGridDomainType } from "./contexts/TableContext";
+import TableProvider, { TableContextHandler, type AgGridDomainType } from "./contexts/TableContext";
 import type { TableInternalMetadata } from "./types/TableInternalMetadata";
 import type { QuickFilterMetadata } from "./components/quick-filter/types/QuickFilterMetadata";
 
@@ -89,11 +91,9 @@ if (process.env.NODE_ENV !== 'production') {
 
 export const GenericTable =
 
-    <T extends Record<string, any>>({ serviceLocator, metadata, ref }: TableAttributes<T> & { ref?: React.Ref<GridApi> }) => {
+    <T extends Record<string, TableHandler>>({ serviceLocator, metadata, ref }: TableAttributes<T> & { ref?: React.Ref<TableHandler> }) => {
 
-        useImperativeHandle(ref, () => ({
-            gridApi: () => gridApiRef.current
-        }));
+        const tableContextRef = useRef<TableContextHandler>(null);
 
         //TRANSLATIONS
         const t = metadata?.t ?? {};
@@ -683,10 +683,15 @@ export const GenericTable =
 
         }, [customTitle]);
 
+        useImperativeHandle<any, TableHandler>(ref, () => ({
+            context: tableContextRef.current
+        }));
+
         return (
 
             domain && (
                 <TableProvider 
+                    ref={tableContextRef}
                     serviceLocator={serviceLocator}
                     metadata={metadata} 
                     domain={{ agGridDomain: agGridDomainRef.current, serviceLocatorDomain: serviceLocatorDomainRef.current }} 
@@ -777,7 +782,7 @@ export const GenericTable =
                             onGridPreDestroyed={onGridPreDestroyed}
                             onSelectionChanged={onSelectionChanged}
                         />}
-                        <GenericTableSummary />
+                        {/* <GenericTableSummary /> */}
                     </Container>
                     {/* <GenericActionHandler ref={actionHandlerRef} /> */}
                 </>
