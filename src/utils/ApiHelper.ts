@@ -1,4 +1,4 @@
-import { CrudEndpoints, SERVICE_ENDPOINT } from "../constants/apiConstants";
+import { CrudEndpoints, SERVICE_ENDPOINT } from "../types/api/ApiEndpoints";
 
 /**
  * Crea gli endpoint CRUD di un servizio a partire dal suo percorso base.

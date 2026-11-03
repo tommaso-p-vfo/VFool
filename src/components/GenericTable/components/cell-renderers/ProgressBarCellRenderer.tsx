@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ThemeColor, toCssColor } from '../../../../utils/Color';
-import CustomProgressBar from '../../../CustomProgressBar';
+import { ProgressBar } from '../../../../utils/components/ProgressBar';
 import { Container } from 'react-bootstrap';
 
 // /**
@@ -44,7 +44,7 @@ const ProgressBarCellRenderer: React.FC<any> = ({ data, colId, defaultColor }: {
 
     return (
         <Container className="progress-bar-container d-flex justify-content-start align-items-start">
-            <CustomProgressBar value={data?.[colId] ?? 0} color={color} />
+            <ProgressBar value={data?.[colId] ?? 0} color={color} />
         </Container>
     );
 
