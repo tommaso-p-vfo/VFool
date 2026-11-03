@@ -2,7 +2,7 @@ import type {
     ColumnState
 } from "ag-grid-community";
 
-import { AppPathHelper } from "../../../../../../core/helpers/AppPathHelper";
+
 import { StorageHelper } from "../../../../../../storage/helpers/StorageHelper";
 import STORAGE from "../../../../../../storage/constants/storage";
 import type { UserGridSetting } from "../../../../../../types/dto/UserGridSetting";
@@ -14,6 +14,7 @@ import { useAppContext } from "../../../../../../core/context/hooks/useAppContex
 import { toast } from "react-toastify";
 import { useCallback, useEffect, useMemo } from "react";
 import { type AgGridDomainType } from "../../../contexts/TableContext";
+import { buildPath } from "../../../../../utils/Path";
 
 export type GridSettingsHandler = {
     saveGridSettings: (columnState: ColumnState[], saveOnServer: boolean) => void;
@@ -34,7 +35,7 @@ export const useGridSettingsLogic = (domain: AgGridDomainType, gridSettings: Use
             if (!prev) return prev;
             const updated = { ...prev, _isModified: mod } as UserGridSetting;
             StorageHelper.saveInSession(
-                AppPathHelper.build(domain.agGridDomain, STORAGE.COLUMN_PREFERENCES),
+                buildPath(domain.agGridDomain, STORAGE.COLUMN_PREFERENCES),
                 updated
             );
             return updated;
@@ -45,7 +46,7 @@ export const useGridSettingsLogic = (domain: AgGridDomainType, gridSettings: Use
 
         if (!gridSettings) return;
 
-        StorageHelper.saveInSession(AppPathHelper.build(domain.agGridDomain, STORAGE.COLUMN_PREFERENCES), gridSettings);
+        StorageHelper.saveInSession(buildPath(domain.agGridDomain, STORAGE.COLUMN_PREFERENCES), gridSettings);
 
     }, [domain, gridSettings]);
 
@@ -65,7 +66,7 @@ export const useGridSettingsLogic = (domain: AgGridDomainType, gridSettings: Use
 
         if (saveOnServer) { 
             let request = {
-                service: AppPathHelper.build(DOMAIN.USERS, SUBDOMAIN.USER_GRID_SETTINGS, SERVICE_ENDPOINT.UPDATE),
+                service: buildPath(DOMAIN.USERS, SUBDOMAIN.USER_GRID_SETTINGS, SERVICE_ENDPOINT.UPDATE),
                 data: { ..._gridSettings, settings: JSON.stringify(_gridSettings.settings) } as UserGridSetting
             } as ApiRequest;
             

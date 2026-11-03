@@ -34,9 +34,9 @@ import {
 import type { PageRequest, PageResponse } from "../../types/api/PageTypes";
 import { DataFormat } from "../../types/DataFormat";
 
-import { SERVICE_ENDPOINT } from "../../constants/apiConstants";
+import { SERVICE_ENDPOINT } from "../../types/api/ApiEndpoints";
 
-import TableTopBar from "./components/table-top-bar/TableTopBar";
+// import TableTopBar from "./components/table-top-bar/TableTopBar";
 
 import type { TableAttributes } from "./types/TableAttributes";
 import { type TableCustomFilter } from "./types/TableCustomFilter";
@@ -44,7 +44,7 @@ import { TableCustomSetting } from "./types/TableCustomSettings";
 
 import type { ColumnState } from "./types/TableColumn";
 
-import LoadingOverlay from "../../utils/components/LoadingOverlay";
+import LoadingOverlay from "../LoadingOverlay";
 import { buildPath } from "../../utils/Path";
 import { getFromSession } from "../../utils/StorageHelper";
 import { getTranslation } from "../../utils/TranslationHelper";
@@ -67,8 +67,9 @@ import type { QuickFilterMetadata } from "./components/quick-filter/types/QuickF
 import type { TableTopBarMetadata } from "./components/table-top-bar/types/TableTopBarMetadata";
 import { Card, CardBody, Container } from "react-bootstrap";
 import type { GridDetails } from "./types/TableMetadata";
-import GenericActionHandler from "./components/actions/GenericActionHandler";
-import ColumnChooserModal from "./components/column-preferences/ColumnChoserModal";
+//TODO fix GenericActionHandler 
+// import GenericActionHandler from "./components/actions/GenericActionHandler";
+// import ColumnChooserModal from "./components/column-preferences/ColumnChoserModal";
 import { useTableContext } from "./hooks/useTableContext";
 
 import { ThemeColor, toCssColor } from "../../utils/Color";
@@ -714,7 +715,7 @@ export const GenericTable =
                             </p>
                         }
 
-                        <TableTopBar ref={topBarRef} metadata={topBarMetadata} gridApiRef={gridApiRef} openColumnChooser={() => setOpenColumnChoser(true)}></TableTopBar>
+                        {/* <TableTopBar ref={topBarRef} metadata={topBarMetadata} gridApiRef={gridApiRef} openColumnChooser={() => setOpenColumnChoser(true)}></TableTopBar> */}
                         {/* <ColumnChooserModal
                             domain={columnChooserProps.domain}
                             tableName={columnChooserProps.tableName}
@@ -778,7 +779,7 @@ export const GenericTable =
                         />}
                         <GenericTableSummary />
                     </Container>
-                    <GenericActionHandler ref={actionHandlerRef} />
+                    {/* <GenericActionHandler ref={actionHandlerRef} /> */}
                 </>
             </TableProvider> 
         )
@@ -790,7 +791,7 @@ export const GenericTableSummary = () => {
 
     const tableContext = useTableContext();
     const summary = tableContext.summary;
-    const t = tableContext.;
+    const t = tableContext.t;
     const domain = tableContext.domain;
     const meta = tableContext.metadata;
 

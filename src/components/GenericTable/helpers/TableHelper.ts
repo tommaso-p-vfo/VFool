@@ -13,13 +13,15 @@ import type { FilterModel } from "../../../types/api/FilterModel";
 
 import type { CellClickedEvent, ColDef, ColumnState, GridApi, ITextFilterParams } from 'ag-grid-community';
 import { AG_GRID_COLUMN_TYPE, AG_GRID_FILTER_TYPE, COL_EMPTY_PLACEHOLDER, COL_MIN_WIDTH, DEFAULT_COLUMN_FILTER, DEFAULT_COLUMN_SORTABLE, type AgGridColumnType, type AgGridFilterType } from "../constants/tableConstants";
-import ActionsCellRenderer from "../components/actions/ActionCellRenderer";
+//TODO fix ActionsCellRenderer
+// import ActionsCellRenderer from "../components/actions/ActionCellRenderer";
 
 import type { InternalTableColumnMetadata, TableColumnMetadata, TableMetadata } from "../types/TableMetadata";
 import type { TableInternalMetadata } from "../types/TableInternalMetadata";
 import ColorCellRenderer, { ColorHeader } from "../components/cell-renderers/ColorCellRenderer";
 
-import type { ActionsMetadata } from "../components/actions/types/ActionsMetadata";
+//TODO fix ActionsMetadata
+// import type { ActionsMetadata } from "../components/actions/types/ActionsMetadata";
 
 import BoxedTextCellRenderer from "../components/cell-renderers/BoxedTextCellRenderer";
 import BoxedNumberCellRenderer from "../components/cell-renderers/BoxedNumberCellRenderer";
@@ -38,7 +40,7 @@ import ListCellRenderer from "../components/cell-renderers/ListCellRenderer";
 import { type TableCustomFilter } from "../types/TableCustomFilter";
 import { TableCustomSetting } from "../types/TableCustomSettings";
 
-import { ArrayIncludesFilter } from "../components/filters/ArrayIncludesFilter";
+// import { ArrayIncludesFilter } from "../components/filters/ArrayIncludesFilter";
 
 export type CellRendererStrategyResponse = { cellRenderer: any, wrappedCellRenderer: any | undefined }
 
@@ -677,7 +679,7 @@ export class TableHelper {
                     // events: actionsEvents, 
                     //modalVersion: modalVersion 
                 
-                } as ActionsMetadata;
+                }; // as ActionsMetadata;
 
                 colDef.field = "_actions";
                 colDef.lockPosition = "right";
@@ -691,7 +693,8 @@ export class TableHelper {
                 colDef.headerName = getTranslation(internalMetadata?.t, "configuration.actionsColumn.headerName") || "";
                 colDef.headerClass = 'ag-center-header';
                 colDef.sortable = false;
-                colDef.cellRenderer = ActionsCellRenderer; // Aggiungi il cell renderer
+                //TODO fix ActionsCellRenderer
+                // colDef.cellRenderer =  ActionsCellRenderer; // Aggiungi il cell renderer
                 colDef.cellRendererParams = {
                     // gridApi: internalMetadata?.gridApi,
                     metadata: actionsMetadata
@@ -993,18 +996,19 @@ export class TableHelper {
                 // I filtri custom non supportano floating filter
                 colDef.floatingFilter = false;
                 break;
-            case AG_GRID_COLUMN_TYPE.LIST:
-                colDef.filter = enabled ? ArrayIncludesFilter : false;
-                // I filtri custom non supportano floating filter
-                colDef.floatingFilter = false;
+                //TODO fix ArrayIncludesFilter
+            // case AG_GRID_COLUMN_TYPE.LIST:
+            //     colDef.filter = enabled ? ArrayIncludesFilter : false;
+            //     // I filtri custom non supportano floating filter
+            //     colDef.floatingFilter = false;
 
-                colDef.filterParams = {
-                    ...colDef.filterParams,
-                    field: column.params?.field,
-                    domain: column.domain
-                }
+            //     colDef.filterParams = {
+            //         ...colDef.filterParams,
+            //         field: column.params?.field,
+            //         domain: column.domain
+            //     }
 
-                break;
+            //     break;
             default:
                 colDef.filter = DEFAULT_COLUMN_FILTER;
                 break;

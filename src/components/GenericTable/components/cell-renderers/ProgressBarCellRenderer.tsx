@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ThemeColor, toCssColor } from '../../../../utils/Color';
-import { ProgressBar } from '../../../../utils/components/ProgressBar';
+import { ProgressBar } from '../../../ProgressBar';
 import { Container } from 'react-bootstrap';
 
 // /**

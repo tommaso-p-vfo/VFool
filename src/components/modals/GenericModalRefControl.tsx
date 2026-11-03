@@ -1,6 +1,6 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Modal, Button, Container } from 'react-bootstrap';
-import LoadingOverlay from '../../utils/components/LoadingOverlay';
+import LoadingOverlay from '../LoadingOverlay';
 
 export type ModalAction = {
     name: string;

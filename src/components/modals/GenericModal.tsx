@@ -1,6 +1,6 @@
 import React, { CSSProperties, forwardRef, useEffect, useImperativeHandle, useRef, useState, type ReactElement } from 'react';
 import { Modal, Button, Container } from 'react-bootstrap';
-import LoadingOverlay from '../../utils/components/LoadingOverlay';
+import LoadingOverlay from '../LoadingOverlay';
 import { toCssColor } from '../../utils/Color';
 
 // Definisci il tipo per l'handle esposto
