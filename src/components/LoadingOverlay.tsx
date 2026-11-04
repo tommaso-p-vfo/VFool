@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, JSX, ReactNode } from "react";
 import { FaEllipsisH } from "react-icons/fa";
 import { ThemeColor, toCssColor } from "../utils";
 
@@ -37,12 +37,88 @@ const SPINNER_CSS = `
 }
 `;
 
+/**
+ * Props del componente Overlay.
+ *
+ * Mostra un livello semitrasparente sopra il contenuto del contenitore padre
+ * (es. durante un caricamento o per bloccare l'interazione), con testo e/o icona
+ * opzionali centrati.
+ *
+ * @remarks
+ * Il contenitore padre deve avere `position: relative` (o comunque un
+ * posizionamento diverso da `static`) perché l'overlay lo copra correttamente.
+ *
+ * @example
+ * // Overlay di caricamento con spinner e testo
+ * <Overlay
+ *     icon={<Spinner animation="border" size="sm" />}
+ *     text="Caricamento in corso..."
+ *     bgColor="dark"
+ *     color="light"
+ * />
+ *
+ * @example
+ * // Overlay senza blur, con colori personalizzati
+ * <Overlay blur="0" bgColor="rgba(255, 255, 255, 0.6)" color="#333" />
+ */
 type Props = {
+    /**
+     * Colore del contenuto in primo piano (testo e icona).
+     *
+     * Accetta un colore del tema (es. `"primary"`, `"light"`, `"danger"`)
+     * oppure qualsiasi valore CSS valido (`"#fff"`, `"rgb(0,0,0)"`, `"white"`).
+     *
+     * @example "light"
+     * @example "#212529"
+     */
     color?: ThemeColor | string;
+
+    /**
+     * Colore di sfondo dell'overlay.
+     *
+     * Accetta un colore del tema oppure qualsiasi valore CSS valido.
+     * Per un effetto semitrasparente usa un colore con canale alpha
+     * (es. `"rgba(0, 0, 0, 0.5)"` o `"#00000080"`).
+     *
+     * @example "dark"
+     * @example "rgba(0, 0, 0, 0.5)"
+     */
     bgColor?: ThemeColor | string;
-    /** es. "4px", "0" per disattivarlo */
+
+    /**
+     * Intensità della sfocatura applicata al contenuto sottostante
+     * (`backdrop-filter: blur(...)`).
+     *
+     * Deve essere una lunghezza CSS valida. Usa `"0"` per disattivare la sfocatura.
+     *
+     * @example "4px"
+     * @example "0.5rem"
+     * @example "0" // nessun blur
+     */
     blur?: string;
+
+    /**
+     * Testo opzionale mostrato al centro dell'overlay, sotto l'icona se presente.
+     *
+     * @example "Caricamento in corso..."
+     */
     text?: string;
+
+    /**
+     * Icona o elemento opzionale mostrato al centro dell'overlay, sopra il testo.
+     * Può essere un'icona, uno spinner o qualsiasi elemento JSX.
+     *
+     * @example <Spinner animation="border" />
+     * @example <i className="bi bi-lock-fill" />
+     */
+    icon?: JSX.Element;
+
+    /**
+     * Classi CSS aggiuntive applicate al contenitore dell'overlay.
+     * Utile per personalizzare z-index, bordi arrotondati, padding, ecc.
+     *
+     * @example "rounded z-3"
+     */
     className?: string;
 };
 
@@ -58,6 +134,7 @@ export const LoadingOverlay = ({
     bgColor,
     blur,
     text = "Caricamento dati...",
+    icon,
     className,
 }: Props) => {
     // Imposta la variabile solo se la prop è passata:
@@ -67,6 +144,8 @@ export const LoadingOverlay = ({
         ...(blur && { "--vfo-spinner-blur": blur }),
         ...(color && { "--vfo-spinner-color": toCssColor(color) }),
     } as CSSProperties;
+
+    const Icon = icon ?? <FaEllipsisH style={{ width: "2rem", height: "2rem" }} />;
 
     return (
         <>
@@ -82,7 +161,7 @@ export const LoadingOverlay = ({
                 <div className="d-flex flex-column align-items-center">
                     <div className="vfo-spinner">
                         <span>
-                            <FaEllipsisH style={{ width: "2rem", height: "2rem" }} />
+                            {Icon}
                         </span>
                     </div>
                     <div className="mt-3 text-muted">{text}</div>
