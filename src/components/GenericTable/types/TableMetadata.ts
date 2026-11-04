@@ -10,28 +10,36 @@ import { TableTranslation } from "./TableTranslation";
 */
 export type TableMetadata<T> = {
 
-    icon?:ReactElement;
     t?: TableTranslation;
-    componentRegistry?: IComponentRegistry;
 
     domain: string; // Service Domain - Identificatore univoco della tabella (vd. DOMAIN e SUBDOMAIN)
     defaultPageRequest?: PageRequest; // Richiesta di pagina predefinita per la tabella
+    maxBlocksInCache?: number; // Ag Grid - Numero massimo di blocchi nella cache per la tabella. Da usare per la gestione della memoria e delle performance.
+    
     searchFilterColumns?: string[]; //nome colonne del filtro di ricerca testuale rapido - default 'name' se non impostato.
-    hideTitle?: boolean; //se true, nasconde il titolo della tabella (utile se la tabella è inserita in un contesto che già ne prevede uno)
-    // events?: TableEvents<T>, //eventi custom associati alla tabella
-    modalVersion?: boolean; //se true usa i modal per i form di visualizzazione/modifica, altrimenti si aspetta un drawer custom
+    preFilter?: FilterModel; //carica la griglia prefiltrata con il seguente filterModel - si applica al campo di 'ricerca rapida' Quick Search
+    
     columns?: {
         [colName: string]: TableColumnMetadata;
         // _actions: boolean;
     },
+    
+    icon?:ReactElement;
+    hideTitle?: boolean; //se true, nasconde il titolo della tabella (utile se la tabella è inserita in un contesto che già ne prevede uno)
+    customTitle?: string, //da un nome alla tabella custom, a prescindere dal menu item
+    
+    componentRegistry?: IComponentRegistry;
+
+    // events?: TableEvents<T>, //eventi custom associati alla tabella
+    modalVersion?: boolean; //se true usa i modal per i form di visualizzazione/modifica, altrimenti si aspetta un drawer custom
     // protectedColumns?: string[]; //elenco di nomi di colonne che non devono essere visualizzate in nessun modo dall'utente (a meno che non sia Admin).
     // systemColumns?: string[]; //elenco di nomi di colonne che non devono essere visualizzate dall'utente ma devono essere raggiungibili dalla AG GRID (incluse in tabella) per ragioni di sistema
-    maxBlocksInCache?: number; // Ag Grid - Numero massimo di blocchi nella cache per la tabella. Da usare per la gestione della memoria e delle performance.
-    formContainer?: any; //DOM element dove iniettare i form di visualizzazione/modifica - default GenericModal
-    preFilter?: FilterModel; //carica la griglia prefiltrata con il seguente filterModel - si applica al campo di 'ricerca rapida' Quick Search
-    customTitle?: string, //da un nome alla tabella custom, a prescindere dal menu item
+    
+    
     gridDetails?: GridDetails, //aggiunge una card alla griglia per dettagliare la vista. es. un filtro per trattativa con i dettagli della trattativa
+
     actions: _TableActionsConfig<T>; //permett di aggiungere azioni custom alla action bar (di fianco ad ADD e Gestione Colonne)
+    
     contextDataConfig: ContextDataConfig[]; //aggiunge dati serverside al contesto della tabella
     
     summary?: { //sommario - totali restituiti dalle GET LIST lato server
@@ -86,9 +94,9 @@ export type TableColumnParams = {
 // }
 
 export type ContextDataConfig = {
-    name: string;
-    service: string;
-    params: any;
+    name: string; //nome da assegnare alla collezione di dati
+    service: string; //dominio del servizio per la fetch
+    params: any; //parametri per la fetch (es. PageRequest type, ecc.)
 }
 
 
