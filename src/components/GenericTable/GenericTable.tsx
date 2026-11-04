@@ -46,7 +46,7 @@ import { TableCustomSetting } from "./types/TableCustomSettings";
 
 import type { ColumnState } from "./types/TableColumn";
 
-import LoadingOverlay from "../LoadingOverlay";
+import { LoadingOverlay } from "../LoadingOverlay";
 import { buildPath } from "../../utils/Path";
 import { getFromSession } from "../../utils/StorageHelper";
 import { getTranslation } from "../../utils/TranslationHelper";
@@ -706,7 +706,7 @@ export const GenericTable =
                     isLoadingGridData={loading}
                     >
                 <>
-                    <Container fluid className="ids-generic-table-container w-100 mt-3">
+                    <Container fluid className="vfo-generic-table-container w-100 mt-3">
                         {!hideTitle &&
                             <h1 className="text-start d-flex align-items-center m-0 mt-2 mb-2 ms-2">
                                 <span className="me-2 pb-2">{metadata.icon}</span>
@@ -750,7 +750,7 @@ export const GenericTable =
                             loadingOverlayComponent={LoadingOverlay}
                             loadingOverlayComponentParams={loadingOverlayComponentParams}
                             localeText={AG_GRID_LOCALE_IT}
-                            className="ids-generic-table"
+                            className="vfo-generic-table"
                             columnDefs={columnDefs}
 
                             //infinite row model
@@ -824,7 +824,7 @@ export const GenericTableSummary = () => {
     return (<>
         {!isLoading && !isEmptyObject(summary) && 
         
-        <div className="ids-generic-table-summary">
+        <div className="vfo-generic-table-summary">
             {Object.entries(summary).map(([k,v], idx) => (
                 <>
                     {!excludes.includes(k) && <span className="small ms-3">

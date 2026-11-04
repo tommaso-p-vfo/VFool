@@ -49,7 +49,7 @@ export const FilterChooser = ({ onFilterApplied }: { onFilterApplied?: () => voi
     const [validated, setValidated] = useState(false);
 
     return (<>
-        <div className="p-2 ids-filter-chooser">
+        <div className="p-2 vfo-filter-chooser">
             <div className="row small fst-italic mb-2">
                 <div className="col-1">Attiva</div>
                 <div className="col">Nome filtro</div>

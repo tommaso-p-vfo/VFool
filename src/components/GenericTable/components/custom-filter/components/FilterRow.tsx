@@ -193,7 +193,7 @@ export const FilterRow = forwardRef<FilterRowHandle, { col: ColDef, translationP
                         <Form.Check
                             onChange={onCheckChange}
                         />
-                        <span className="small fst-italic ids-text-truncate" title={TranslationHelper.getProperty(t, AppPathHelper.build(translationPath, col.colId))}>
+                        <span className="small fst-italic vfo-text-truncate" title={TranslationHelper.getProperty(t, AppPathHelper.build(translationPath, col.colId))}>
                             {TranslationHelper.getProperty(t, AppPathHelper.build(translationPath, col.colId))}
                         </span>
                     </div>

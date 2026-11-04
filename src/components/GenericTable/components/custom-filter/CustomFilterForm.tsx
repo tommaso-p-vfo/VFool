@@ -53,7 +53,7 @@ export const CustomFilterForm = forwardRef<CustomFilterFormHandler, CustomFilter
                         onChange={(e) => setFilterName(e.target.value)}
                     />
                 </div>
-                <div className="ids-custom-filter-container">
+                <div className="vfo-custom-filter-container">
                     {cols?.map((col, idx) => (
                         <FilterRow
                             key={col.colId ?? idx}

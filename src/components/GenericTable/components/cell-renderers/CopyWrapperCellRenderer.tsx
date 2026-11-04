@@ -46,7 +46,7 @@ const CopyWrapperCellRenderer: React.FC<CopyWrapperCellRendererProps> = ({
                 colId={colId}
                 defaultColor={defaultColor}
                 defaultCurrency={defaultCurrency}
-                className={`ids-text-truncate ids-collapse-wrapper ${className}`}
+                className={`vfo-text-truncate ids-collapse-wrapper ${className}`}
             />
         </div>
         </>

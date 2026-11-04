@@ -126,7 +126,7 @@ useImperativeHandle(ref, () => ({
 
 return (
     <>
-        <div className='d-flex ids-quick-filter'>
+        <div className='d-flex vfo-quick-filter'>
 
             <InputGroup className="mb-3 ">
                 <GenericButton id="ids-filter" 
@@ -141,7 +141,7 @@ return (
                 />
                 <FilterShower filter={activeFilter} />
                 <Form.Control
-                    id='ids-search-filter'
+                    id='vfo-search-filter'
                     placeholder="Cerca..."
                     aria-label="Cerca"
                     aria-describedby="ids-filter"

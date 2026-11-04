@@ -36,7 +36,7 @@ const CollapseWrapperCellRenderer: React.FC<CollapseWrapperCellRendererProps> = 
                 colId={colId}
                 defaultColor={defaultColor}
                 defaultCurrency={defaultCurrency}
-                className={`ids-text-truncate ids-collapse-wrapper ${className}`}
+                className={`vfo-text-truncate ids-collapse-wrapper ${className}`}
             />
         </div>
         <Overlay

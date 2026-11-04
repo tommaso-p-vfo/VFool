@@ -220,7 +220,7 @@ const ActionBar = ({
 
     return (
 
-        <div className="ids-action-bar d-flex justify-content-between">
+        <div className="vfo-action-bar d-flex justify-content-between">
 
             {(openAddModal) && 
             
@@ -288,7 +288,7 @@ const ActionBar = ({
                             color: action.color,
                             icon: action.icon
                         } as GenericButtonConfig}
-                        className="ids-table-top-bar-btn m-0"
+                        className="vfo-table-top-bar-btn m-0"
                     />
                 ))}
                 
@@ -300,7 +300,7 @@ const ActionBar = ({
                         color: IdsColor.PRIMARY,
                         icon: <FaRedo />
                     } as GenericButtonConfig}
-                    className="ids-table-top-bar-btn m-0"
+                    className="vfo-table-top-bar-btn m-0"
                 />
 
             {metadata?.actionsConfig?.[TABLE_ACTION_NAME.EXPORT]?.enabled &&
@@ -312,7 +312,7 @@ const ActionBar = ({
                         color: IdsColor.PRIMARY,
                         icon: <FaDownload />
                     } as GenericButtonConfig}
-                    className="ids-table-top-bar-btn"
+                    className="vfo-table-top-bar-btn"
                 />
             }
             
@@ -325,11 +325,11 @@ const ActionBar = ({
                         color: IdsColor.PRIMARY,
                         icon: <FaPlusCircle />
                     } as GenericButtonConfig}
-                    className="ids-table-top-bar-btn"
+                    className="vfo-table-top-bar-btn"
                 />
             }
 
-            <InputGroup className="w-auto gap-0 m-0 p-0 ids-table-top-bar-btn ids-table-top-bar-inputgrp-btn">
+            <InputGroup className="w-auto gap-0 m-0 p-0 vfo-table-top-bar-btn vfo-table-top-bar-inputgrp-btn">
                 <GenericButton
                     tooltip="Gestione colonne"
                     onClick={openColumnChooser}

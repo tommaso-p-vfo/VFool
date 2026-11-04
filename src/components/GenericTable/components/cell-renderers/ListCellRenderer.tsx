@@ -87,7 +87,7 @@ const ListCellRenderer: React.FC<ListCellRendererProps> = ({
                 {!isEmpty && visibleItems.map((item, index) => (
                     <span
                         key={index}
-                        className={`${className} ids-text-truncate`}
+                        className={`${className} vfo-text-truncate`}
                         title={field ? item[field] : ''}
                         style={{
                             color: color,
@@ -159,7 +159,7 @@ const ListCellRenderer: React.FC<ListCellRendererProps> = ({
                 {items.map((item, index) => (
                     <span
                         key={index}
-                        className={`${className} ids-text-truncate`}
+                        className={`${className} vfo-text-truncate`}
                         title={field ? item[field] : ''}
                         style={{
                             color: color,

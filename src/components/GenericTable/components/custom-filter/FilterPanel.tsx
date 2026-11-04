@@ -42,9 +42,9 @@ export const FilterPanel = ({ filter }: { filter?: UserCustomFilter }) => {
 
     return (<>
 
-        <div className="ids-not-saved-filter d-flex align-items-center ms-0">
+        <div className="vfo-not-saved-filter d-flex align-items-center ms-0">
 
-            <div className="ids-not-saved-filter-name ids-text-truncate" title={`Filtro attivo: ${notSavedFilter?.name ?? 'Nessuno'}`} >
+            <div className="vfo-not-saved-filter-name vfo-text-truncate" title={`Filtro attivo: ${notSavedFilter?.name ?? 'Nessuno'}`} >
                 {!notSavedFilter?._isNew && 
                     <Form.Text>
                         <span className="me-1">Filtro attivo:</span>
@@ -53,7 +53,7 @@ export const FilterPanel = ({ filter }: { filter?: UserCustomFilter }) => {
                     </Form.Text>}
                 {notSavedFilter?._isNew &&
                     <Form ref={notSavedFilterformRef} noValidate validated={validated}>
-                        <Form.Group controlId='nsFilterName' className="ids-not-saved-filter-input" >
+                        <Form.Group controlId='nsFilterName' className="vfo-not-saved-filter-input" >
                             <Form.Control
                                 value={notSavedFilter.name}
                                 required

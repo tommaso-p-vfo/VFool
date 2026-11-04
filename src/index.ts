@@ -2,7 +2,7 @@ import './theme/index.scss';
 
 export * from './components/Welcome';
 export * from './components/GenericTable';
-// export * from './components/LoadingOverlay';
+export { LoadingOverlay } from './components/LoadingOverlay';
 // export * from './components/ProgressBar';
 // export * from './components/InfoButon';
 // export * from './components/GenericButton';
