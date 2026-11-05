@@ -30,6 +30,20 @@ export type ThemeColor = ThemeColorName | (string & {});
 
 const THEME_COLORS = new Set<string>(Object.values(ThemeColor));
 
+export const ThemeVariant = {
+    FILLED: 'filled',
+    OUTLINED: 'outlined'
+}
+
+export type ThemeVariantName = (typeof ThemeVariant)[keyof typeof ThemeVariant];
+
+/**
+ * Variante di visualizzazione del componente
+ * filled - colore pieno
+ * outlined - colore di contorno
+ */
+export type ThemeVariant = ThemeVariantName;
+
 /**
  * Converte un colore in un'espressione CSS.
  *

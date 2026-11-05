@@ -40,7 +40,7 @@ import { SERVICE_ENDPOINT } from "../../types/api/ApiEndpoints";
 
 // import TableTopBar from "./components/table-top-bar/TableTopBar";
 
-import type { TableAttributes, TableHandler } from "./types/TableAttributes";
+import type { ColumnHandlerProps, TableActionConfig, TableAdditionalDetails, TableAttributes, TableColumnConfig, TableHandler, TableSummaryConfig, TableTranslations } from "./types/TableAttributes";
 import { type TableCustomFilter } from "./types/TableCustomFilter";
 import { TableCustomSetting } from "./types/TableCustomSettings";
 
@@ -62,13 +62,14 @@ import {
 
 import { type ApiRequest } from "../../types/api/ApiRequest";
 
-import TableProvider, { TableContextHandler, type AgGridDomainType } from "./contexts/TableContext";
+import TableProvider, { SummaryHandler, TableContextHandler, type AgGridDomainType } from "./contexts/TableContext";
 import type { TableInternalMetadata } from "./types/TableInternalMetadata";
-import type { QuickFilterMetadata } from "./components/quick-filter/types/QuickFilterMetadata";
+// import type { QuickFilterMetadata } from "./components/quick-filter/types/QuickFilterMetadata";
 
 import type { TableTopBarMetadata } from "./components/table-top-bar/types/TableTopBarMetadata";
 import { Card, CardBody, Container } from "react-bootstrap";
-import type { GridDetails } from "./types/TableMetadata";
+// import type { GridDetails } from "./types/TableMetadata";
+
 //TODO fix GenericActionHandler 
 // import GenericActionHandler from "./components/actions/GenericActionHandler";
 // import ColumnChooserModal from "./components/column-preferences/ColumnChoserModal";
@@ -91,12 +92,24 @@ if (process.env.NODE_ENV !== 'production') {
 
 export const GenericTable =
 
-    <T extends Record<string, TableHandler>>({ serviceLocator, metadata, ref }: TableAttributes<T> & { ref?: React.Ref<TableHandler> }) => {
+    <T extends Record<string, TableHandler>>({ 
+        dataConnector, 
+        appearance, 
+        actions, 
+        columns, 
+        componentRegistry, 
+        quickSearch: quickSearchConfig, 
+        summary: summaryConfig, 
+        translations, 
+        ref 
+    }: TableAttributes<T> & { ref?: React.Ref<TableHandler> }) => {
 
         const tableContextRef = useRef<TableContextHandler>(null);
 
         //TRANSLATIONS
-        const t = metadata?.t ?? {};
+        const t = translations ?? {} as TableTranslations;
+
+        const serviceLocator = dataConnector.serviceLocator;
 
         //DOMAIN
         const [domain, setDomain] = useState<AgGridDomainType>();
@@ -141,11 +154,13 @@ export const GenericTable =
             'uiColumnSorted', 'columnVisible', 'toolPanelUi', 'contextMenu', 'quickFilter', 'columnFilter'
         ]);
         
-        //TABLE ICON AND NAME        
-        const tableNameRef = useRef<string>('');
+        //TABLE APPEARANCE        
+        const customTitleRef = useRef<string>('');
+        const customSubTitleRef = useRef<string>('');
         const [customTitle, setCustomTitle] = useState<string | null>(null);
-        const [gridDetails, setGridDetails] = useState<GridDetails | null>(null);
-        const [hideTitle, setHideTitle] = useState<boolean>(false);
+        const [customSubTitle, setCustomSubTitle] = useState<string | null>(null);
+        const [gridDetails, setGridDetails] = useState<TableAdditionalDetails | null>(null);
+        const [showHeader, setShowHeader] = useState<boolean>(true);
 
         //custom spinner
         const [loading, setLoading] = useState<boolean>(false);
@@ -215,7 +230,6 @@ export const GenericTable =
                             ...summary
                         } = result.data as PageResponse<T>;
                         setSummary(summary);
-                        // handleColumnDefinitions(pageResponse.items);
 
                         params.successCallback(items, totalCount);
 
@@ -243,7 +257,7 @@ export const GenericTable =
 
             return dataSource;
 
-        }, [serviceLocator, metadata]);
+        }, [serviceLocator]);
 
         const onGridReady = useCallback((params: GridReadyEvent) => {
             if (typeof params.api.setGridOption === 'function') {
@@ -266,7 +280,7 @@ export const GenericTable =
             else
                 console.error("setDatasource is not a function on the grid API. Ensure you are using the correct version of ag-Grid.");
 
-        }, [serviceLocator, metadata]);
+        }, [serviceLocator]);
 
         const onColumnResized = (params: ColumnResizedEvent) => {
 
@@ -446,18 +460,34 @@ export const GenericTable =
 
         // Memoizzazione degli headers per evitare ricalcoli non necessari
         const _loadDefaultColumns = useCallback((item: any) => {
-            let internalMetadata = {
-                agGridDomain: TableHelper._getDomainForAgGrid(agGridDomainRef.current),
-                tableName: tableNameRef.current,
-                t: t,
-                gridApi: gridApiRef?.current,
-                actionHandlerRef: actionHandlerRef
-            } as TableInternalMetadata;
 
-            let columnDefinitions = TableHelper.getAgGridColumnDefs(item, metadata, internalMetadata);
+            let columnDefinitionsProps = {
+
+                item: item, //prima row per popolamento colonne
+
+                columns: columns,
+                actions: actions,
+                t: t
+
+                // domain: TableHelper._getDomainForAgGrid(agGridDomainRef.current),
+                // title: customTitleRef.current,
+                // gridApi: gridApiRef?.current,
+                // actionHandlerRef: actionHandlerRef
+            } as ColumnHandlerProps<T>;
+
+
+            // let internalMetadata = {
+            //     agGridDomain: TableHelper._getDomainForAgGrid(agGridDomainRef.current),
+            //     tableName: customTitleRef.current,
+            //     t: t,
+            //     gridApi: gridApiRef?.current,
+            //     actionHandlerRef: actionHandlerRef
+            // } as TableInternalMetadata;
+
+            let columnDefinitions = TableHelper.getAgGridColumnDefs(columnDefinitionsProps);
 
             return columnDefinitions;
-        }, [metadata]);
+        }, [columns, actions]);
 
         const _handleColumnDefinitions = useCallback((items: any) => {
 
@@ -471,22 +501,24 @@ export const GenericTable =
         //init - set domain
         useEffect(() => {
 
-            let _domain = TableHelper._getDomainForAgGrid(metadata?.domain);
+            let _domain = TableHelper._getDomainForAgGrid(dataConnector?.domain);
             if (!_domain) return;
-            if(metadata?.domain === serviceLocatorDomainRef.current) return;
+            if(dataConnector?.domain === serviceLocatorDomainRef.current) return;
 
             agGridDomainRef.current = _domain;
-            setDomain({ agGridDomain: _domain, serviceLocatorDomain: metadata?.domain });
-            serviceLocatorDomainRef.current = metadata?.domain;
+            setDomain({ agGridDomain: _domain, serviceLocatorDomain: dataConnector?.domain });
+            serviceLocatorDomainRef.current = dataConnector?.domain;
 
             //reset colonne per visualizzare il caricamento
             setColumnDefs([]);
 
-            tableNameRef.current = t?.title ?? '';
+            customTitleRef.current = t?.title ?? ''
+            customSubTitleRef.current = t?.subTitle ?? ''
+        }, [dataConnector, t]);
 
-            preFilterRef.current = metadata?.preFilter ?? null;
-
-        }, [metadata, t]);
+        useEffect(() => {
+            preFilterRef.current = quickSearchConfig?.preFilter ?? null;
+        }, [quickSearchConfig]);
         
         //init - quando il domain è settato
         const _fetchColumnDefinitions = useCallback(async () => {
@@ -508,7 +540,7 @@ export const GenericTable =
                 setColumnDefs(colDefs);
             }
 
-        }, [domain]);
+        }, [serviceLocator, _handleColumnDefinitions]);
 
         useEffect(() => {
 
@@ -518,11 +550,12 @@ export const GenericTable =
             _fetchColumnDefinitions();
 
             //imposto la visibilità del title della tabella
-            setHideTitle(metadata?.hideTitle ?? false);
-            setCustomTitle(metadata?.customTitle ?? null);
-            setGridDetails(metadata?.gridDetails ?? null);
+            setShowHeader(appearance?.showHeader ?? true);
+            setCustomTitle(appearance?.title ?? null);
+            setCustomSubTitle(appearance?.subTitle ?? null);
+            setGridDetails(appearance?.details ?? null);
     
-        }, [domain]);
+        }, [appearance]);
 
         //INITIAL STATE CONFIG
         const initialState = useMemo<GridState | undefined>(() => {
@@ -567,7 +600,7 @@ export const GenericTable =
             }
 
             const savedFilter = TableHelper.getCurrentTableFilter(agGridDomainRef.current);
-            const savedPageSize = TableHelper.getCurrentTablePageSize(agGridDomainRef.current, metadata?.defaultPageRequest?.pageSize ?? AG_GRID_DEFAULT_PAGE_SIZE);
+            const savedPageSize = TableHelper.getCurrentTablePageSize(agGridDomainRef.current, dataConnector?.defaultPage?.pageSize ?? AG_GRID_DEFAULT_PAGE_SIZE);
 
             const state: GridState = {
                 pagination: { pageSize: savedPageSize },
@@ -605,7 +638,7 @@ export const GenericTable =
             }, 1000);
 
             return state;
-        }, [columnDefs, domain, activeFilter]);
+        }, [dataConnector, columnDefs, domain, activeFilter]);
 
         const onGridPreDestroyed = useCallback(() => {
             // Pulisce la datasource per evitare chiamate al server dopo che la griglia è stata distrutta
@@ -642,18 +675,18 @@ export const GenericTable =
             // actionsMetadata.domain = agGridDomainRef.current;
             // actionsMetadata.tableName = tableNameRef.current;
 
-            let quickFilterMetadata = {} as QuickFilterMetadata;
-            quickFilterMetadata.searchFilterColumns = metadata?.searchFilterColumns;
-            quickFilterMetadata.translatedSearchFilterColumns = metadata?.searchFilterColumns?.map(col => {
-                return getTranslation(t, buildPath(agGridDomainRef.current, 'columns', col));
-            });
-            quickFilterMetadata.domain = agGridDomainRef.current;
+            // let quickFilterMetadata = {} as QuickFilterMetadata;
+            // quickFilterMetadata.searchFilterColumns = quickSearchConfig?.searchFilterColumns;
+            // quickFilterMetadata.translatedSearchFilterColumns = quickSearchConfig?.searchFilterColumns?.map(col => {
+            //     return getTranslation(t, buildPath(agGridDomainRef.current, 'columns', col));
+            // });
+            // quickFilterMetadata.domain = agGridDomainRef.current;
 
-            let topBarMetadata = {} as TableTopBarMetadata;
-            // topBarMetadata.actionsMetadata = actionsMetadata;
-            topBarMetadata.quickFilterMetadata = quickFilterMetadata;
-            // topBarMetadata.actionBarConfig = metadata.actionBarConfig;
-            setTopBarMetadata(topBarMetadata);
+            // let topBarMetadata = {} as TableTopBarMetadata;
+            // // topBarMetadata.actionsMetadata = actionsMetadata;
+            // topBarMetadata.quickFilterMetadata = quickFilterMetadata;
+            // // topBarMetadata.actionBarConfig = metadata.actionBarConfig;
+            // setTopBarMetadata(topBarMetadata);
 
             // let _columnChooserProps = {
             //     domain: agGridDomainRef.current,
@@ -670,18 +703,26 @@ export const GenericTable =
             // setColumnChooserProps(_columnChooserProps);
 
             //ripristino del filter
-            const quickSearchFilter = TableHelper.getCurrentQuickTableFilter(agGridDomainRef.current);
-            topBarRef?.current?.setQuickFilterText(quickSearchFilter);
+            // const quickSearchFilter = TableHelper.getCurrentQuickTableFilter(agGridDomainRef.current);
+            // topBarRef?.current?.setQuickFilterText(quickSearchFilter);
 
-        }, [isGridReady, metadata, columnDefs, openColumnChoser]);
+        }, [isGridReady, quickSearchConfig, columnDefs, openColumnChoser]);
 
         //customTitle
         useEffect(() => {
 
             if (customTitle != null)
-                tableNameRef.current = customTitle;
+                customTitleRef.current = customTitle;
 
         }, [customTitle]);
+
+        //customSubTitle
+        useEffect(() => {
+
+            if (customSubTitle != null)
+                customSubTitleRef.current = customSubTitle;
+
+        }, [customSubTitle]);
 
         useImperativeHandle<any, TableHandler>(ref, () => ({
             context: tableContextRef.current
@@ -693,7 +734,10 @@ export const GenericTable =
                 <TableProvider 
                     ref={tableContextRef}
                     serviceLocator={serviceLocator}
-                    metadata={metadata} 
+                    dataConnector={dataConnector}
+                    translations={t}
+                    columnsConfig={columns}
+                    // metadata={metadata} 
                     domain={{ agGridDomain: agGridDomainRef.current, serviceLocatorDomain: serviceLocatorDomainRef.current }} 
                     gridApi={gridApiState} 
                     isGridReady={isGridReady} 
@@ -701,24 +745,26 @@ export const GenericTable =
                     setActiveFilter={setActiveFilter}
                     gridSettings={gridSettings} 
                     setGridSettings={setGridSettings}
-                    summary={summary}
-                    setSummary={setSummary}
+                    summaryHandler={{ config: summaryConfig, data: summary } as SummaryHandler}
+  
                     isLoadingGridData={loading}
                     >
                 <>
                     <Container fluid className="vfo-generic-table-container w-100 mt-3">
-                        {!hideTitle &&
-                            <h1 className="text-start d-flex align-items-center m-0 mt-2 mb-2 ms-2">
-                                <span className="me-2 pb-2">{metadata.icon}</span>
-                                <span>{tableNameRef.current}</span>
-                            </h1>
-                        }
+                        {showHeader && (
+                            <>
+                                <h1 className="text-start d-flex align-items-center m-0 mt-2 mb-2 ms-2">
+                                    {appearance?.icon && <span className="me-2 pb-2">{appearance.icon}</span>}
+                                    <span>{customTitleRef.current}</span>
+                                </h1>
+                                {customSubTitleRef.current && (
+                                    <p className="mb-4 mt-0 ms-2 pt-2 fst-italic">
+                                        {customSubTitleRef.current}
+                                    </p>
+                                )}
+                            </>
+                        )}
 
-                        {!hideTitle && t.subTitle &&
-                            <p className="mb-4 mt-0 ms-2 pt-2 fst-italic">
-                                {t.subTitle}
-                            </p>
-                        }
 
                         {/* <TableTopBar ref={topBarRef} metadata={topBarMetadata} gridApiRef={gridApiRef} openColumnChooser={() => setOpenColumnChoser(true)}></TableTopBar> */}
                         {/* <ColumnChooserModal
@@ -782,7 +828,7 @@ export const GenericTable =
                             onGridPreDestroyed={onGridPreDestroyed}
                             onSelectionChanged={onSelectionChanged}
                         />}
-                        {/* <GenericTableSummary /> */}
+                        { appearance?.showSummary && <GenericTableSummary /> }
                     </Container>
                     {/* <GenericActionHandler ref={actionHandlerRef} /> */}
                 </>
@@ -795,13 +841,14 @@ export const GenericTable =
 export const GenericTableSummary = () => {
 
     const tableContext = useTableContext();
-    const summary = tableContext.summary;
+
+    const handler = tableContext.summaryHandler ?? {} as SummaryHandler;
+    const summary = handler.data;
+    const config = handler.config ?? {} as TableSummaryConfig;
+    const excludes = config.excludes ?? [];
+
     const t = tableContext.t;
-    const domain = tableContext.domain;
-    const meta = tableContext.metadata;
-
-    const excludes = meta?.summary?.excludes ?? [];
-
+    const domain = tableContext.domain?.agGridDomain ?? '';
     let isLoading = tableContext.isLoadingGridData;
 
     const formatValue = (v: any) => {
@@ -828,7 +875,7 @@ export const GenericTableSummary = () => {
             {Object.entries(summary).map(([k,v], idx) => (
                 <>
                     {!excludes.includes(k) && <span className="small ms-3">
-                        <span >{getTranslation(t, buildPath(domain?.agGridDomain, 'summary', k))}:</span>
+                        <span >{getTranslation(t, buildPath(domain, 'summary', k))}:</span>
                         <span className="ms-1 me-2 fw-bold">{formatValue(v)}</span>
 
                     </span>}

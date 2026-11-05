@@ -27,6 +27,7 @@ import { TableCustomSetting } from "../types/TableCustomSettings";
 import type { PageRequest } from "../../../types/api/PageTypes";
 import { AG_GRID_COLUMN_TYPE } from "../constants/tableConstants";
 import { TableTranslation } from "../types/TableTranslation";
+import { TableColumnConfig, TableDataConnector, TableSummaryConfig, TableTranslations } from "../types/TableAttributes";
 
 export type AgGridDomainType = {
 
@@ -37,6 +38,11 @@ export type AgGridDomainType = {
     agGridDomain: string; //dominio ripulito per lavorare con ag grid
     serviceLocatorDomain: string | null; //dominio puro necessario al service locator
 }
+
+export type SummaryHandler = {
+    data: any; //totali tabella da mostrare nel footer
+    config: TableSummaryConfig|undefined;
+};
 
 export interface TableContextHandler {
     domain: AgGridDomainType | undefined;
@@ -57,7 +63,7 @@ export interface TableContextHandler {
     //TODO fix types
     customFilterHandler: any; // TableCustomFilterHandler;
     gridSettingsHandler: any; // GridSettingsHandler;
-    summary: any; //totali tabella da mostrare nel footer
+    summaryHandler?: SummaryHandler; 
     isLoadingGridData: boolean; //items loading from server
 }
 
@@ -66,7 +72,10 @@ const TableContext = createContext<TableContextHandler | undefined>(undefined);
 interface TableProviderProps {
     children: React.ReactNode;
     serviceLocator: IServiceLocator;
-    metadata: TableMetadata<any>;
+    dataConnector: TableDataConnector;
+    translations: TableTranslations;
+    columnsConfig?: { [colName: string]: TableColumnConfig; };
+    // metadata: TableMetadata<any>;
     domain?: AgGridDomainType|undefined;
     gridApi: GridApi | null;
     isGridReady: boolean;
@@ -74,13 +83,29 @@ interface TableProviderProps {
     setActiveFilter: (filter?: TableCustomFilter) => void; 
     gridSettings: TableCustomSetting |undefined;
     setGridSettings: (gridSettings?: TableCustomSetting) => void;
-    summary: any|undefined; 
-    setSummary: (summary: any) => void;
+    
+    summaryHandler?: SummaryHandler;
+
     isLoadingGridData: boolean; //loading data items from server
 }
 
-const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({ children, serviceLocator, metadata, domain, gridApi, isGridReady, activeFilter, setActiveFilter, gridSettings, setGridSettings, 
-    summary, setSummary, isLoadingGridData }: TableProviderProps, ref) => {
+const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({ 
+    children, 
+    serviceLocator, 
+    dataConnector,
+    translations,
+    columnsConfig,
+    // metadata, 
+    domain, 
+    gridApi, 
+    isGridReady, 
+    activeFilter, 
+    setActiveFilter, 
+    gridSettings, 
+    setGridSettings, 
+    summaryHandler, 
+    isLoadingGridData 
+}: TableProviderProps, ref) => {
 
     //TODO fix useCustomFilterLogic e useGridSettingsLogic
     const customFilterHandler = {}; // useCustomFilterLogic({ domain, gridApi, activeFilter, setActiveFilter, serviceLocator });
@@ -97,7 +122,7 @@ const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({ chi
 
     const [isLoadingData, setIsLoadingData] = useState(false);
 
-    const t = metadata?.t ?? {} as TableTranslation;
+    const t = translations ?? {} as TableTranslation;
 
     useEffect(() => {
       
@@ -124,13 +149,13 @@ const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({ chi
 
     const fetchLists = useCallback(async (request?: PageRequest) => {
 
-        if (!metadata || Object.keys(metadata).length === 0) return;
+        if (!columnsConfig || Object.keys(columnsConfig).length === 0) return;
 
         setIsLoadingData(true);
         try {
             const map = new Map<string, { id: number, name: string, raw: any }[]>();
 
-            for (const [key, column] of Object.entries(metadata.columns)) {
+            for (const [key, column] of Object.entries(columnsConfig)) {
                 if (column && column.type === AG_GRID_COLUMN_TYPE.LIST) {
                     if (!column.domain) continue;
 
@@ -155,17 +180,17 @@ const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({ chi
         } finally {
             setIsLoadingData(false);
         }
-    }, [metadata, serviceLocator]);
+    }, [columnsConfig, serviceLocator]);
 
     const fetchDropdowns = useCallback(async () => {
 
-        if (!metadata || Object.keys(metadata).length === 0) return;
+        if (!columnsConfig || Object.keys(columnsConfig).length === 0) return;
 
         setIsLoadingData(true);
         try {
             const map = new Map<string, TableComboboxOption[]>();
 
-            for (const [key, column] of Object.entries(metadata.columns)) {
+            for (const [key, column] of Object.entries(columnsConfig)) {
                 if (column && column.type === AG_GRID_COLUMN_TYPE.BOXED_COMBOBOX) {
                     if (!column.domain) continue;
 
@@ -181,17 +206,17 @@ const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({ chi
         } finally {
             setIsLoadingData(false);
         }
-    }, [metadata, serviceLocator]);
+    }, [columnsConfig, serviceLocator]);
 
     const fetchData = useCallback(async () => {
 
-        if (!metadata || Object.keys(metadata).length === 0 || !metadata.contextDataConfig) return;
+        if (!dataConnector || !dataConnector.extraData) return;
 
         setIsLoadingData(true);
         try {
             const map = new Map<string, any>();
 
-            for (const [key, cData] of Object.entries(metadata.contextDataConfig)) {
+            for (const [key, cData] of Object.entries(dataConnector.extraData)) {
                 if (cData) {
                     if (!cData.service) continue;
 
@@ -211,7 +236,7 @@ const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({ chi
         } finally {
             setIsLoadingData(false);
         }
-    }, [metadata, serviceLocator]);
+    }, [dataConnector, serviceLocator]);
 
     useEffect(() => {
         fetchLists();
@@ -223,7 +248,7 @@ const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({ chi
         domain,
         serviceLocator,
         t,
-        metadata,
+        // metadata,
         comboboxMap,
         listsMap,
         fetchLists,
@@ -235,9 +260,24 @@ const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({ chi
         data,
         customFilterHandler,
         gridSettingsHandler,
-        summary,
+        summaryHandler,
         isLoadingGridData
-    }), [domain, serviceLocator, metadata, comboboxMap, listsMap, filterData, isLoadingData, gridApi, isGridReady, data, customFilterHandler, gridSettingsHandler, summary, isLoadingGridData]);
+    }), [
+        domain,
+         serviceLocator, 
+        //  metadata, 
+         comboboxMap, 
+         listsMap, 
+         filterData, 
+         isLoadingData, 
+         gridApi, 
+         isGridReady, 
+         data, 
+         customFilterHandler, 
+         gridSettingsHandler, 
+         summaryHandler, 
+         isLoadingGridData
+        ]);
 
 
     useImperativeHandle(ref, () => {

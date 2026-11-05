@@ -15,6 +15,7 @@ import { COL_EMPTY_PLACEHOLDER } from '../../constants/tableConstants';
 
 import { useTableContext } from '../../hooks/useTableContext';
 import { ThemeColor, toCssColor } from '../../../../utils/Color';
+import { TableColumnParams } from '../../types/TableMetadata';
 
 // /**
 //  *
@@ -39,12 +40,16 @@ import { ThemeColor, toCssColor } from '../../../../utils/Color';
  * @param props 
  * @returns 
  */
-const BoxedComboboxCellRenderer: React.FC<any> = ({ data, colId, colName, boxedColorColId, defaultColor }) => {
+const BoxedComboboxCellRenderer: React.FC<any> = ({ data, colId, params, boxedColorColId }: { data: any, colId: string, params?: TableColumnParams, boxedColorColId: string}) => {
 
+
+    const defaultColor = params?.defaultColor;
+    const placeholder = params?.placeholder; 
     
     const tableContext = useTableContext();
     const serviceLocator = tableContext.serviceLocator;
     const t = tableContext.t;
+    
 
     const cellContainerRef = useRef<HTMLDivElement>(null);
     const [_data, setData] = useState(data);
@@ -119,7 +124,7 @@ const BoxedComboboxCellRenderer: React.FC<any> = ({ data, colId, colName, boxedC
             ref={cellContainerRef} 
             onClick={() => !isEditing && setIsEditing(true)} 
             style={{ cursor: isEditing ? 'default' : 'pointer', width: '100%' }}
-            title={`${t.common.actions.edit + ' ' + colName}`}
+            title={`${t.common.actions.edit + ' ' + placeholder}`}
         >
             {!isEditing ? (
                 <Badge bg="" style={{ backgroundColor: bgColor }} className='px-2 py-1'>

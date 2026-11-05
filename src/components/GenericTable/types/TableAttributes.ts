@@ -1,9 +1,9 @@
-import type { ContextDataConfig, GridDetails as TableAdditionalDetails, TableColumnMetadata, TableMetadata } from "./TableMetadata";
 import { TableContextHandler } from "../contexts/TableContext";
 import { FilterModel, IComponentRegistry, IServiceLocator, PageRequest } from "../../../types";
-import { TableTranslation as TableTranslations } from "./TableTranslation";
 import { JSX } from "react/jsx-runtime";
-import { ThemeColor } from "../../../utils";
+import { ThemeColor, ThemeVariant } from "../../../utils";
+import { GridApi } from "ag-grid-community";
+import { TableColumnType } from "../constants/tableConstants";
 
 /**
  * Interfaccia per definire gli attributi di una tabella attraverso React
@@ -25,10 +25,10 @@ export interface TableAttributes<T> {
     summary?: TableSummaryConfig;
 
     /**
-     * se una action si affida a un manager predefinito dalla libreria
+     * se una action si affida a un manager predefinito della libreria
      * deve esistere un componente nel registro con una property 
      * che abbia come name '<domain>.<TABLE_ACTION_MANAGER_NAME>'
-     * e che risponda alle esigenze dell'azione.
+     * che risponda alle esigenze dell'azione.
      * 
      * TODO - verifica la firma del componente iniettato finale
      * Il manager chiamerà il componente iniettando le seguenti props
@@ -51,7 +51,7 @@ export type TableHandler = {
 }
 
 export type TableColumnConfig = {
-    type: string; //AG_GRID_TYPE_COLUMN constant
+    type: TableColumnType; //TableColumnType - AG_GRID_TYPE_COLUMN constant
     filter?: { //personalizzazione filtro adv a livello di singola colonna
         enabled?: boolean; //permette di disattivare il filtro esplicitamente
         [filterField: string]: any;
@@ -76,6 +76,7 @@ export type TableColumnConfig = {
 export type TableColumnParams = {
     defaultColor?: ThemeColor;
     className?: string;
+    placeholder?: string;
     // actionConfig?: _TableActionsConfig;
 
     [key: string]: any;
@@ -89,7 +90,9 @@ export type TableDataConnector = {
 
     maxBlocksInCache?: number; // Ag Grid - Numero massimo di blocchi nella cache per la tabella. Da usare per la gestione della memoria e delle performance.
 
-    extraData?: TableContextExtraData[]; 
+    extraData?: TableContextExtraData[]; // aggiunge dati serverside al contesto della tabella 
+
+    hasAdminAuthorization?: () => boolean; //default false - conferisce visibilità totale della tabella
 }
 
 /** 
@@ -149,6 +152,7 @@ export type TableAction<T> = {
     name?: string; //ex title - titolo da mostrare nell'header del modal associato all'azione - default inferito da dominio + tipo azione
     icon?: JSX.Element;
     color?: ThemeColor; //CSS color - default primary
+    variant?: ThemeVariant; //default filled
 
     actionManagerConfig?: ActionManagerConfig;
     onClick?: (props: TableActionProps<T>) => Promise<void>; //async function
@@ -185,3 +189,25 @@ export const TABLE_ACTION_MANAGER_NAME = {
 }
 
 export type TableActionManager = typeof TABLE_ACTION_MANAGER_NAME[keyof typeof TABLE_ACTION_MANAGER_NAME];
+
+export type TableTranslations = {
+    title: string;
+    subTitle: string;
+    columns: { [key: string]: string; }
+}
+
+
+export type ColumnHandlerProps<T> = {
+    item?: T;
+    columns: { [colName: string]: TableColumnConfig; },
+    actions?: { [actionName: string]: TableActionConfig<T>; },
+
+    domain: string,
+    title?: string;
+    t: TableTranslations;
+    gridApi: GridApi;
+    actionHandlerRef:any; // actionHandlerRef
+
+    hasAdminAuthorization?: () => boolean;
+    
+}

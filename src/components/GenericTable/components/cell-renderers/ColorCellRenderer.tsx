@@ -1,5 +1,6 @@
 import type { CustomHeaderProps } from 'ag-grid-react';
 import { FaEyeDropper, FaSquare } from 'react-icons/fa';
+import { TableColumnParams } from '../../types/TableMetadata';
 
 /**
  * 
@@ -24,13 +25,13 @@ const ColorHeader = ({ displayName }: CustomHeaderProps) => {
  * @param props 
  * @returns 
  */
-const ColorCellRenderer: React.FC<any> = ({ data, field }: {data: any, field: string}) => {
+const ColorCellRenderer: React.FC<any> = ({ data, colId }: {data: any, colId: string, params?: TableColumnParams}) => {
 
 
     return (
 
         <>
-            <FaSquare color={data?.[field]} fill={data?.[field]} />
+            <FaSquare color={data?.[colId]} fill={data?.[colId]} />
         </>
 
     );

@@ -17,7 +17,7 @@ export const AG_GRID_PAGE_SIZE = {
 }
 export const AG_GRID_DEFAULT_PAGE_SIZE = 20;
 
-export type AgGridColumnType = typeof AG_GRID_COLUMN_TYPE[keyof typeof AG_GRID_COLUMN_TYPE];
+export type TableColumnType = typeof AG_GRID_COLUMN_TYPE[keyof typeof AG_GRID_COLUMN_TYPE];
 
 export const AG_GRID_COLUMN_TYPE = {
     AG_GRID_TEXT: "agTextColumnFilter", //AG GRID FILTER - THIS VALUE CAN'T CHANGE

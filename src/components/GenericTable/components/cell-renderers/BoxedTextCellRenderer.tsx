@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Badge } from 'react-bootstrap';
 import { COL_EMPTY_PLACEHOLDER } from '../../constants/tableConstants';
 import { ThemeColor, toCssColor } from '../../../../utils/Color';
+import { TableColumnParams } from '../../types/TableMetadata';
 
 // /**
 //  *
@@ -26,10 +27,11 @@ import { ThemeColor, toCssColor } from '../../../../utils/Color';
  * @param props 
  * @returns 
  */
-const BoxedTextCellRenderer: React.FC<any> = ({ data, colId, boxedColorColId, defaultColor }: { data: any, colId: string, boxedColorColId: string, defaultColor?: string}) => {
+const BoxedTextCellRenderer: React.FC<any> = ({ data, colId, boxedColorColId, params }: { data: any, colId: string, boxedColorColId: string, params?: TableColumnParams}) => {
 
 
     const [bgColor, setBgColor] = useState<string>(ThemeColor.PRIMARY);
+    const defaultColor = params?.defaultColor;
 
     useEffect(() => {
 
