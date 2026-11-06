@@ -27,7 +27,7 @@ import { TableCustomSetting } from "../types/TableCustomSettings";
 import type { PageRequest } from "../../../types/api/PageTypes";
 import { AG_GRID_COLUMN_TYPE } from "../constants/tableConstants";
 import { TableTranslation } from "../types/TableTranslation";
-import { QuickSearchConfig, TableColumnConfig, TableDataConnector, TableSummaryConfig, TableTranslations } from "../types/TableAttributes";
+import { QuickSearchConfig, TableApperance, TableColumnConfig, TableDataConnector, TableSummaryConfig, TableTranslations } from "../types/TableAttributes";
 import { useCustomFilterLogic } from "../components/custom-filter/hooks/useCustomFiltersLogic";
 
 export type AgGridDomainType = {
@@ -47,6 +47,7 @@ export type SummaryHandler = {
 
 export interface TableContextHandler {
     quickSearch?: QuickSearchConfig;
+    appearance?: TableApperance;
 
     domain: AgGridDomainType | undefined;
     serviceLocator: IServiceLocator;
@@ -78,6 +79,7 @@ interface TableProviderProps {
     translations: TableTranslations;
     quickSearch?: QuickSearchConfig;
     columnsConfig?: { [colName: string]: TableColumnConfig; };
+    appearance?: TableApperance;
 
 
     serviceLocator: IServiceLocator;
@@ -101,6 +103,7 @@ const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({
     translations,
     columnsConfig,
     quickSearch,
+    appearance,
 
     serviceLocator, 
     // metadata, 
@@ -254,6 +257,7 @@ const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({
 
     const value = useMemo<TableContextHandler>(() => ({
         quickSearch,
+        appearance,
 
         domain,
         serviceLocator,
@@ -274,6 +278,7 @@ const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({
         isLoadingGridData
     }), [
         quickSearch,
+        appearance,
 
         domain,
          serviceLocator, 

@@ -12,7 +12,7 @@
  * } as const;
  */
 export const TABLE_API_KEYS = {
-    TABLE_CUSTOM_FILTER: 'tableCustomFilter',
+    TABLE_CUSTOM_FILTER: 'tableCustomFilter', //filtri tabella salvati nel server - as TableCustomFilter[]
 } as const;
 
 /** Nome di una chiave di service API di VFool Table (es. `'TABLE_CUSTOM_FILTER'`). */

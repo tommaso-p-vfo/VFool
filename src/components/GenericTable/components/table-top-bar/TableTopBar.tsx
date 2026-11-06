@@ -7,7 +7,7 @@ import { useTableContext } from "../../hooks/useTableContext";
 const TableTopBar = forwardRef((props: { gridApiRef: any, openColumnChooser: any, metadata: TableTopBarMetadata }, ref) => {
 
     const tableContext = useTableContext();
-    tableContext
+    const appearance = tableContext.appearance;
     
     const metadata = props?.metadata;
     const openColumnChooser = props?.openColumnChooser;
@@ -26,7 +26,7 @@ const TableTopBar = forwardRef((props: { gridApiRef: any, openColumnChooser: any
 
     return (
         <Container fluid className='w-100 d-flex justify-content-between'>
-            <QuickFilter ref={quickFilterRef} />
+            {appearance?.showQuickFilter && <QuickFilter ref={quickFilterRef} />}
             {/* <ActionBar 
                 gridApiRef={props?.gridApiRef} 
                 metadata={metadata.actionsMetadata} 

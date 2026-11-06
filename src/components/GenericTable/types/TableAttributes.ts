@@ -114,6 +114,7 @@ export type QuickSearchConfig = {
 export type TableApperance = {
     showHeader?: boolean; //default true
     showNavbar?: boolean; //default true
+    showQuickFilter?: boolean; //default true
     showSummary?: boolean; //default true
 
     icon?: JSX.Element;

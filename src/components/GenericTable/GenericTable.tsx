@@ -40,7 +40,7 @@ import { SERVICE_ENDPOINT } from "../../types/api/ApiEndpoints";
 
 // import TableTopBar from "./components/table-top-bar/TableTopBar";
 
-import type { ColumnHandlerProps, TableActionConfig, TableAdditionalDetails, TableAttributes, TableColumnConfig, TableHandler, TableSummaryConfig, TableTranslations } from "./types/TableAttributes";
+import type { ColumnHandlerProps, TableActionConfig, TableAdditionalDetails, TableApperance, TableAttributes, TableColumnConfig, TableHandler, TableSummaryConfig, TableTranslations } from "./types/TableAttributes";
 import { type TableCustomFilter } from "./types/TableCustomFilter";
 import { TableCustomSetting } from "./types/TableCustomSettings";
 
@@ -107,6 +107,31 @@ export const GenericTable =
 
         const tableContextRef = useRef<TableContextHandler>(null);
 
+        //TABLE APPEARANCE
+        const [tableAppearance, setTableAppearance] = useState<TableApperance>();
+        const customTitleRef = useRef<string>('');
+        const customSubTitleRef = useRef<string>('');
+        const [customTitle, setCustomTitle] = useState<string | null>(null);
+        const [customSubTitle, setCustomSubTitle] = useState<string | null>(null);
+        const [gridDetails, setGridDetails] = useState<TableAdditionalDetails | null>(null);
+
+        useEffect(() => {
+            setTableAppearance({
+                showHeader: true,
+                showNavbar: true,
+                showQuickFilter: true,
+                showSummary: true,
+                ...appearance
+            });
+
+            //imposto la visibilità del title della tabella
+            setCustomTitle(appearance?.title ?? null);
+            setCustomSubTitle(appearance?.subTitle ?? null);
+            setGridDetails(appearance?.details ?? null);
+
+        }, [appearance]);
+        
+
         //TRANSLATIONS
         const t = translations ?? {} as TableTranslations;
 
@@ -154,15 +179,8 @@ export const GenericTable =
             'uiColumnMoved', 'uiColumnDragged', 'uiColumnResized',
             'uiColumnSorted', 'columnVisible', 'toolPanelUi', 'contextMenu', 'quickFilter', 'columnFilter'
         ]);
-        
-        //TABLE APPEARANCE        
-        const customTitleRef = useRef<string>('');
-        const customSubTitleRef = useRef<string>('');
-        const [customTitle, setCustomTitle] = useState<string | null>(null);
-        const [customSubTitle, setCustomSubTitle] = useState<string | null>(null);
-        const [gridDetails, setGridDetails] = useState<TableAdditionalDetails | null>(null);
+    
 
-        const [showHeader, setShowHeader] = useState<boolean>(true);
 
         //custom spinner
         const [loading, setLoading] = useState<boolean>(false);
@@ -520,6 +538,7 @@ export const GenericTable =
 
         useEffect(() => {
             preFilterRef.current = quickSearchConfig?.preFilter ?? null;
+            console.log('ue ' + JSON.stringify(quickSearchConfig?.preFilter));
         }, [quickSearchConfig]);
         
         //init - quando il domain è settato
@@ -549,15 +568,8 @@ export const GenericTable =
             //fetch first row per ricavare le colDefs e costruire la tabella 
             //la griglia aspetta le colDefs per inizializzarsi
             //carico le colDefs
-            _fetchColumnDefinitions();
-
-            //imposto la visibilità del title della tabella
-            setShowHeader(appearance?.showHeader ?? true);
-            setCustomTitle(appearance?.title ?? null);
-            setCustomSubTitle(appearance?.subTitle ?? null);
-            setGridDetails(appearance?.details ?? null);
-    
-        }, [appearance]);
+            _fetchColumnDefinitions();    
+        }, [domain]);
 
         //INITIAL STATE CONFIG
         const initialState = useMemo<GridState | undefined>(() => {
@@ -739,6 +751,9 @@ export const GenericTable =
                     dataConnector={dataConnector}
                     translations={t}
                     columnsConfig={columns}
+                    appearance={tableAppearance}
+
+
                     // metadata={metadata} 
                     domain={{ agGridDomain: agGridDomainRef.current, serviceLocatorDomain: serviceLocatorDomainRef.current }} 
                     gridApi={gridApiState} 
@@ -753,10 +768,10 @@ export const GenericTable =
                     >
                 <>
                     <Container fluid className="vfo-generic-table-container w-100 mt-3">
-                        {showHeader && (
+                        {tableAppearance?.showHeader && (
                             <>
                                 <h1 className="text-start d-flex align-items-center m-0 mt-2 mb-2 ms-2">
-                                    {appearance?.icon && <span className="me-2 pb-2">{appearance.icon}</span>}
+                                        {tableAppearance?.icon && <span className="me-2 pb-2">{tableAppearance.icon}</span>}
                                     <span>{customTitleRef.current}</span>
                                 </h1>
                                 {customSubTitleRef.current && (
@@ -768,7 +783,7 @@ export const GenericTable =
                         )}
 
 
-                        { appearance?.showNavbar && <TableTopBar 
+                        {tableAppearance?.showNavbar && <TableTopBar 
                                 ref={topBarRef} 
                                 metadata={topBarMetadata} 
                                 gridApiRef={gridApiRef} 
@@ -835,7 +850,7 @@ export const GenericTable =
                             onGridPreDestroyed={onGridPreDestroyed}
                             onSelectionChanged={onSelectionChanged}
                         />}
-                        { appearance?.showSummary && <GenericTableSummary /> }
+                        {tableAppearance?.showSummary && <GenericTableSummary /> }
                     </Container>
                     {/* <GenericActionHandler ref={actionHandlerRef} /> */}
                 </>
