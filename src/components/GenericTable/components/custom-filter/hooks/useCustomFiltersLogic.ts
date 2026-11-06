@@ -9,7 +9,7 @@ import { type TableCustomFilter } from "../../../types/TableCustomFilter";
 import { AG_GRID_STORAGE_KEYS } from "../../../constants/tableStorageConstants";
 import { getFromSession } from "../../../../../utils/StorageHelper";
 
-import { SERVICE_ENDPOINT } from "../../../../../constants/apiConstants";
+import { SERVICE_ENDPOINT } from "../../../../../types/api/ApiEndpoints";
 import { TABLE_API_KEYS } from "../../../constants/tableApiConstants";
 import { buildPath } from "../../../../../utils/Path";
 

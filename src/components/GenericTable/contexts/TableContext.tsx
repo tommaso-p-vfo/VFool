@@ -27,7 +27,8 @@ import { TableCustomSetting } from "../types/TableCustomSettings";
 import type { PageRequest } from "../../../types/api/PageTypes";
 import { AG_GRID_COLUMN_TYPE } from "../constants/tableConstants";
 import { TableTranslation } from "../types/TableTranslation";
-import { TableColumnConfig, TableDataConnector, TableSummaryConfig, TableTranslations } from "../types/TableAttributes";
+import { QuickSearchConfig, TableColumnConfig, TableDataConnector, TableSummaryConfig, TableTranslations } from "../types/TableAttributes";
+import { useCustomFilterLogic } from "../components/custom-filter/hooks/useCustomFiltersLogic";
 
 export type AgGridDomainType = {
 
@@ -45,6 +46,8 @@ export type SummaryHandler = {
 };
 
 export interface TableContextHandler {
+    quickSearch?: QuickSearchConfig;
+
     domain: AgGridDomainType | undefined;
     serviceLocator: IServiceLocator;
     t: TableTranslation;
@@ -71,10 +74,13 @@ const TableContext = createContext<TableContextHandler | undefined>(undefined);
 
 interface TableProviderProps {
     children: React.ReactNode;
-    serviceLocator: IServiceLocator;
     dataConnector: TableDataConnector;
     translations: TableTranslations;
+    quickSearch?: QuickSearchConfig;
     columnsConfig?: { [colName: string]: TableColumnConfig; };
+
+
+    serviceLocator: IServiceLocator;
     // metadata: TableMetadata<any>;
     domain?: AgGridDomainType|undefined;
     gridApi: GridApi | null;
@@ -91,10 +97,12 @@ interface TableProviderProps {
 
 const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({ 
     children, 
-    serviceLocator, 
     dataConnector,
     translations,
     columnsConfig,
+    quickSearch,
+
+    serviceLocator, 
     // metadata, 
     domain, 
     gridApi, 
@@ -108,7 +116,7 @@ const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({
 }: TableProviderProps, ref) => {
 
     //TODO fix useCustomFilterLogic e useGridSettingsLogic
-    const customFilterHandler = {}; // useCustomFilterLogic({ domain, gridApi, activeFilter, setActiveFilter, serviceLocator });
+    const customFilterHandler = useCustomFilterLogic({ domain, gridApi, activeFilter, setActiveFilter, serviceLocator });
     const gridSettingsHandler = {}; //useGridSettingsLogic(domain, gridSettings, setGridSettings, serviceLocator);
 
     const [filterData, setFilterData] = useState<FilterModel>(); //filtro che viene applicato a prescindere dalle interazioni utente: es. filtro 'solo mie'
@@ -245,6 +253,8 @@ const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({
     }, [fetchDropdowns, fetchLists, fetchData]);
 
     const value = useMemo<TableContextHandler>(() => ({
+        quickSearch,
+
         domain,
         serviceLocator,
         t,
@@ -263,6 +273,8 @@ const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({
         summaryHandler,
         isLoadingGridData
     }), [
+        quickSearch,
+
         domain,
          serviceLocator, 
         //  metadata, 

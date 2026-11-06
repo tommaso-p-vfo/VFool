@@ -76,6 +76,7 @@ import { Card, CardBody, Container } from "react-bootstrap";
 import { useTableContext } from "./hooks/useTableContext";
 
 import { ThemeColor, toCssColor } from "../../utils/Color";
+import TableTopBar from "./components/table-top-bar/TableTopBar";
 
 
 //ag grid - modulo community per caricamento dinamico dei dati
@@ -160,6 +161,7 @@ export const GenericTable =
         const [customTitle, setCustomTitle] = useState<string | null>(null);
         const [customSubTitle, setCustomSubTitle] = useState<string | null>(null);
         const [gridDetails, setGridDetails] = useState<TableAdditionalDetails | null>(null);
+
         const [showHeader, setShowHeader] = useState<boolean>(true);
 
         //custom spinner
@@ -766,7 +768,12 @@ export const GenericTable =
                         )}
 
 
-                        {/* <TableTopBar ref={topBarRef} metadata={topBarMetadata} gridApiRef={gridApiRef} openColumnChooser={() => setOpenColumnChoser(true)}></TableTopBar> */}
+                        { appearance?.showNavbar && <TableTopBar 
+                                ref={topBarRef} 
+                                metadata={topBarMetadata} 
+                                gridApiRef={gridApiRef} 
+                                openColumnChooser={() => setOpenColumnChoser(true)}
+                            ></TableTopBar> }
                         {/* <ColumnChooserModal
                             domain={columnChooserProps.domain}
                             tableName={columnChooserProps.tableName}
