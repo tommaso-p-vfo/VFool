@@ -1,9 +1,10 @@
-import { TableContextHandler } from "../contexts/TableContext";
+import { TableContextHandler, TableInternalContextHandler } from "../contexts/TableContext";
 import { FilterModel, IComponentRegistry, IServiceLocator, PageRequest } from "../../../types";
 import { JSX } from "react/jsx-runtime";
 import { ThemeColor, ThemeVariant } from "../../../utils";
 import { GridApi } from "ag-grid-community";
 import { TableColumnType } from "../constants/tableConstants";
+import { TableUserFilter } from "./TableCustomFilter";
 
 /**
  * Interfaccia per definire gli attributi di una tabella attraverso React
@@ -19,7 +20,8 @@ export interface TableAttributes<T> {
     appearance?: TableApperance;
     translations?: TableTranslations;
 
-    quickSearch?: QuickSearchConfig;
+    filter?: TableFilterConfig;
+
     columns?: { [colName: string]: TableColumnConfig; }; // TODO _actions: boolean; }
     actions?: { [actionName: string]: TableActionConfig<T>; };
     summary?: TableSummaryConfig;
@@ -103,12 +105,6 @@ export type TableContextExtraData = {
     name: string; //nome da assegnare alla collezione di dati
     service: string; //dominio del servizio per la fetch
     params: any; //parametri per la fetch (es. PageRequest type, ecc.)
-}
-
-export type QuickSearchConfig = {
-    enabled: boolean; //default true
-    searchFilterColumns?: string[]; //nome colonne del filtro di ricerca testuale rapido - default 'name' se non impostato.
-    preFilter?: FilterModel; //carica la griglia prefiltrata con il seguente filterModel - si applica al campo di 'ricerca rapida' Quick Search
 }
 
 export type TableApperance = {
@@ -211,4 +207,26 @@ export type ColumnHandlerProps<T> = {
 
     hasAdminAuthorization?: () => boolean;
     
+}
+
+export type QuickSearchConfig = {
+    enabled: boolean; //default true
+    searchFilterColumns?: string[]; //nome colonne del filtro di ricerca testuale rapido - default 'name' se non impostato.
+}
+
+export type TableFilterConfig = {
+    baseFilter?: FilterModel; //carica la griglia applicando il seguente filterModel - va in AND con userFilter ed è trasparente all'utente
+    quickSearch?: QuickSearchConfig;
+}
+
+export type TableFilterHandler = {
+    baseFilter?: FilterModel | undefined | null; //filtro di config - in AND con userFilter - SOLA LETTURA
+    userFilter?: TableUserFilter; //filtro utente corrente - SOLA LETTURA
+    quickSearchText?: string; //testo inserito nella ricerca rapida - SOLA LETTURA
+
+    savedFilters?: TableUserFilter[]; //lista filtri utente salvati serverside
+    setUserFilter?: (filter: TableUserFilter) => void; //funzione di modifica del filtro corrente
+    resetQuickSearch: () => void;//funzione di pulizia del filtro
+
+    gridApi?: GridApi
 }

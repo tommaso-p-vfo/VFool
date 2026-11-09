@@ -46,3 +46,13 @@ export function isEmptyObject(obj: object | null | undefined): boolean {
 export function isBoolean(value: unknown): value is boolean {
     return typeof value === 'boolean';
 }
+
+/**
+ * Indica se il valore è una funzione.
+ *
+ * @param value - Valore da controllare.
+ * @returns `true` se il valore è `function` o `false` altrimenti.
+ */
+export function isFunction(value: unknown): value is "function" {
+    return typeof value === 'function';
+}

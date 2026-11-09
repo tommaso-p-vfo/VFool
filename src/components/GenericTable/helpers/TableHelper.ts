@@ -37,7 +37,7 @@ import CopyWrapperCellRenderer from "../components/cell-renderers/CopyWrapperCel
 import BooleanCellRenderer from "../components/cell-renderers/BooleanCellRenderer";
 import ListCellRenderer from "../components/cell-renderers/ListCellRenderer";
 
-import { type TableCustomFilter } from "../types/TableCustomFilter";
+import { type TableUserFilter } from "../types/TableCustomFilter";
 import { TableCustomSetting } from "../types/TableCustomSettings";
 import { ColumnHandlerProps, TableActionConfig, TableColumnConfig, TableTranslations } from "../types/TableAttributes";
 
@@ -582,7 +582,7 @@ export class TableHelper {
      * @param id
      * @param name - opzionale - default 'default' 
      */
-    static saveCurrentTableFilterDetails = (domain: string, filter?: TableCustomFilter) => {
+    static saveCurrentTableFilterDetails = (domain: string, filter?: TableUserFilter) => {
 
         let filterPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_FILTER_DETAILS);
         //salvo in sessione

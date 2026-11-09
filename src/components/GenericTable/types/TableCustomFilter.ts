@@ -36,4 +36,4 @@ export type TableCustomFilterUiState = {
 /**
  * Filtro personalizzato usato dai componenti: dati API + stato UI.
  */
-export type TableCustomFilter = TableCustomFilterDto & TableCustomFilterUiState;
+export type TableUserFilter = TableCustomFilterDto & TableCustomFilterUiState;

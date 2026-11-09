@@ -17,7 +17,7 @@ import type {
 import { removeFromSession } from "../../../utils/StorageHelper";
 import { AG_GRID_STORAGE_KEYS } from "../constants/tableStorageConstants";
 
-import { type TableCustomFilter } from "../types/TableCustomFilter";
+import { type TableUserFilter } from "../types/TableCustomFilter";
 import { TableCustomSetting } from "../types/TableCustomSettings";
 
 // TODO fix useCustomFiltersLogic e useGridSettingsLogic
@@ -27,8 +27,8 @@ import { TableCustomSetting } from "../types/TableCustomSettings";
 import type { PageRequest } from "../../../types/api/PageTypes";
 import { AG_GRID_COLUMN_TYPE } from "../constants/tableConstants";
 import { TableTranslation } from "../types/TableTranslation";
-import { QuickSearchConfig, TableApperance, TableColumnConfig, TableDataConnector, TableSummaryConfig, TableTranslations } from "../types/TableAttributes";
-import { useCustomFilterLogic } from "../components/custom-filter/hooks/useCustomFiltersLogic";
+import { QuickSearchConfig, TableApperance, TableColumnConfig, TableDataConnector, TableFilterConfig, TableFilterHandler, TableSummaryConfig, TableTranslations } from "../types/TableAttributes";
+import { TableCustomFilterHandler, useCustomFilterLogic } from "../components/custom-filter/hooks/useCustomFiltersLogic";
 
 export type AgGridDomainType = {
 
@@ -45,50 +45,68 @@ export type SummaryHandler = {
     config: TableSummaryConfig|undefined;
 };
 
-export interface TableContextHandler {
-    quickSearch?: QuickSearchConfig;
+export interface TableInternalContextHandler {
     appearance?: TableApperance;
-
+    
     domain: AgGridDomainType | undefined;
     serviceLocator: IServiceLocator;
     t: TableTranslation;
-
+    
     // metadata: TableMetadata<any> | undefined;
     comboboxMap: Map<string, TableComboboxOption[]>;
     listsMap: Map<string, { id: string, name: string, raw: any }[]>;
     fetchLists: (request?: PageRequest) => Promise<void>;
     isLoadingData: boolean;
-    filterData: FilterModel | undefined,
-    setFilterData: (filter: FilterModel | undefined) => void;
     gridApi: GridApi | null;
     isGridReady: boolean;
     data: any;
-
+    
+    
+    quickSearch?: QuickSearchConfig;
+    filterData: FilterModel | undefined,
+    setFilterData: (filter: FilterModel | undefined) => void;
+    customFilterHandler: TableCustomFilterHandler;
+    
+    
+    
     //TODO fix types
-    customFilterHandler: any; // TableCustomFilterHandler;
     gridSettingsHandler: any; // GridSettingsHandler;
     summaryHandler?: SummaryHandler; 
     isLoadingGridData: boolean; //items loading from server
 }
 
-const TableContext = createContext<TableContextHandler | undefined>(undefined);
+const TableContext = createContext<TableInternalContextHandler | undefined>(undefined);
+
+/**
+ * context pubblico
+ */
+export type TableContextHandler = {
+    appearance?: TableApperance;
+    filter?: TableFilterHandler;
+    
+    gridApi: GridApi | null;
+}
 
 interface TableProviderProps {
     children: React.ReactNode;
     dataConnector: TableDataConnector;
     translations: TableTranslations;
-    quickSearch?: QuickSearchConfig;
     columnsConfig?: { [colName: string]: TableColumnConfig; };
     appearance?: TableApperance;
+    
+    filter?: TableFilterConfig;
+    userFilter: TableUserFilter | undefined;
+    setUserFilter: (filter?: TableUserFilter) => void; 
+    quickFilterText: string | undefined;
+    setQuickFilterText: (text?: string) => void;
+
+    gridApi: GridApi | null;
 
 
     serviceLocator: IServiceLocator;
     // metadata: TableMetadata<any>;
     domain?: AgGridDomainType|undefined;
-    gridApi: GridApi | null;
     isGridReady: boolean;
-    activeFilter: TableCustomFilter |undefined;
-    setActiveFilter: (filter?: TableCustomFilter) => void; 
     gridSettings: TableCustomSetting |undefined;
     setGridSettings: (gridSettings?: TableCustomSetting) => void;
     
@@ -97,21 +115,25 @@ interface TableProviderProps {
     isLoadingGridData: boolean; //loading data items from server
 }
 
-const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({ 
+const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps>(({ 
     children, 
     dataConnector,
     translations,
     columnsConfig,
-    quickSearch,
     appearance,
+
+    filter,
+    userFilter, 
+    setUserFilter, 
+    quickFilterText,
+    setQuickFilterText,
+
 
     serviceLocator, 
     // metadata, 
     domain, 
     gridApi, 
     isGridReady, 
-    activeFilter, 
-    setActiveFilter, 
     gridSettings, 
     setGridSettings, 
     summaryHandler, 
@@ -119,7 +141,14 @@ const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({
 }: TableProviderProps, ref) => {
 
     //TODO fix useCustomFilterLogic e useGridSettingsLogic
-    const customFilterHandler = useCustomFilterLogic({ domain, gridApi, activeFilter, setActiveFilter, serviceLocator });
+    const customFilterHandler = useCustomFilterLogic({ 
+        serviceLocator,
+        domain, 
+        gridApi, 
+        userFilter, 
+        setUserFilter, 
+    });
+
     const gridSettingsHandler = {}; //useGridSettingsLogic(domain, gridSettings, setGridSettings, serviceLocator);
 
     const [filterData, setFilterData] = useState<FilterModel>(); //filtro che viene applicato a prescindere dalle interazioni utente: es. filtro 'solo mie'
@@ -255,9 +284,17 @@ const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({
         fetchData();
     }, [fetchDropdowns, fetchLists, fetchData]);
 
-    const value = useMemo<TableContextHandler>(() => ({
-        quickSearch,
+    const value = useMemo<TableInternalContextHandler>(() => ({
         appearance,
+        
+        quickSearch: filter?.quickSearch,
+        filterData,
+        setFilterData,
+
+        userFilter,
+        setUserFilter,
+        
+        
 
         domain,
         serviceLocator,
@@ -267,8 +304,6 @@ const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({
         listsMap,
         fetchLists,
         isLoadingData,
-        filterData, 
-        setFilterData,
         gridApi,
         isGridReady,
         data,
@@ -277,7 +312,13 @@ const TableProvider = forwardRef<TableContextHandler, TableProviderProps>(({
         summaryHandler,
         isLoadingGridData
     }), [
-        quickSearch,
+
+        userFilter,
+        setUserFilter,
+
+
+
+        filter,
         appearance,
 
         domain,

@@ -41,7 +41,7 @@ import { SERVICE_ENDPOINT } from "../../types/api/ApiEndpoints";
 // import TableTopBar from "./components/table-top-bar/TableTopBar";
 
 import type { ColumnHandlerProps, TableActionConfig, TableAdditionalDetails, TableApperance, TableAttributes, TableColumnConfig, TableHandler, TableSummaryConfig, TableTranslations } from "./types/TableAttributes";
-import { type TableCustomFilter } from "./types/TableCustomFilter";
+import { type TableUserFilter } from "./types/TableCustomFilter";
 import { TableCustomSetting } from "./types/TableCustomSettings";
 
 import type { ColumnState } from "./types/TableColumn";
@@ -50,7 +50,7 @@ import { LoadingOverlay } from "../LoadingOverlay";
 import { buildPath } from "../../utils/Path";
 import { getFromSession } from "../../utils/StorageHelper";
 import { getTranslation } from "../../utils/TranslationHelper";
-import { isEmptyObject } from "../../utils/Guards";
+import { isEmptyObject, isFunction } from "../../utils/Guards";
 import { formatAs } from "../../utils/Format";
 
 import { AG_GRID_STORAGE_KEYS } from "./constants/tableStorageConstants";
@@ -62,7 +62,7 @@ import {
 
 import { type ApiRequest } from "../../types/api/ApiRequest";
 
-import TableProvider, { SummaryHandler, TableContextHandler, type AgGridDomainType } from "./contexts/TableContext";
+import TableProvider, { SummaryHandler, TableInternalContextHandler, type AgGridDomainType } from "./contexts/TableContext";
 import type { TableInternalMetadata } from "./types/TableInternalMetadata";
 // import type { QuickFilterMetadata } from "./components/quick-filter/types/QuickFilterMetadata";
 
@@ -99,13 +99,13 @@ export const GenericTable =
         actions, 
         columns, 
         componentRegistry, 
-        quickSearch: quickSearchConfig, 
+        filter,
         summary: summaryConfig, 
         translations, 
         ref 
     }: TableAttributes<T> & { ref?: React.Ref<TableHandler> }) => {
 
-        const tableContextRef = useRef<TableContextHandler>(null);
+        const tableContextRef = useRef<TableInternalContextHandler>(null);
 
         //TABLE APPEARANCE
         const [tableAppearance, setTableAppearance] = useState<TableApperance>();
@@ -145,12 +145,15 @@ export const GenericTable =
         // PAGE SIZE - Inizializzazione sincrona — legge da storage al momento della dichiarazione
         const pageRestoredRef = useRef<boolean>(false);
         const [pageSelectorSize, setPageSelectorSize] = useState<number>();
+
+        // BASE FILTER - filtro impostato tramite config - in AND con userFilter e trasparente all'utente
+        const baseFilterRef = useRef<FilterModel | undefined>(null);       
         
-        // PRE FILTER - filtro impostato tramite metadata
-        const preFilterRef = useRef<FilterModel | null>(null);       
-        
-        //ACTIVE FILTER - filtro avanzato utente preso dalla sessione
-        const [activeFilter, setActiveFilter] = useState<TableCustomFilter>();
+        //QUICK SEARCH - FILTER TEXT - testo sulla barra di ricerca
+        const [quickSearchText, setQuickSearchText] = useState<string>();
+
+        //USER FILTER - filtro utente corrente
+        const [userFilter, setUserFilter] = useState<TableUserFilter>();
 
         //PREFERENZE COLONNA CORRENTI
         const [gridSettings, setGridSettings] = useState<TableCustomSetting>();
@@ -219,13 +222,15 @@ export const GenericTable =
                         }
                     }
 
-                    if (preFilterRef.current) {
+                    if (baseFilterRef.current) {
                         //mi assicuro di includere il pre filtro in ogni filtro successivo
                         _pageRequest.filter = {
                             ..._pageRequest.filter,
-                            ...preFilterRef.current
+                            ...baseFilterRef.current
                         } as FilterModel;
                     }
+
+                    console.log('fm ' + JSON.stringify(_pageRequest.filter));
 
                     if (sortModel) {
                         sortModel.forEach(col => {
@@ -373,29 +378,32 @@ export const GenericTable =
             if (e.api) {
                 const currentFilter = e.api.getFilterModel();
 
-                if (e.fromButtons || e.context?.fromButtons) {
+                if (e.fromButtons || e.context?.fromButtons || e.context?.fromExternal) {
                     //UX - l'utente ha modificato il filtro
                     e.context.fromButtons = false; //reset sempre
 
-                    let isCurrentFilterSaved = activeFilter && activeFilter?.id > 0;
+                    //LIBRARY - un dev attraverso la libreria ha modificato il filtro
+                    e.context.fromExternal = false; //reset sempre
+
+                    let isCurrentFilterSaved = userFilter && userFilter?.id > 0;
 
                     let notSavedFilter = {
-                        ...activeFilter,
+                        ...userFilter,
                         _isTemporary: true,
-                        _isCandidateForNew: activeFilter && activeFilter?.id == -1,
+                        _isCandidateForNew: userFilter && userFilter?.id == -1,
                         _isNew: false,
                         _isModified: isCurrentFilterSaved,
                         definition: currentFilter
-                    } as TableCustomFilter;
+                    } as TableUserFilter;
 
-                    setActiveFilter(notSavedFilter);
+                    setUserFilter(notSavedFilter);
                     TableHelper.saveCurrentTableFilterDetails(agGridDomainRef.current, notSavedFilter);
                 }
 
                 TableHelper.saveCurrentTableFilter(agGridDomainRef.current, currentFilter, topBarRef?.current?.quickFilterText());
                 TableHelper.resetCurrentTablePage(agGridDomainRef.current);
             }
-        }, [activeFilter]);
+        }, [userFilter]);
 
         const onSelectionChanged = useCallback((event: SelectionChangedEvent) => {
 
@@ -534,12 +542,10 @@ export const GenericTable =
 
             customTitleRef.current = t?.title ?? ''
             customSubTitleRef.current = t?.subTitle ?? ''
-        }, [dataConnector, t]);
 
-        useEffect(() => {
-            preFilterRef.current = quickSearchConfig?.preFilter ?? null;
-            console.log('ue ' + JSON.stringify(quickSearchConfig?.preFilter));
-        }, [quickSearchConfig]);
+            baseFilterRef.current = filter?.baseFilter ?? null;
+
+        }, [dataConnector, t, filter]);
         
         //init - quando il domain è settato
         const _fetchColumnDefinitions = useCallback(async () => {
@@ -618,7 +624,7 @@ export const GenericTable =
 
             const state: GridState = {
                 pagination: { pageSize: savedPageSize },
-                filter: { filterModel: isEmptyObject(savedFilter) ? (activeFilter ? activeFilter?.definition : {}) : savedFilter },
+                filter: { filterModel: isEmptyObject(savedFilter) ? (userFilter ? userFilter?.definition : {}) : savedFilter },
             };
 
             const order = columnState.map(c => c.colId).filter(Boolean);
@@ -652,7 +658,7 @@ export const GenericTable =
             }, 1000);
 
             return state;
-        }, [dataConnector, columnDefs, domain, activeFilter]);
+        }, [dataConnector, columnDefs, domain, userFilter]);
 
         const onGridPreDestroyed = useCallback(() => {
             // Pulisce la datasource per evitare chiamate al server dopo che la griglia è stata distrutta
@@ -661,7 +667,7 @@ export const GenericTable =
             setIsGridReady(false);
             updateFilterRef.current = false;
 
-            preFilterRef.current = null;
+            baseFilterRef.current = null;
         }, []);
 
         //isGridSettling
@@ -720,7 +726,7 @@ export const GenericTable =
             // const quickSearchFilter = TableHelper.getCurrentQuickTableFilter(agGridDomainRef.current);
             // topBarRef?.current?.setQuickFilterText(quickSearchFilter);
 
-        }, [isGridReady, quickSearchConfig, columnDefs, openColumnChoser]);
+        }, [isGridReady, columnDefs, openColumnChoser]);
 
         //customTitle
         useEffect(() => {
@@ -739,7 +745,29 @@ export const GenericTable =
         }, [customSubTitle]);
 
         useImperativeHandle<any, TableHandler>(ref, () => ({
-            context: tableContextRef.current
+            context: { 
+
+                appearance: tableContextRef.current?.appearance,
+                filter: {
+                    userFilter,
+                    setUserFilter: (filterModel: FilterModel) => {
+                        gridApiRef.current?.setFilterModel(filterModel);
+                        updateFilterRef.current = true;
+                        let e = {
+                            api: gridApiRef.current,
+                            context: { fromExternal: true },
+                        } as FilterChangedEvent;
+                        onFilterChanged(e);
+                    },
+                    quickSearchText: quickSearchText,
+                    resetQuickSearch: () => { setQuickSearchText(undefined) },
+                    baseFilter: baseFilterRef.current,
+                    savedFilters: tableContextRef.current?.customFilterHandler?.savedFilters,
+
+                },
+                gridApi: gridApiRef.current
+
+            }
         }));
 
         return (
@@ -747,19 +775,22 @@ export const GenericTable =
             domain && (
                 <TableProvider 
                     ref={tableContextRef}
-                    serviceLocator={serviceLocator}
+                    appearance={tableAppearance}
                     dataConnector={dataConnector}
                     translations={t}
                     columnsConfig={columns}
-                    appearance={tableAppearance}
-
-
+                    
+                    filter={filter}
+                    userFilter={userFilter} 
+                    setUserFilter={setUserFilter}
+                    quickFilterText={quickSearchText}
+                    setQuickFilterText={setQuickSearchText}
+                    
                     // metadata={metadata} 
+                    serviceLocator={serviceLocator}
                     domain={{ agGridDomain: agGridDomainRef.current, serviceLocatorDomain: serviceLocatorDomainRef.current }} 
                     gridApi={gridApiState} 
                     isGridReady={isGridReady} 
-                    activeFilter={activeFilter} 
-                    setActiveFilter={setActiveFilter}
                     gridSettings={gridSettings} 
                     setGridSettings={setGridSettings}
                     summaryHandler={{ config: summaryConfig, data: summary } as SummaryHandler}
