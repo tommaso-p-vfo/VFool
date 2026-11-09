@@ -138,7 +138,8 @@
 }
 
 .vfo-not-saved-filter-name {
-    width: 220px;
+    width: 100%; //220px;
+    
 
     &.vfo-text-truncate {
         display: inline-block;
