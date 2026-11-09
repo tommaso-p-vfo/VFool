@@ -23,12 +23,16 @@ const QuickFilter = forwardRef((props: any, ref) => {
     const [shouldOpenModal, setShouldOpenModal] = useState<boolean>(false);
 
     const tableContext = useTableContext();
+
+    const appearance = tableContext.appearance;
+    const showUserFilter = appearance?.showUserFilter ?? true;
+
     const [gridApi, setGridApi] = useState<GridApi|null>(null);
     const [domain, setDomain] = useState<string | undefined>(undefined);
 
     const config = tableContext.quickSearch;
 
-    const { resetActiveFilter, activeFilter } = tableContext.customFilterHandler;
+    const { resetUserFilter, userFilter } = tableContext.customFilterHandler;
         // const activeFilter = tableContext.activeFilter;
 
     const searchTimeoutRef = useRef<NodeJS.Timeout>(undefined);
@@ -90,7 +94,7 @@ const QuickFilter = forwardRef((props: any, ref) => {
                     ...genericFilter
                 };
 
-                resetActiveFilter();
+                resetUserFilter();
                 TableHelper.saveCurrentTableFilter(domain, genericFilter, _value);
                 TableHelper.resetCurrentTablePage(domain);
 
@@ -126,9 +130,9 @@ const QuickFilter = forwardRef((props: any, ref) => {
         TableHelper.removeCurrentTableFilter(domain);
         TableHelper.removeCurrentQuickTableFilter(domain);
 
-        resetActiveFilter();
+        resetUserFilter();
 
-    }, [gridApi, tableContext.filterData, resetActiveFilter]);
+    }, [gridApi, tableContext.filterData, resetUserFilter]);
 
     //
     // FILTRO - END
@@ -144,7 +148,9 @@ const QuickFilter = forwardRef((props: any, ref) => {
             <div className='d-flex vfo-quick-filter'>
 
                 <InputGroup className="mb-3 ">
-                    <GenericButton id="vfo-filter" 
+                    <GenericButton
+                        type='button' 
+                        readableName='Gestisci i tuoi filtri'
                         tooltip='Gestisci i tuoi filtri'
                         onClick={() => { setShouldOpenModal(true); }}
                         buttonConfig={{
@@ -154,7 +160,7 @@ const QuickFilter = forwardRef((props: any, ref) => {
                         } as GenericButtonConfig}
                         className='m-0 me-0 p-1 px-2'
                     />
-                    {/* <FilterPanel filter={activeFilter} /> */}
+                    {showUserFilter && <FilterPanel filter={userFilter} />}
                     <Form.Control
                         id='vfo-search-filter'
                         placeholder="Cerca..."
@@ -164,8 +170,10 @@ const QuickFilter = forwardRef((props: any, ref) => {
                         value={genericSearch}
                     />
 
-
                     <GenericButton 
+                        className='ms-0' 
+                        type='button'
+                        readableName='Pulisci filtro corrente'
                         tooltip='Pulisci filtro corrente'
                         onClick={onReset}
                         buttonConfig={{
@@ -173,7 +181,7 @@ const QuickFilter = forwardRef((props: any, ref) => {
                             color: ThemeColor.PRIMARY,
                             icon: <FaFunnelDollar size={18} />
                         } as GenericButtonConfig}
-                        className='ms-0' type={'button'} readableName={''}                    />
+                    />
 
                 </InputGroup>
                 <InfoButton 

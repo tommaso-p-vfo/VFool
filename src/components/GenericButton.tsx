@@ -7,6 +7,135 @@ import { Button } from "react-bootstrap";
 import { InfoButton } from "./InfoButton";
 import { toCssColor } from "../utils";
 
+const CSS = `
+/* GENERIC BUTTON */
+:where(.vfo-btn {
+
+  border-radius: 5px;
+
+  &.active {
+    filter: brightness(1.2); // schiarisce del 20%
+  }
+
+  &:hover {
+    filter: brightness(1.1);
+  }
+})
+
+:where(.vfo-btn-dark {
+  &.vfo-btn-radio {
+    background-color: $primary !important;
+    color: $white !important;
+    border: 1px solid $primary !important;
+  }
+})
+
+:where(.vfo-btn-light {
+    background-color: $vfo-contrast-70 !important;
+    border: 1px solid;
+
+    &.primary-contrast {
+      &:hover {
+        background-color: var(--vfo-primary-contrast) !important;
+        color: var(--primary) !important;
+      }
+      color: var(--vfo-primary-contrast) !important;
+      // border-color: var(--vfo-primary-contrast) !important;
+    }
+
+    &.primary {
+      &:hover {
+        background-color: var(--primary) !important;
+        color: var(--vfo-primary-contrast) !important;
+      }
+      color: var(--primary) !important;
+      // border-color: var(--primary) !important;
+    }
+
+    &.secondary {
+      &:hover {
+        background-color: var(--secondary) !important;
+        color: $white !important;
+      }
+      color: var(--secondary) !important;
+      // border-color: var(--secondary) !important;
+    }
+
+    &.vfo-red {
+      &:hover {
+        background-color: var(--vfo-red) !important;
+        color: white !important;
+      }
+      color: var(--vfo-red) !important;
+      // border-color: var(--vfo-red) !important;
+    }
+
+    &.vfo-gray {
+      &:hover {
+        background-color: var(--vfo-gray) !important;
+        color: white !important;
+      }
+      color: var(--vfo-gray) !important;
+      // border-color: var(--vfo-gray) !important;
+    }
+
+    &.vfo-green {
+      &:hover {
+        background-color: var(--vfo-green) !important;
+        color: white !important;
+      }
+      color: var(--vfo-green) !important;
+      // border-color: var(--vfo-green) !important;
+    }
+
+    &.vfo-blue {
+      &:hover {
+        background-color: var(--vfo-blue) !important;
+        color: white !important;
+      }
+      color: var(--vfo-blue) !important;
+      // border-color: var(--vfo-blue) !important;
+    }
+
+    &.vfo-light-gray {
+      &:hover {
+        background-color: var(--vfo-light-gray) !important;
+        color: white !important;
+      }
+      color: var(--vfo-light-gray) !important;
+      // border-color: var(--vfo-light-gray) !important;
+    }
+
+    &.vfo-light-blue {
+      &:hover {
+        background-color: var(--vfo-light-blue) !important;
+        color: white !important;
+      }
+      color: var(--vfo-light-blue) !important;
+      // border-color: var(--vfo-light-blue) !important;
+    }
+
+    &.vfo-orange {
+      &:hover {
+        background-color: var(--vfo-orange) !important;
+        color: white !important;
+      }
+      color: var(--vfo-orange) !important;
+      // border-color: var(--vfo-orange) !important;
+    }
+
+    &.vfo-yellow {
+      &:hover {
+        background-color: var(--vfo-yellow) !important;
+        color: white !important;
+      }
+      color: var(--vfo-yellow) !important;
+      // border-color: var(--vfo-yellow) !important;
+    }
+
+})
+`;
+
 export type GenericButtonProps = { 
     type: 'button' | 'checkbox' | 'deleteButton'; //deleteButton - permette di interagire con l'azione di cancellazione dell'item che è inclusa di default nella combobox opion - es. permette di disabilitare il pulsante di cancellazione se l'item è in stato "vinto" (isWon)
     readableName: string;
@@ -70,7 +199,7 @@ export const GenericButton = ({ readableName, onClick, children, tooltip, classN
     
     useEffect(() => {
         
-        // setVariant(buttonConfig?.variant ? buttonConfig?.variant == IdsVariant.DARK ? 'ids-btn-dark' : 'ids-btn-light' : '');
+        // setVariant(buttonConfig?.variant ? buttonConfig?.variant == IdsVariant.DARK ? 'vfo-btn-dark' : 'vfo-btn-light' : '');
         if (buttonConfig?.backgroundColor) {
             let colorObj = toCssColor(buttonConfig?.backgroundColor);
             setBgColor(colorObj);
@@ -95,12 +224,14 @@ export const GenericButton = ({ readableName, onClick, children, tooltip, classN
     }, [buttonConfig]);
 
     return (<>
-    
+        <style href="vfo-generic-button" precedence="default">
+            {CSS}
+        </style>
         {buttonConfig && buttonConfig?.infoButtonConfig &&
             <InfoButton
                 htmlContent={buttonConfig?.infoButtonConfig.htmlContent}
                 placement='right-end'
-                className='mb-3 position-absolute top-0 ids-right-10'
+                className='mb-3 position-absolute top-0 vfo-right-10'
                 tooltip={buttonConfig?.infoButtonConfig.tooltip ?? ''}
             />
         }
@@ -110,7 +241,7 @@ export const GenericButton = ({ readableName, onClick, children, tooltip, classN
                 title={tooltip} 
                 onClick={onClick} 
                 disabled={disabled} 
-                className={`cursor-pointer ids-btn mx-1 ${variant} ${colorClass} ${className}`} 
+                className={`cursor-pointer vfo-btn mx-1 ${variant} ${colorClass} ${className}`} 
                 hidden={hidden} 
                 style={{ color: color, backgroundColor: bgColor, borderColor: borderColor }}
             >
@@ -146,7 +277,7 @@ export const GenericButton = ({ readableName, onClick, children, tooltip, classN
                 onClick={onClick}
                 disabled={disabled}
                 hidden={hidden}
-                className={`cursor-pointer ids-btn p-1 pb-2 d-flex align-items-center justify-content-center w-100 overflow-hidden ${variant} ${colorClass} ${className}`}
+                className={`cursor-pointer vfo-btn p-1 pb-2 d-flex align-items-center justify-content-center w-100 overflow-hidden ${variant} ${colorClass} ${className}`}
                 style={{ color, backgroundColor: bgColor, borderColor: borderColor, maxHeight: 50 }}
                 ref={btnRef}
             >

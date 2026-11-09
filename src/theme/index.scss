@@ -3,6 +3,15 @@
 
 @import '../components/modals/modal.scss';
 
-.test {
-    padding: 0%;
+//BORDERS
+.no-border {
+    border: none !important;
+}
+
+.no-border-right {
+    border-right: none !important;
+}
+
+.no-border-left {
+    border-left: none !important;
 }

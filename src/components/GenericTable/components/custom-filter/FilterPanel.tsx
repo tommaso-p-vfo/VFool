@@ -1,19 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { UserCustomFilter } from "../../../../../types/dto/UserCustomFilter";
 import { useTableContext } from "../../hooks/useTableContext";
 import { Form } from "react-bootstrap";
-import GenericButton, { type GenericButtonConfig } from "../../../GenericButton";
-import { IdsVariant } from "../../../../../types/system/IdsVariant";
-import { IdsColor } from "../../../../../types/system/IdsColor";
+import { GenericButton, type GenericButtonConfig } from "../../../GenericButton";
 import { FaPlusCircle, FaSave } from "react-icons/fa";
+import { TableUserFilter } from "../../types/TableCustomFilter";
+import { ThemeColor, ThemeVariant } from "../../../../utils";
 
-export const FilterPanel = ({ filter }: { filter?: UserCustomFilter }) => {
+export const FilterPanel = ({ filter }: { filter?: TableUserFilter }) => {
 
     const tableContext = useTableContext();
-    const { addFilter, updateFilter, activeFilter } = tableContext.customFilterHandler;
+    const { addFilter, updateFilter, userFilter } = tableContext.customFilterHandler;
 
     const notSavedFilterformRef = useRef(null);
-    const [notSavedFilter, setNotSavedFilter] = useState<UserCustomFilter>({});
+    const [notSavedFilter, setNotSavedFilter] = useState<TableUserFilter>({});
     const [validated, setValidated] = useState(false);
 
     const saveFilter = useCallback(async () => {
@@ -28,8 +27,8 @@ export const FilterPanel = ({ filter }: { filter?: UserCustomFilter }) => {
 
     useEffect(() => {
 
-        if(activeFilter) {
-            setNotSavedFilter(activeFilter);
+        if(userFilter) {
+            setNotSavedFilter(userFilter);
         } else if (filter){
             setNotSavedFilter(filter);
         }
@@ -77,8 +76,8 @@ export const FilterPanel = ({ filter }: { filter?: UserCustomFilter }) => {
                     className="no-border m-0 px-1"
                     tooltip="Crea nuovo filtro"
                     buttonConfig={{
-                        variant: IdsVariant.LIGHT,
-                        color: IdsColor.GREEN,
+                        variant: ThemeVariant.OUTLINED,
+                        color: ThemeColor.GREEN,
                         icon: <FaPlusCircle />
                     } as GenericButtonConfig}
                 />}
@@ -86,13 +85,14 @@ export const FilterPanel = ({ filter }: { filter?: UserCustomFilter }) => {
 
             <div className="">
                 {!notSavedFilter?._isNew && notSavedFilter?._isModified && <GenericButton
+                    type="button"
                     onClick={() => { updateFilter(notSavedFilter) }}
                     readableName={"Aggiorna"}
                     className="no-border m-0 px-1"
                     tooltip="Aggiorna il filtro"
                     buttonConfig={{
-                        variant: IdsVariant.LIGHT,
-                        color: IdsColor.YELLOW,
+                        variant: ThemeVariant.OUTLINED,
+                        color: ThemeColor.YELLOW,
                         icon: <FaSave /> // <FaPencilAlt />
                     } as GenericButtonConfig}>
                 </GenericButton>}
@@ -107,20 +107,21 @@ export const FilterPanel = ({ filter }: { filter?: UserCustomFilter }) => {
                     className="no-border m-0 px-1"
                     tooltip="Crea nuovo filtro"
                     buttonConfig={{
-                        variant: IdsVariant.LIGHT,
-                        color: IdsColor.GREEN,
+                        variant: ThemeVariant.OUTLINED,
+                        color: ThemeColor.GREEN,
                         icon: <FaPlusCircle />
                     } as GenericButtonConfig}
                 />}
 
                 {notSavedFilter?._isNew && <GenericButton
+                    type="button"
                     onClick={() => { saveFilter() }}
                     readableName={"Salva"}
                     className="no-border"
                     tooltip="Salva filtro"
                     buttonConfig={{
-                        variant: IdsVariant.LIGHT,
-                        color: IdsColor.GREEN,
+                        variant: ThemeVariant.OUTLINED,
+                        color: ThemeColor.GREEN,
                         icon: <FaSave /> // <FaPencilAlt />
                     } as GenericButtonConfig}>
                 </GenericButton>}

@@ -356,7 +356,7 @@ const ActionBar = ({
                     onClick={() => {
                         gridSettingsHandler.saveGridSettings(gridApiRef.current.getColumnState(), true);
                     }}
-                    className="m-0 px-2 ids-no-border-left"
+                    className="m-0 px-2 no-border-left"
                     disabled={!gridSettingsHandler.isModified}
                     buttonConfig={{
 
