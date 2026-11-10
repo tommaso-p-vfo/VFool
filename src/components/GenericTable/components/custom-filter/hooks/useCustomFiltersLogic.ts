@@ -33,7 +33,10 @@ export type TableFilterInternalHandler = {
     // serviceLocator: IServiceLocator;
     // cols: ColDef[];
 
-    filterConfig: { baseFilter?: FilterModel };
+    filterConfig: {
+        baseFilter?: FilterModel, 
+        enableSavedFilters?: boolean; 
+    };
 
     userFilter: TableUserFilter|undefined;
     
@@ -77,6 +80,10 @@ export const useCustomFilterLogic = ({
     
     const [pendingActivationFilter, setPendingActivationFilter] = useState<TableUserFilter | undefined>();
     const [savedFilters, setSavedFilters] = useState<TableUserFilter[]>([]);
+
+    const enableSavedFilters = useMemo(() => {
+        return filterConfig?.enableSavedFilters ?? false;
+    }, [filterConfig?.enableSavedFilters]);
 
     const cols = useMemo(() => 
         gridApi?.getColumnDefs()?.filter(c => !c?.colId?.startsWith('_')
@@ -188,7 +195,7 @@ export const useCustomFilterLogic = ({
     const addFilter = useCallback(async (filter: TableUserFilter): Promise<TableUserFilter> => {
 
         let _domain = domain?.agGridDomain ?? '';
-        let service = buildPath(_domain, TABLE_API_KEYS.TABLE_CUSTOM_FILTER, SERVICE_ENDPOINT.SAVE);
+        let service = buildPath(_domain, TABLE_API_KEYS.TABLE_SAVED_FILTER, SERVICE_ENDPOINT.SAVE);
         
         let data = {
             userId: user.id,
@@ -213,7 +220,7 @@ export const useCustomFilterLogic = ({
         //aggiorna il filtro attivo se è quello modificato
 
         let _domain = domain?.agGridDomain ?? '';
-        let service = buildPath(_domain, TABLE_API_KEYS.TABLE_CUSTOM_FILTER, SERVICE_ENDPOINT.UPDATE);
+        let service = buildPath(_domain, TABLE_API_KEYS.TABLE_SAVED_FILTER, SERVICE_ENDPOINT.UPDATE);
 
         let data = {
             id: filter.id,
@@ -237,7 +244,7 @@ export const useCustomFilterLogic = ({
     const removeFilter = useCallback(async (filter: TableUserFilter): Promise<void> => {
 
         let _domain = domain?.agGridDomain ?? '';
-        let service = buildPath(_domain, TABLE_API_KEYS.TABLE_CUSTOM_FILTER, SERVICE_ENDPOINT.DELETE);
+        let service = buildPath(_domain, TABLE_API_KEYS.TABLE_SAVED_FILTER, SERVICE_ENDPOINT.DELETE);
 
         let data = {
             id: filter.id
@@ -294,7 +301,7 @@ export const useCustomFilterLogic = ({
     const fetchSavedFilters = useCallback(async () => {
 
         let _domain = domain?.agGridDomain ?? '';
-        let service = buildPath(_domain, TABLE_API_KEYS.TABLE_CUSTOM_FILTER, SERVICE_ENDPOINT.LIST);
+        let service = buildPath(_domain, TABLE_API_KEYS.TABLE_SAVED_FILTER, SERVICE_ENDPOINT.LIST);
 
         let data = {
             filter: {
@@ -363,7 +370,7 @@ export const useCustomFilterLogic = ({
     }, [pendingActivationFilter]);
 
     return {
-        filterConfig: { baseFilter: filterConfig?.baseFilter },
+        filterConfig: { baseFilter: filterConfig?.baseFilter, enableSavedFilters },
         // cols,
         userFilter,
         savedFilters,

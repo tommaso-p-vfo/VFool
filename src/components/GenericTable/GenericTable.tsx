@@ -755,7 +755,18 @@ export const GenericTable =
                         } as FilterChangedEvent;
                         onFilterChanged(e);
                     },
-                    savedFilters: tableContextRef.current?.filterHandler?.savedFilters
+
+                    savedFiltersHandler: tableContextRef.current?.filterHandler.filterConfig.enableSavedFilters ? 
+                    
+                    {
+                        savedFilters: tableContextRef.current?.filterHandler?.savedFilters
+
+                    }
+
+                    
+                    : null
+
+                    
 
                 },
                 gridApi: gridApiRef.current

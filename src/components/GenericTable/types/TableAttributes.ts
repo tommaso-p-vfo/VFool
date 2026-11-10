@@ -216,6 +216,7 @@ export type QuickSearchConfig = {
 }
 
 export type TableFilterConfig = {
+    enableSavedFilters?: boolean; // default false - abilita il CRUD lato server - deve essere implementato lato service locator con service: <domain>.tableSavedUserFilter.list
     baseFilter?: FilterModel; //carica la griglia applicando il seguente filterModel - va in AND con userFilter ed è trasparente all'utente
     quickSearch?: QuickSearchConfig;
 }

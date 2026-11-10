@@ -45,12 +45,24 @@ export type SummaryHandler = {
     config: TableSummaryConfig|undefined;
 };
 
+export type TableSavedFilterHandler = {
+    savedFilters: TableUserFilter[];
+    existFilter: (filterId: number) => boolean;
+    applyFilter: (filterId: number) => Promise<void>;
+    addFilter: (filter: TableUserFilter) => Promise<TableUserFilter>;
+    updateFilter: (filter: TableUserFilter) => Promise<void>;
+    removeFilter: (filter: TableUserFilter) => Promise<void>;
+    refreshSavedFilters: (activeFilter?: TableUserFilter, forceActiveFilterReset?: boolean) => Promise<void>;
+}
+
 /**
  * context pubblico
  */
 export type TableContextHandler = {
     appearance?: TableApperance;
     filterHandler?: TableFilterHandler;
+
+    savedFiltersHandler?: TableSavedFilterHandler;
 
     gridApi: GridApi | null;
 }

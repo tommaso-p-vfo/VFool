@@ -155,7 +155,7 @@ const QuickFilter = forwardRef((props: any, ref) => {
             <div className='d-flex vfo-quick-filter'>
 
                 <InputGroup className="mb-3 ">
-                    <GenericButton
+                    {showUserFilter && filterHandler.filterConfig.enableSavedFilters && <GenericButton
                         type='button' 
                         readableName='Gestisci i tuoi filtri'
                         tooltip='Gestisci i tuoi filtri'
@@ -166,8 +166,8 @@ const QuickFilter = forwardRef((props: any, ref) => {
                             icon: <FaSlidersH />
                         } as GenericButtonConfig}
                         className='m-0 me-0 p-1 px-2'
-                    />
-                    {showUserFilter && <FilterPanel />}
+                    /> }
+                    {showUserFilter && filterHandler.filterConfig.enableSavedFilters && <FilterPanel />}
                     <Form.Control
                         id='vfo-search-filter'
                         placeholder="Cerca..."
