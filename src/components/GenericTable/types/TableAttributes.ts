@@ -21,11 +21,10 @@ export interface TableAttributes<T> {
     appearance?: TableApperance;
     translations?: TableTranslations;
 
-    filter?: TableFilterConfig;
-
-    columns?: { [colName: string]: TableColumnConfig; }; // TODO _actions: boolean; }
-    actions?: { [actionName: string]: TableActionConfig<T>; };
-    summary?: TableSummaryConfig;
+    filterConfig?: TableFilterConfig;
+    columnsConfig?: { [colName: string]: TableColumnConfig; }; // TODO _actions: boolean; }
+    actionsConfig?: { [actionName: string]: TableActionConfig<T>; };
+    summaryConfig?: TableSummaryConfig;
 
     /**
      * se una action si affida a un manager predefinito della libreria

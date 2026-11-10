@@ -19,7 +19,7 @@ import { ApiRequest } from "../../../../../types/api/ApiRequest";
 import { TableHelper } from "../../../helpers/TableHelper";
 import { AG_GRID_FILTER_TYPE } from "../../../constants/tableConstants";
 import { isEmptyObject } from "../../../../../utils/Guards";
-import { QuickSearchConfig } from "../../../types/TableAttributes";
+import { QuickSearchConfig, TableFilterConfig } from "../../../types/TableAttributes";
 
 export type QuickSearchInternalHandler = {
     config?: QuickSearchConfig;
@@ -32,6 +32,8 @@ export type QuickSearchInternalHandler = {
 export type TableFilterInternalHandler = {
     // serviceLocator: IServiceLocator;
     // cols: ColDef[];
+
+    filterConfig: { baseFilter?: FilterModel };
 
     userFilter: TableUserFilter|undefined;
     
@@ -53,12 +55,14 @@ export type TableFilterInternalHandler = {
 }
 
 export const useCustomFilterLogic = ({ 
+    filterConfig,
     serviceLocator, 
     domain, 
     gridApi,
     userFilter, 
     setUserFilter 
 }: { 
+    filterConfig?: TableFilterConfig;
     serviceLocator: IServiceLocator, 
     domain: AgGridDomainType | undefined, 
     gridApi: GridApi | null, 
@@ -88,12 +92,13 @@ export const useCustomFilterLogic = ({
         }
         
         return {
+            config: filterConfig?.quickSearch,
             text: quickSearchFilterText,
             filter: quickSearchFilter,
             reset: resetQuickSearch,
             setFilter: setQuickSearchFilter
         }
-    }, [quickSearchFilter]);
+    }, [quickSearchFilter, filterConfig?.quickSearch]);
 
     const isFilterApplied = useCallback((filter: TableUserFilter): boolean => {
         return userFilter?.id === filter.id;
@@ -358,7 +363,7 @@ export const useCustomFilterLogic = ({
     }, [pendingActivationFilter]);
 
     return {
-        // serviceLocator,
+        filterConfig: { baseFilter: filterConfig?.baseFilter },
         // cols,
         userFilter,
         savedFilters,

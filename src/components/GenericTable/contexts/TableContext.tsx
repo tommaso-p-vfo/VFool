@@ -60,7 +60,9 @@ export type TableContextHandler = {
  */
 export interface TableInternalContextHandler {
     appearance?: TableApperance;
+    filterHandler: TableFilterInternalHandler;
     
+
     domain: AgGridDomainType | undefined;
     serviceLocator: IServiceLocator;
     t: TableTranslation;
@@ -74,11 +76,6 @@ export interface TableInternalContextHandler {
     isGridReady: boolean;
     data: any;
     
-    filterHandler: TableFilterInternalHandler;
-
-    // filterData: FilterModel | undefined,
-    // setFilterData: (filter: FilterModel | undefined) => void;
-    // customFilterHandler: TableCustomFilterHandler;
     
     //TODO fix types
     gridSettingsHandler: any; // GridSettingsHandler;
@@ -92,10 +89,10 @@ interface TableProviderProps {
     children: React.ReactNode;
     dataConnector: TableDataConnector;
     translations: TableTranslations;
+    filterConfig?: TableFilterConfig;
     columnsConfig?: { [colName: string]: TableColumnConfig; };
     appearance?: TableApperance;
     
-    filter?: TableFilterConfig;
     userFilter: TableUserFilter | undefined;
     setUserFilter: (filter?: TableUserFilter) => void; 
 
@@ -116,12 +113,13 @@ interface TableProviderProps {
 
 const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps>(({ 
     children, 
+    appearance,
     dataConnector,
     translations,
-    columnsConfig,
-    appearance,
 
-    filter,
+    columnsConfig,
+    filterConfig,
+
     userFilter, 
     setUserFilter, 
 
@@ -136,12 +134,13 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
     isLoadingGridData 
 }: TableProviderProps, ref) => {
 
-    const filterHandler = useCustomFilterLogic({ 
+    const filterHandler = useCustomFilterLogic({
+        filterConfig,
         serviceLocator,
         domain, 
         gridApi, 
         userFilter, 
-        setUserFilter, 
+        setUserFilter 
     });
     
     //TODO fix useGridSettingsLogic
@@ -279,58 +278,43 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
     }, [fetchDropdowns, fetchLists, fetchData]);
 
     const value = useMemo<TableInternalContextHandler>(() => ({
-        appearance,
-        // quickSearch: {
-            //     config: filter?.quickSearch,
-            //     text: quickSearchFilterText,
-            //     filter: quickSearchFilter
-            // },
-            // filterData: quickFilter,
-            // setFilterData: setQuickFilter,
-            
+        appearance,    
         filterHandler,        
-        userFilter,
-        setUserFilter,
-        
-        
 
         domain,
         serviceLocator,
         t,
+
         // metadata,
         comboboxMap,
         listsMap,
-        fetchLists,
         isLoadingData,
         gridApi,
         isGridReady,
         data,
+
+        fetchLists,
         
         gridSettingsHandler,
         summaryHandler,
         isLoadingGridData
     }), [
 
-        userFilter,
-        setUserFilter,
+        appearance,
         filterHandler,
 
-
-
-        filter,
-        appearance,
-
         domain,
-         serviceLocator, 
+         serviceLocator,
+         t,
+
         //  metadata, 
          comboboxMap, 
          listsMap, 
-        //  quickFilter, 
          isLoadingData, 
          gridApi, 
          isGridReady, 
          data, 
-         filterHandler, 
+          
          gridSettingsHandler, 
          summaryHandler, 
          isLoadingGridData

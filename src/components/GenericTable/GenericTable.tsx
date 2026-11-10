@@ -97,11 +97,11 @@ export const GenericTable =
     <T extends Record<string, TableHandler>>({ 
         dataConnector, 
         appearance, 
-        actions, 
-        columns, 
+        actionsConfig, 
+        columnsConfig, 
         componentRegistry, 
-        filter,
-        summary: summaryConfig, 
+        filterConfig,
+        summaryConfig, 
         translations, 
         ref 
     }: TableAttributes<T> & { ref?: React.Ref<TableHandler> }) => {
@@ -487,8 +487,8 @@ export const GenericTable =
 
                 item: item, //prima row per popolamento colonne
 
-                columns: columns,
-                actions: actions,
+                columns: columnsConfig,
+                actions: actionsConfig,
                 t: t
 
                 // domain: TableHelper._getDomainForAgGrid(agGridDomainRef.current),
@@ -509,7 +509,7 @@ export const GenericTable =
             let columnDefinitions = TableHelper.getAgGridColumnDefs(columnDefinitionsProps);
 
             return columnDefinitions;
-        }, [columns, actions]);
+        }, [columnsConfig, actionsConfig]);
 
         const _handleColumnDefinitions = useCallback((items: any) => {
 
@@ -537,9 +537,9 @@ export const GenericTable =
             customTitleRef.current = t?.title ?? ''
             customSubTitleRef.current = t?.subTitle ?? ''
 
-            baseFilterRef.current = filter?.baseFilter ?? null;
+            baseFilterRef.current = filterConfig?.baseFilter ?? null;
 
-        }, [dataConnector, t, filter]);
+        }, [dataConnector, t, filterConfig]);
         
         //init - quando il domain è settato
         const _fetchColumnDefinitions = useCallback(async () => {
@@ -743,23 +743,19 @@ export const GenericTable =
 
                 appearance: tableContextRef.current?.appearance,
                 filterHandler: {
-                    quickSearchHandler: tableContextRef.current?.filterHandler.quickSearchHandler
-                    // userFilter,
-                    // setUserFilter: (filterModel: FilterModel) => {
-                    //     gridApiRef.current?.setFilterModel(filterModel);
-                    //     updateFilterRef.current = true;
-                    //     let e = {
-                    //         api: gridApiRef.current,
-                    //         context: { fromExternal: true },
-                    //     } as FilterChangedEvent;
-                    //     onFilterChanged(e);
-                    // },
-                    // // quickSearchText: tableContextRef.current?.quickSearchFilterText,
-                    // // resetQuickSearch: tableContextRef.current?.resetQuickSearch,
-                    // baseFilter: baseFilterRef.current,
-                    // savedFilters: tableContextRef.current?.filterHandler?.savedFilters,
-                    // quickSearchHandker: tableContextRef.current?.filterHandler?.quickSearchHandler
-                    // // filterData: tableContextRef.current?.filterData
+                    quickSearchHandler: tableContextRef.current?.filterHandler.quickSearchHandler,
+                    baseFilter: tableContextRef.current?.filterHandler.filterConfig.baseFilter,
+                    userFilter: tableContextRef.current?.filterHandler.userFilter,
+                    setUserFilter: (filterModel: FilterModel) => {
+                        gridApiRef.current?.setFilterModel(filterModel);
+                        updateFilterRef.current = true;
+                        let e = {
+                            api: gridApiRef.current,
+                            context: { fromExternal: true },
+                        } as FilterChangedEvent;
+                        onFilterChanged(e);
+                    },
+                    savedFilters: tableContextRef.current?.filterHandler?.savedFilters
 
                 },
                 gridApi: gridApiRef.current
@@ -775,9 +771,9 @@ export const GenericTable =
                     appearance={tableAppearance}
                     dataConnector={dataConnector}
                     translations={t}
-                    columnsConfig={columns}
+                    columnsConfig={columnsConfig}
+                    filterConfig={filterConfig}
                     
-                    filter={filter}
                     userFilter={userFilter} 
                     setUserFilter={setUserFilter}
                     
