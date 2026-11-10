@@ -62,7 +62,7 @@ import {
 
 import { type ApiRequest } from "../../types/api/ApiRequest";
 
-import TableProvider, { SummaryHandler, TableInternalContextHandler, type AgGridDomainType } from "./contexts/TableContext";
+import TableProvider, { SummaryHandler, TableContextHandler, TableInternalContextHandler, type AgGridDomainType } from "./contexts/TableContext";
 import type { TableInternalMetadata } from "./types/TableInternalMetadata";
 // import type { QuickFilterMetadata } from "./components/quick-filter/types/QuickFilterMetadata";
 
@@ -386,13 +386,15 @@ export const GenericTable =
                     //LIBRARY - un dev attraverso la libreria ha modificato il filtro
                     e.context.fromExternal = false; //reset sempre
 
-                    const notSavedFilter = tableContextRef.current?.customFilterHandler?.buildTableUserFilter(currentFilter, userFilter) ?? {} as TableUserFilter;
+                    const notSavedFilter = tableContextRef.current?.filterHandler?.buildTableUserFilter(currentFilter, userFilter) ?? {} as TableUserFilter;
 
                     setUserFilter(notSavedFilter);
                     TableHelper.saveCurrentTableFilterDetails(agGridDomainRef.current, notSavedFilter);
                 }
 
-                TableHelper.saveCurrentTableFilter(agGridDomainRef.current, currentFilter, topBarRef?.current?.quickFilterText());
+                TableHelper.saveCurrentTableFilter(agGridDomainRef.current,
+                     currentFilter,
+                    tableContextRef.current?.filterHandler?.quickSearchHandler.text);
                 TableHelper.resetCurrentTablePage(agGridDomainRef.current);
             }
         }, [userFilter]);
@@ -740,26 +742,29 @@ export const GenericTable =
             context: { 
 
                 appearance: tableContextRef.current?.appearance,
-                filter: {
-                    userFilter,
-                    setUserFilter: (filterModel: FilterModel) => {
-                        gridApiRef.current?.setFilterModel(filterModel);
-                        updateFilterRef.current = true;
-                        let e = {
-                            api: gridApiRef.current,
-                            context: { fromExternal: true },
-                        } as FilterChangedEvent;
-                        onFilterChanged(e);
-                    },
-                    quickSearchText: quickSearchText,
-                    resetQuickSearch: () => { setQuickSearchText(undefined) },
-                    baseFilter: baseFilterRef.current,
-                    savedFilters: tableContextRef.current?.customFilterHandler?.savedFilters,
+                filterHandler: {
+                    quickSearchHandler: tableContextRef.current?.filterHandler.quickSearchHandler
+                    // userFilter,
+                    // setUserFilter: (filterModel: FilterModel) => {
+                    //     gridApiRef.current?.setFilterModel(filterModel);
+                    //     updateFilterRef.current = true;
+                    //     let e = {
+                    //         api: gridApiRef.current,
+                    //         context: { fromExternal: true },
+                    //     } as FilterChangedEvent;
+                    //     onFilterChanged(e);
+                    // },
+                    // // quickSearchText: tableContextRef.current?.quickSearchFilterText,
+                    // // resetQuickSearch: tableContextRef.current?.resetQuickSearch,
+                    // baseFilter: baseFilterRef.current,
+                    // savedFilters: tableContextRef.current?.filterHandler?.savedFilters,
+                    // quickSearchHandker: tableContextRef.current?.filterHandler?.quickSearchHandler
+                    // // filterData: tableContextRef.current?.filterData
 
                 },
                 gridApi: gridApiRef.current
 
-            }
+            } as TableContextHandler
         }));
 
         return (
@@ -775,8 +780,6 @@ export const GenericTable =
                     filter={filter}
                     userFilter={userFilter} 
                     setUserFilter={setUserFilter}
-                    quickFilterText={quickSearchText}
-                    setQuickFilterText={setQuickSearchText}
                     
                     // metadata={metadata} 
                     serviceLocator={serviceLocator}

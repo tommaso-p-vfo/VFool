@@ -1,5 +1,5 @@
 import type { GridApi } from 'ag-grid-community';
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Form, InputGroup } from 'react-bootstrap';
 import { GenericButton, type GenericButtonConfig } from '../../../GenericButton';
 import { useTableContext } from '../../hooks/useTableContext';
@@ -11,6 +11,8 @@ import { GenericModal } from '../../../modals/GenericModal';
 import { buildPath, ThemeColor, ThemeVariant } from '../../../../utils';
 import { FilterPanel } from '../custom-filter/FilterPanel';
 import { getTranslation } from '../../../../utils/TranslationHelper';
+import { QuickSearchInternalHandler, TableFilterInternalHandler } from '../custom-filter/hooks/useCustomFiltersLogic';
+import { QuickSearchConfig } from '../../types/TableAttributes';
 
 export type QuickFilterMetadata = {
     domain: string;
@@ -30,15 +32,23 @@ const QuickFilter = forwardRef((props: any, ref) => {
     const [gridApi, setGridApi] = useState<GridApi|null>(null);
     const [domain, setDomain] = useState<string | undefined>(undefined);
 
-    const config = tableContext.quickSearch;
+    const filterHandler = useMemo<TableFilterInternalHandler>(() => {
+        return tableContext.filterHandler;
+    }, [tableContext.filterHandler]);
 
-    const { resetUserFilter } = tableContext.customFilterHandler;
-        // const activeFilter = tableContext.activeFilter;
+    const quickSearchHandler = useMemo<QuickSearchInternalHandler>(() => {
+        return filterHandler.quickSearchHandler;
+    }, [filterHandler.quickSearchHandler]);
+
+    const config = useMemo<QuickSearchConfig | undefined>(() => {
+        return quickSearchHandler.config;
+    }, [quickSearchHandler.config]);
+
+    const { resetUserFilter } = filterHandler;
 
     const searchTimeoutRef = useRef<NodeJS.Timeout>(undefined);
     const [genericSearch, setGenericSearch] = useState<string>('');
     const [searchCols, setSearchCols] = useState<string[]>(config?.searchFilterColumns ?? ['name']); //default value
-    // const [translatedSearchCols, setTranslatedSearchCols] = useState<string[]>(metadata?.translatedSearchFilterColumns ?? ['Nome']); //default value
 
     useEffect(() => {
        setDomain(tableContext.domain?.agGridDomain);
@@ -49,10 +59,7 @@ const QuickFilter = forwardRef((props: any, ref) => {
     }, [tableContext.gridApi]);
 
     useEffect(() => {
-
         setSearchCols(config?.searchFilterColumns ?? ['name']);
-        // setTranslatedSearchCols(metadata?.translatedSearchFilterColumns ?? ['Nome']);
-
     }, [config]);
 
     const onGenericSearchChange = useCallback((e) => {
@@ -70,36 +77,36 @@ const QuickFilter = forwardRef((props: any, ref) => {
 
             if (gridApi) {
                 //fast search text config (_genericSearch) - inserisco la colonna di default
-                let genericFilter = {};
+                let searchFilter = {};
                 searchCols.forEach(col => {
 
                     if(col == 'id') {
                         //number
-                        genericFilter = {
-                            ...genericFilter,
+                        searchFilter = {
+                            ...searchFilter,
                             [col]: { filterType: "number", type: "equals", filter: _value }
                         };
                     } else {
                         //text
-                        genericFilter = {
-                            ...genericFilter,
+                        searchFilter = {
+                            ...searchFilter,
                             [col]: { filterType: "text", type: "contains", filter: _value }
                         };
                     }
                     
                 });
                 
-                genericFilter = {
-                    ...tableContext.filterData,
-                    ...genericFilter
+                searchFilter = {
+                    ...quickSearchHandler.filter,
+                    ...searchFilter
                 };
 
                 resetUserFilter();
-                TableHelper.saveCurrentTableFilter(domain, genericFilter, _value);
+                TableHelper.saveCurrentTableFilter(domain, searchFilter, _value);
                 TableHelper.resetCurrentTablePage(domain);
 
-                tableContext.setFilterData(genericFilter);
-                gridApi.setFilterModel(genericFilter);
+                quickSearchHandler.setFilter(searchFilter);
+                gridApi.setFilterModel(searchFilter);
 
             }
 
@@ -108,7 +115,7 @@ const QuickFilter = forwardRef((props: any, ref) => {
         }, 500);
 
         
-    }, [gridApi]);
+    }, [gridApi, quickSearchHandler.filter]);
 
     const onReset = useCallback(() => {
 
@@ -117,13 +124,13 @@ const QuickFilter = forwardRef((props: any, ref) => {
         }
 
         const updatedFilter = Object.fromEntries(
-            Object.entries(tableContext.filterData ?? {}).filter(([key]) => 
+            Object.entries(quickSearchHandler.filter ?? {}).filter(([key]) => 
                 !searchCols.includes(key)
             )
         );
 
         const updatedFilterModel = Object.keys(updatedFilter).length > 0 ? updatedFilter : undefined;
-        tableContext.setFilterData(updatedFilterModel);
+        tableContext.filterHandler.quickSearchHandler.setFilter(updatedFilterModel);
         gridApi.setFilterModel(updatedFilterModel);
         setGenericSearch('');
 
@@ -132,16 +139,16 @@ const QuickFilter = forwardRef((props: any, ref) => {
 
         resetUserFilter();
 
-    }, [gridApi, tableContext.filterData, resetUserFilter]);
+    }, [gridApi, quickSearchHandler.filter, resetUserFilter]);
 
     //
     // FILTRO - END
     //
 
-    useImperativeHandle(ref, () => ({
-        quickFilterText: () => genericSearch ?? undefined,
-        setQuickFilterText: (text:string) => { setGenericSearch(text ?? ''); }
-    }), [genericSearch]);
+    // useImperativeHandle(ref, () => ({
+    //     quickFilterText: () => genericSearch ?? undefined,
+    //     setQuickFilterText: (text:string) => { setGenericSearch(text ?? ''); }
+    // }), [genericSearch]);
 
     return (
         <>

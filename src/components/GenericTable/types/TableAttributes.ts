@@ -5,6 +5,7 @@ import { ThemeColor, ThemeVariant } from "../../../utils";
 import { GridApi } from "ag-grid-community";
 import { TableColumnType } from "../constants/tableConstants";
 import { TableUserFilter } from "./TableCustomFilter";
+import { QuickSearchInternalHandler } from "../components/custom-filter/hooks/useCustomFiltersLogic";
 
 /**
  * Interfaccia per definire gli attributi di una tabella attraverso React
@@ -223,11 +224,8 @@ export type TableFilterConfig = {
 export type TableFilterHandler = {
     baseFilter?: FilterModel | undefined | null; //filtro di config - in AND con userFilter - SOLA LETTURA
     userFilter?: TableUserFilter; //filtro utente corrente - SOLA LETTURA
-    quickSearchText?: string; //testo inserito nella ricerca rapida - SOLA LETTURA
+    quickSearchHandler?: QuickSearchInternalHandler;
 
     savedFilters?: TableUserFilter[]; //lista filtri utente salvati serverside
     setUserFilter?: (filter: TableUserFilter) => void; //funzione di modifica del filtro corrente
-    resetQuickSearch: () => void;//funzione di pulizia del filtro
-
-    gridApi?: GridApi
 }

@@ -19,10 +19,19 @@ import { ApiRequest } from "../../../../../types/api/ApiRequest";
 import { TableHelper } from "../../../helpers/TableHelper";
 import { AG_GRID_FILTER_TYPE } from "../../../constants/tableConstants";
 import { isEmptyObject } from "../../../../../utils/Guards";
+import { QuickSearchConfig } from "../../../types/TableAttributes";
 
-export type TableCustomFilterHandler = {
-    serviceLocator: IServiceLocator;
-    cols: ColDef[];
+export type QuickSearchInternalHandler = {
+    config?: QuickSearchConfig;
+    text ?: string;
+    filter ?: FilterModel;
+    reset: () => void;
+    setFilter: (filter?: FilterModel) => void;
+};
+
+export type TableFilterInternalHandler = {
+    // serviceLocator: IServiceLocator;
+    // cols: ColDef[];
 
     userFilter: TableUserFilter|undefined;
     
@@ -33,13 +42,13 @@ export type TableCustomFilterHandler = {
     updateFilter: (filter: TableUserFilter) => Promise<void>;
     removeFilter: (filter: TableUserFilter) => Promise<void>;
 
-    updateDefaultFilter: (filterId: number) => Promise<void>;
-    resetUserFilter: () => void;
-
+    // updateDefaultFilter: (filterId: number) => Promise<void>;
     buildTableUserFilter: (filter: FilterModel, currentUserFilter?: TableUserFilter) => TableUserFilter;
-    
+    resetUserFilter: () => void;
     savedFilters: TableUserFilter[];
     refreshSavedFilters: () => void;
+
+    quickSearchHandler: QuickSearchInternalHandler;
     
 }
 
@@ -69,10 +78,26 @@ export const useCustomFilterLogic = ({
         gridApi?.getColumnDefs()?.filter(c => !c?.colId?.startsWith('_')
     ), [gridApi]);
 
+    const [quickSearchFilter, setQuickSearchFilter] = useState<FilterModel>(); //filtro che viene applicato a prescindere dalle interazioni utente: es. filtro 'solo mie'
+    const resetQuickSearch = () => { setQuickSearchFilter(undefined); };
+    const quickSearchHandler = useMemo<QuickSearchInternalHandler>(() => {
+        
+        let quickSearchFilterText = '';
+        if(!isEmptyObject(quickSearchFilter)) {
+            quickSearchFilterText = Object.entries(quickSearchFilter)[0][1].filter;
+        }
+        
+        return {
+            text: quickSearchFilterText,
+            filter: quickSearchFilter,
+            reset: resetQuickSearch,
+            setFilter: setQuickSearchFilter
+        }
+    }, [quickSearchFilter]);
+
     const isFilterApplied = useCallback((filter: TableUserFilter): boolean => {
         return userFilter?.id === filter.id;
     }, [userFilter]);
-
 
     const existFilter = (filterId: number): boolean => {
         return !!savedFilters?.find(f => f.id === filterId);
@@ -333,8 +358,8 @@ export const useCustomFilterLogic = ({
     }, [pendingActivationFilter]);
 
     return {
-        serviceLocator,
-        cols,
+        // serviceLocator,
+        // cols,
         userFilter,
         savedFilters,
         updateDefaultFilter,
@@ -346,7 +371,8 @@ export const useCustomFilterLogic = ({
         removeFilter,
         refreshSavedFilters,
         resetUserFilter,
-        buildTableUserFilter
-    } as TableCustomFilterHandler
+        buildTableUserFilter,
+        quickSearchHandler
+    } as TableFilterInternalHandler
 
 }

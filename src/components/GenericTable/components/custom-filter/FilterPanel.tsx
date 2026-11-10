@@ -9,7 +9,7 @@ import { ThemeColor, ThemeVariant } from "../../../../utils";
 export const FilterPanel = () => {
 
     const tableContext = useTableContext();
-    const { addFilter, updateFilter, userFilter } = tableContext.customFilterHandler;
+    const { addFilter, updateFilter, userFilter } = tableContext.filterHandler;
 
     const formRef = useRef<HTMLFormElement>(null); //form nuovo filtro
     const [notSavedFilter, setNotSavedFilter] = useState<TableUserFilter>();
