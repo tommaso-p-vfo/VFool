@@ -77,6 +77,7 @@ import { useTableContext } from "./hooks/useTableContext";
 
 import { ThemeColor, toCssColor } from "../../utils/Color";
 import TableTopBar from "./components/table-top-bar/TableTopBar";
+import { useCustomFilterLogic } from "./components/custom-filter/hooks/useCustomFiltersLogic";
 
 
 //ag grid - modulo community per caricamento dinamico dei dati
@@ -230,7 +231,7 @@ export const GenericTable =
                         } as FilterModel;
                     }
 
-                    console.log('fm ' + JSON.stringify(_pageRequest.filter));
+                    // console.log('fm ' + JSON.stringify(_pageRequest.filter));
 
                     if (sortModel) {
                         sortModel.forEach(col => {
@@ -385,16 +386,7 @@ export const GenericTable =
                     //LIBRARY - un dev attraverso la libreria ha modificato il filtro
                     e.context.fromExternal = false; //reset sempre
 
-                    let isCurrentFilterSaved = userFilter && userFilter?.id > 0;
-
-                    let notSavedFilter = {
-                        ...userFilter,
-                        _isTemporary: true,
-                        _isCandidateForNew: userFilter && userFilter?.id == -1,
-                        _isNew: false,
-                        _isModified: isCurrentFilterSaved,
-                        definition: currentFilter
-                    } as TableUserFilter;
+                    const notSavedFilter = tableContextRef.current?.customFilterHandler?.buildTableUserFilter(currentFilter, userFilter) ?? {} as TableUserFilter;
 
                     setUserFilter(notSavedFilter);
                     TableHelper.saveCurrentTableFilterDetails(agGridDomainRef.current, notSavedFilter);

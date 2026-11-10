@@ -32,7 +32,7 @@ const QuickFilter = forwardRef((props: any, ref) => {
 
     const config = tableContext.quickSearch;
 
-    const { resetUserFilter, userFilter } = tableContext.customFilterHandler;
+    const { resetUserFilter } = tableContext.customFilterHandler;
         // const activeFilter = tableContext.activeFilter;
 
     const searchTimeoutRef = useRef<NodeJS.Timeout>(undefined);
@@ -160,7 +160,7 @@ const QuickFilter = forwardRef((props: any, ref) => {
                         } as GenericButtonConfig}
                         className='m-0 me-0 p-1 px-2'
                     />
-                    {showUserFilter && <FilterPanel filter={userFilter} />}
+                    {showUserFilter && <FilterPanel />}
                     <Form.Control
                         id='vfo-search-filter'
                         placeholder="Cerca..."

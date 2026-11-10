@@ -6,17 +6,17 @@ import { FaPlusCircle, FaSave } from "react-icons/fa";
 import { TableUserFilter } from "../../types/TableCustomFilter";
 import { ThemeColor, ThemeVariant } from "../../../../utils";
 
-export const FilterPanel = ({ filter }: { filter?: TableUserFilter }) => {
+export const FilterPanel = () => {
 
     const tableContext = useTableContext();
     const { addFilter, updateFilter, userFilter } = tableContext.customFilterHandler;
 
-    const notSavedFilterformRef = useRef(null);
-    const [notSavedFilter, setNotSavedFilter] = useState<TableUserFilter>({});
+    const formRef = useRef<HTMLFormElement>(null); //form nuovo filtro
+    const [notSavedFilter, setNotSavedFilter] = useState<TableUserFilter>();
     const [validated, setValidated] = useState(false);
 
     const saveFilter = useCallback(async () => {
-        let isValid = notSavedFilterformRef.current?.checkValidity() ?? false;
+        let isValid = formRef.current?.checkValidity() ?? false;
         setValidated(!isValid);
 
         if (!isValid) return;
@@ -27,15 +27,15 @@ export const FilterPanel = ({ filter }: { filter?: TableUserFilter }) => {
 
     useEffect(() => {
 
+        console.log('uf from handler ' + JSON.stringify(userFilter));
+
         if(userFilter) {
             setNotSavedFilter(userFilter);
-        } else if (filter){
-            setNotSavedFilter(filter);
         }
 
         setValidated(false);
 
-    }, [filter]);
+    }, [userFilter]);
 
     // if (filter?.id == -1 && !filter?._isNew) return;
 
@@ -43,7 +43,7 @@ export const FilterPanel = ({ filter }: { filter?: TableUserFilter }) => {
 
         <div className="vfo-user-filter d-flex align-items-center ms-0">
 
-            <div className="vfo-user-filter-name vfo-text-truncate" title={`Filtro attivo: ${notSavedFilter?.name ?? 'Nessuno'}`} >
+            <div className="vfo-user-filter-name vfo-text-truncate text-start" title={`Filtro attivo: ${notSavedFilter?.name ?? 'Nessuno'}`} >
                 {!notSavedFilter?._isNew && 
                     <Form.Text>
                         <span className="me-1">Filtro attivo:</span>
@@ -51,7 +51,7 @@ export const FilterPanel = ({ filter }: { filter?: TableUserFilter }) => {
                         <span className="ms-1 small fst-italic">{notSavedFilter?._isModified && '(modificato)'}</span>
                     </Form.Text>}
                 {notSavedFilter?._isNew &&
-                    <Form ref={notSavedFilterformRef} noValidate validated={validated}>
+                    <Form ref={formRef} noValidate validated={validated}>
                         <Form.Group controlId='nsFilterName' className="vfo-user-filter-input" >
                             <Form.Control
                                 value={notSavedFilter.name}
@@ -66,7 +66,9 @@ export const FilterPanel = ({ filter }: { filter?: TableUserFilter }) => {
                         </Form.Group>
                     </Form>
                 }
-                {!notSavedFilter?._isNew && notSavedFilter?._isCandidateForNew && !notSavedFilter?._isModified && <GenericButton
+                {!notSavedFilter?._isNew && notSavedFilter?._isCandidateForNew && !notSavedFilter?._isModified && 
+                <GenericButton
+                    type="button"
                     onClick={async () => {
 
                         setNotSavedFilter(prev => ({ ...prev, _isNew: true, name: '' }))
@@ -84,7 +86,8 @@ export const FilterPanel = ({ filter }: { filter?: TableUserFilter }) => {
             </div>
 
             <div className="">
-                {!notSavedFilter?._isNew && notSavedFilter?._isModified && <GenericButton
+                {!notSavedFilter?._isNew && notSavedFilter?._isModified && 
+                <GenericButton
                     type="button"
                     onClick={() => { updateFilter(notSavedFilter) }}
                     readableName={"Aggiorna"}
@@ -97,7 +100,9 @@ export const FilterPanel = ({ filter }: { filter?: TableUserFilter }) => {
                     } as GenericButtonConfig}>
                 </GenericButton>}
 
-                {!notSavedFilter?._isCandidateForNew && !notSavedFilter?._isNew && notSavedFilter?._isModified && <GenericButton
+                {!notSavedFilter?._isCandidateForNew && !notSavedFilter?._isNew && notSavedFilter?._isModified && 
+                <GenericButton
+                    type="button"
                     onClick={async () => {
 
                         setNotSavedFilter(prev => ({ ...prev, _isNew: true, name: '' }))
@@ -113,7 +118,8 @@ export const FilterPanel = ({ filter }: { filter?: TableUserFilter }) => {
                     } as GenericButtonConfig}
                 />}
 
-                {notSavedFilter?._isNew && <GenericButton
+                {notSavedFilter?._isNew && 
+                <GenericButton
                     type="button"
                     onClick={() => { saveFilter() }}
                     readableName={"Salva"}

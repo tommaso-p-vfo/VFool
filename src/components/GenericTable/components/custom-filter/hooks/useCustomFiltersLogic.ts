@@ -18,6 +18,7 @@ import { IServiceLocator } from "../../../../../types/api/IServiceLocator";
 import { ApiRequest } from "../../../../../types/api/ApiRequest";
 import { TableHelper } from "../../../helpers/TableHelper";
 import { AG_GRID_FILTER_TYPE } from "../../../constants/tableConstants";
+import { isEmptyObject } from "../../../../../utils/Guards";
 
 export type TableCustomFilterHandler = {
     serviceLocator: IServiceLocator;
@@ -34,6 +35,8 @@ export type TableCustomFilterHandler = {
 
     updateDefaultFilter: (filterId: number) => Promise<void>;
     resetUserFilter: () => void;
+
+    buildTableUserFilter: (filter: FilterModel, currentUserFilter?: TableUserFilter) => TableUserFilter;
     
     savedFilters: TableUserFilter[];
     refreshSavedFilters: () => void;
@@ -240,6 +243,24 @@ export const useCustomFilterLogic = ({
 
     }, [gridApi]);
 
+    const buildTableUserFilter = (filter: FilterModel, currentUserFilter?: TableUserFilter) => {
+
+        let isCurrentFilterSaved = currentUserFilter && currentUserFilter?.id > 0;
+
+        let userFilter = {
+            ...currentUserFilter,
+            _isTemporary: true,
+            _isCandidateForNew: !isCurrentFilterSaved && !isEmptyObject(filter),
+            _isNew: false,
+            _isModified: isCurrentFilterSaved ?? false,
+            definition: filter
+        } as TableUserFilter;
+
+        // console.log('onChange ' + JSON.stringify(userFilter));
+        return userFilter;
+
+    }
+
     const fetchSavedFilters = useCallback(async () => {
 
         let _domain = domain?.agGridDomain ?? '';
@@ -324,7 +345,8 @@ export const useCustomFilterLogic = ({
         updateFilter,
         removeFilter,
         refreshSavedFilters,
-        resetUserFilter
+        resetUserFilter,
+        buildTableUserFilter
     } as TableCustomFilterHandler
 
 }
