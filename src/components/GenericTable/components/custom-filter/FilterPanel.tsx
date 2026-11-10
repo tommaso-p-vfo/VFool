@@ -79,7 +79,7 @@ export const FilterPanel = () => {
                     tooltip="Crea nuovo filtro"
                     buttonConfig={{
                         variant: ThemeVariant.OUTLINED,
-                        color: ThemeColor.GREEN,
+                        color: ThemeColor.PRIMARY,
                         icon: <FaPlusCircle />
                     } as GenericButtonConfig}
                 />}
@@ -113,7 +113,7 @@ export const FilterPanel = () => {
                     tooltip="Crea nuovo filtro"
                     buttonConfig={{
                         variant: ThemeVariant.OUTLINED,
-                        color: ThemeColor.GREEN,
+                        color: ThemeColor.PRIMARY,
                         icon: <FaPlusCircle />
                     } as GenericButtonConfig}
                 />}
