@@ -22,4 +22,7 @@
   --vfo-color-black: var(--bs-black);
   --vfo-color-white: var(--bs-white);
   --vfo-color-transparent: transparent;
+
+  //più basso è il numero % più chiaro è il colore
+  --vfo-border-color: color-mix(in srgb, var(--vfo-color-primary) 40%, white); 
 }
