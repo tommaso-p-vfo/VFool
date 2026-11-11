@@ -6,18 +6,21 @@ import { useTableContext } from "../../hooks/useTableContext";
 import { GenericButton, GenericButtonConfig } from "../../../GenericButton";
 import { ThemeColor, ThemeVariant } from "../../../../utils";
 import { FaCog, FaColumns, FaSave } from "react-icons/fa";
+import ColumnSettings from "../column-settings/ColumnSettings";
+import { GenericModal } from "../../../modals/GenericModal";
 
 const TableTopBar = forwardRef((props: any, ref) => {
 
     const tableContext = useTableContext();
     const appearance = tableContext.appearance;
+
+    const columnSettingsRef = useRef(null);
     
     // const metadata = props?.metadata;
     // const openColumnChooser = props?.openColumnChooser;
 
-    const quickFilterRef = useRef(null);
 
-    const openColumnChooser = useCallback(() => {
+    const openColumnSettings = useCallback(() => {
         // openColumnChooser(true);
     }, []);
 
@@ -29,7 +32,7 @@ const TableTopBar = forwardRef((props: any, ref) => {
 
     return (
         <Container fluid className='w-100 d-flex justify-content-between'>
-            {appearance?.showQuickFilter && <QuickFilter ref={quickFilterRef} />}
+            {appearance?.showQuickFilter && <QuickFilter />}
             {/* <ActionBar 
                 gridApiRef={props?.gridApiRef} 
                 metadata={metadata.actionsMetadata} 
@@ -43,7 +46,7 @@ const TableTopBar = forwardRef((props: any, ref) => {
                         type="button"
                         tooltip="Gestione colonne"
                         readableName="Gestione colonne"
-                        onClick={openColumnChooser}
+                        onClick={openColumnSettings}
                         className="m-0"
                         buttonConfig={{
 
@@ -83,7 +86,8 @@ const TableTopBar = forwardRef((props: any, ref) => {
 
                 </InputGroup>            
 
-                {/* <ColumnSettingsModal
+                <ColumnSettings
+                    ref={columnSettingsRef}
                 // domain={columnChooserProps.domain}
                 // tableName={columnChooserProps.tableName}
                 // gridApi={columnChooserProps.gridApi}
@@ -92,7 +96,17 @@ const TableTopBar = forwardRef((props: any, ref) => {
                 // shouldOpenModal={columnChooserProps.shouldOpenModal}
                 // onCloseModal={() => { columnChooserProps.onCloseModal(); }}
                 >
-                </ColumnSettingsModal> */}
+                </ColumnSettings>
+
+                <GenericModal 
+                    title={`Gestione colonne - ${appearance.title}`} 
+                    children={undefined} 
+                    shouldOpenModal={false} 
+                    onCloseModal={function (): void {
+                        throw new Error('Function not implemented.');
+                } }  />
+
+                
             
             </>}
         </Container>

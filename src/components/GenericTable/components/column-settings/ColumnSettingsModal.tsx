@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Modal, Button, Form, Container } from 'react-bootstrap';
-import ColumnChooser, { type ColumnChooserCallbacks } from './ColumnSettings';
+import ColumnChooser, { type ColumnSettingsHandler } from './ColumnSettings';
 import type { ColDef } from 'ag-grid-community';
 
 export type ColumnChooserMetadata = {
@@ -35,7 +35,7 @@ const ColumnChooserModal: React.FC<ColumnChooserModalProps> = ({
 
     //meccanismo ref per passaggio di funzioni dal figlio al padre
     //usato per le funzioni del footer della modal
-    const columnChooserRef = useRef <ColumnChooserCallbacks>(null);
+    const columnChooserRef = useRef <ColumnSettingsHandler>(null);
     const [colDefs, setColDefs] = useState<ColDef[]>([]);
 
     const [savePreferences, setSavePreferences] = useState<boolean>(false);

@@ -116,8 +116,8 @@ export type TableApperance = {
     showSummary?: boolean; //default true
 
     icon?: JSX.Element;
-    title?: string; //sovrascrive il JSON traduzioni
-    subTitle?: string; //sovrascrive il JSON traduzioni
+    title?: string; //titolo sezione - sovrascrive il JSON traduzioni - vince anche sul nome tabella
+    subTitle?: string; //sottotitolo sezione - sovrascrive il JSON traduzioni
 
     details?: TableAdditionalDetails;
 }
@@ -190,8 +190,9 @@ export const TABLE_ACTION_MANAGER_NAME = {
 export type TableActionManager = typeof TABLE_ACTION_MANAGER_NAME[keyof typeof TABLE_ACTION_MANAGER_NAME];
 
 export type TableTranslations = {
-    title: string;
-    subTitle: string;
+    name: string; //nome tabella - costante
+    title: string; //titolo della sezione - se diverso da nome tabella o si vuole personalizzare 
+    subTitle: string; //sottitolo della sezione
     columns: { [key: string]: string; }
 }
 

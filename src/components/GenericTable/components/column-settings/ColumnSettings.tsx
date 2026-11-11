@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useCallback, useMemo } from 'react';
 import { Button, ButtonGroup, Col, Form, Row, Stack } from 'react-bootstrap';
 
 import type {
@@ -6,29 +6,33 @@ import type {
     ColumnState
 } from "ag-grid-community";
 
-import { GripVertical, ArrowUp, ArrowDown } from 'lucide-react';
+// import { GripVertical, ArrowUp, ArrowDown } from 'lucide-react';
 import type { ColumnChooserProps } from '../../types/TableColumn';
-import { PermissionHelper } from '../../../../../core/auth/helpers/PermissionHelper';
-import useAuth from '../../../../../core/auth/hooks/useAuth';
+// import { PermissionHelper } from '../../../../../core/auth/helpers/PermissionHelper';
+// import useAuth from '../../../../../core/auth/hooks/useAuth';
 import { useTableContext } from '../../hooks/useTableContext';
+import { FaArrowDown, FaArrowUp, FaGripVertical } from 'react-icons/fa';
+import { ThemeColor, ThemeVariant } from '../../../../utils';
+import { GenericButton } from '../../../GenericButton';
 
-export interface ColumnChooserCallbacks {
+export interface ColumnSettingsHandler {
     selectAll: () => void;
     resetPreferences: (savePreferences: boolean) => void;
     applyChanges: (savePreferences: boolean) => void;
 }
 
-const ColumnChooser: React.FC<ColumnChooserProps> = forwardRef(({
-    domain,
-    defaultColumnDefs,
-    metadata,
-    gridApi
-}, ref) => {
+const ColumnChooser: React.FC<ColumnChooserProps> = forwardRef((props, ref) => {
     const [columns, setColumns] = useState<ColumnState[]>([]);
     const [resetPref, setResetPref] = useState<boolean>(false);
 
-    const auth = useAuth();
+    // const auth = useAuth();
     const tableContext = useTableContext();
+    const gridApi = tableContext.gridApi;
+
+    const defaultColumnDefs = useMemo(() => { 
+        return tableContext.defaultColumnDefinitions ?? [];
+    }, [tableContext.defaultColumnDefinitions]);
+    
     const gridSettingsHandler = tableContext.gridSettingsHandler;
 
     useImperativeHandle(ref, () => ({
@@ -114,7 +118,7 @@ const ColumnChooser: React.FC<ColumnChooserProps> = forwardRef(({
                 });
         });
 
-        gridApi.getColumnState().forEach((col: ColumnState) => {
+        gridApi?.getColumnState().forEach((col: ColumnState) => {
             let hdsColDef = hdsColDefsMap.get(col.colId);
             if (!checkAddColumnState(col, hdsColDef))
             {
@@ -129,7 +133,7 @@ const ColumnChooser: React.FC<ColumnChooserProps> = forwardRef(({
         });
         
         setColumns(columnStates.sort((a, b) => a.order - b.order));
-    }, [metadata, defaultColumnDefs]);
+    }, [defaultColumnDefs]);
 
     const loadDefaultColumns = useCallback(() => {
 
@@ -157,7 +161,7 @@ const ColumnChooser: React.FC<ColumnChooserProps> = forwardRef(({
 
         return orderedDefColumnStates;
 
-    }, [metadata, defaultColumnDefs]);
+    }, [defaultColumnDefs]);
 
     /**
      * Determina quali colonne mostrare in elenco
@@ -177,29 +181,30 @@ const ColumnChooser: React.FC<ColumnChooserProps> = forwardRef(({
             return false;
         }
 
-        let systemColumns = metadata.systemColumns;
-        if(systemColumns.includes(_colId)) {
-            // system columns - presenti nella entity ma da non mostrare all'utente - utili solo per sistema
-            // es. agentId per filtrare i preventivi utente (per agente associato all'utente)
-            // skip
-            return false;
-        }
+        //TODO protected e system columns
+        // let systemColumns = metadata.systemColumns;
+        // if(systemColumns.includes(_colId)) {
+        //     // system columns - presenti nella entity ma da non mostrare all'utente - utili solo per sistema
+        //     // es. agentId per filtrare i preventivi utente (per agente associato all'utente)
+        //     // skip
+        //     return false;
+        // }
 
-        let user = auth.user;
-        if (PermissionHelper.isAdmin(user))
-            return true;
+        // let user = auth.user;
+        // if (PermissionHelper.isAdmin(user))
+        //     return true;
 
-        let protectedColumns = metadata?.protectedColumns;
-        if (protectedColumns.includes(_colId)) {
-            // protectedColumns columns - presenti nella entity ma da non mostrare all'utente - utili solo per sistema
-            // es. agentId per filtrare i preventivi utente (per agente associato all'utente)
-            // skip
-            return false;
-        }
+        // let protectedColumns = metadata?.protectedColumns;
+        // if (protectedColumns.includes(_colId)) {
+        //     // protectedColumns columns - presenti nella entity ma da non mostrare all'utente - utili solo per sistema
+        //     // es. agentId per filtrare i preventivi utente (per agente associato all'utente)
+        //     // skip
+        //     return false;
+        // }
         
         return true;
 
-    }, [metadata]);
+    }, []);
 
     if (!gridApi || !defaultColumnDefs) return <div><p>Scelta colonne non disponibile</p></div>;
 
@@ -222,7 +227,7 @@ const ColumnChooser: React.FC<ColumnChooserProps> = forwardRef(({
                     >
                         <Col>
                             <div className='d-flex gap-2' onClick={() => toggleColumnVisibility(column.colId)}>
-                                <span><GripVertical size={18} /></span>
+                                <span><FaGripVertical size={18} /></span>
                                 <Form.Check
                                     type='checkbox'
                                     checked={!column.hide}
@@ -235,21 +240,32 @@ const ColumnChooser: React.FC<ColumnChooserProps> = forwardRef(({
                         <Col className='text-end'>
                             <ButtonGroup>
                                 {index > 0 && (
-                                    <Button
+                                    <GenericButton
+                                        type='button'
+                                        buttonConfig={{
+                                            color: ThemeColor.PRIMARY,
+                                            variant:ThemeVariant.OUTLINED,
+                                            icon: <FaArrowUp size={15} />
+
+                                        }}
                                         onClick={() => moveColumn(index, index - 1)}
-                                        title="Sposta su"
-                                    >
-                                        <ArrowUp size={15} />
-                                    </Button>
+                                        tooltip="Sposta su"
+                                        readableName="Sposta su"
+                                    />                                    
                                 )}
                                 {index < columns.length - 1 && (
-                                    <Button
-                                        variant='secondary'
+                                    <GenericButton
+                                        type='button'
+                                        buttonConfig={{
+                                            color: ThemeColor.PRIMARY,
+                                            variant:ThemeVariant.OUTLINED,
+                                            icon: <FaArrowDown size={15} />
+
+                                        }}
                                         onClick={() => moveColumn(index, index + 1)}
-                                        title="Sposta giù"
-                                    >
-                                        <ArrowDown size={15} />
-                                    </Button>
+                                        tooltip="Sposta giù"
+                                        readableName="Sposta giù"
+                                    />
                                 )}
 
                             </ButtonGroup>

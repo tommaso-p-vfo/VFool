@@ -11,6 +11,7 @@ import { SERVICE_ENDPOINT } from "../../../types/api/ApiEndpoints";
 import { type FilterModel } from "../../../types/api/FilterModel";
 
 import type {
+    ColDef,
     GridApi,
 } from "ag-grid-community";
 
@@ -73,11 +74,15 @@ export type TableContextHandler = {
 export interface TableInternalContextHandler {
     appearance?: TableApperance;
     filterHandler: TableFilterInternalHandler;
-    
 
     domain: AgGridDomainType | undefined;
     serviceLocator: IServiceLocator;
     t: TableTranslation;
+
+    //colonne definite al caricamento della griglia
+    //indipendenti dal columnState corrente
+    //utile per reset
+    defaultColumnDefinitions?: ColDef[];
     
     // metadata: TableMetadata<any> | undefined;
     comboboxMap: Map<string, TableComboboxOption[]>;
@@ -110,6 +115,7 @@ interface TableProviderProps {
 
     gridApi: GridApi | null;
 
+    defaultColumnDefinitions?: ColDef[]; 
 
     serviceLocator: IServiceLocator;
     // metadata: TableMetadata<any>;
@@ -134,6 +140,8 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
 
     userFilter, 
     setUserFilter, 
+
+    defaultColumnDefinitions,
 
     serviceLocator, 
     // metadata, 
@@ -290,12 +298,20 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
     }, [fetchDropdowns, fetchLists, fetchData]);
 
     const value = useMemo<TableInternalContextHandler>(() => ({
-        appearance,    
+        appearance: {
+            name: t.name,
+            title: t.title,
+            subTitle: t.subTitle,
+            ...appearance
+        },
+
         filterHandler,        
 
         domain,
         serviceLocator,
         t,
+
+        defaultColumnDefinitions,
 
         // metadata,
         comboboxMap,
@@ -318,6 +334,8 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
         domain,
          serviceLocator,
          t,
+
+        defaultColumnDefinitions,
 
         //  metadata, 
          comboboxMap, 

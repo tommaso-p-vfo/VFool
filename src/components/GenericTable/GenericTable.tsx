@@ -535,8 +535,8 @@ export const GenericTable =
             //reset colonne per visualizzare il caricamento
             setColumnDefs([]);
 
-            customTitleRef.current = t?.title ?? ''
-            customSubTitleRef.current = t?.subTitle ?? ''
+            customTitleRef.current = t?.title ?? t?.name ?? '';
+            customSubTitleRef.current = t?.subTitle ?? '';
 
             baseFilterRef.current = filterConfig?.baseFilter ?? null;
 
@@ -790,6 +790,8 @@ export const GenericTable =
                     userFilter={userFilter} 
                     setUserFilter={setUserFilter}
                     
+                    columnDefinitions={columnDefs}
+
                     // metadata={metadata} 
                     serviceLocator={serviceLocator}
                     domain={{ agGridDomain: agGridDomainRef.current, serviceLocatorDomain: serviceLocatorDomainRef.current }} 
