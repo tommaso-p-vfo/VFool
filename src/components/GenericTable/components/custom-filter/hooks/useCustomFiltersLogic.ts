@@ -188,10 +188,6 @@ export const useCustomFilterLogic = ({
         }
     }, [savedFilters]);
 
-    const updateDefaultFilter = async (filterId: number): Promise<void> => {
-        
-    }
-
     const addFilter = useCallback(async (filter: TableUserFilter): Promise<TableUserFilter> => {
 
         let _domain = domain?.agGridDomain ?? '';
@@ -341,6 +337,7 @@ export const useCustomFilterLogic = ({
 
     const initSavedFilters = useCallback(async () => {
 
+        if (!filterConfig?.enableSavedFilters) return;
         if (!domain?.agGridDomain) return;
 
         let _activeFilter = getFromSession(buildPath(domain.agGridDomain, AG_GRID_STORAGE_KEYS.COLUMN_FILTER_DETAILS));
@@ -354,7 +351,7 @@ export const useCustomFilterLogic = ({
         if (_activeFilter)
             setPendingActivationFilter({ ..._activeFilter, definition: definition});
 
-    }, [domain, fetchSavedFilters]);
+    }, [domain, fetchSavedFilters, enableSavedFilters]);
 
     useEffect(() => {
         initSavedFilters();
@@ -374,7 +371,6 @@ export const useCustomFilterLogic = ({
         // cols,
         userFilter,
         savedFilters,
-        updateDefaultFilter,
         applyFilter,
         isFilterApplied,
         existFilter,

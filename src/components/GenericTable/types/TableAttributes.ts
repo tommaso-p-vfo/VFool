@@ -223,9 +223,24 @@ export type TableFilterConfig = {
 
 export type TableFilterHandler = {
     baseFilter?: FilterModel | undefined | null; //filtro di config - in AND con userFilter - SOLA LETTURA
-    userFilter?: TableUserFilter; //filtro utente corrente - SOLA LETTURA
     quickSearchHandler?: QuickSearchInternalHandler;
-
-    savedFilters?: TableUserFilter[]; //lista filtri utente salvati serverside
+    
+    userFilter?: TableUserFilter; //filtro utente corrente - SOLA LETTURA
     setUserFilter?: (filter: TableUserFilter) => void; //funzione di modifica del filtro corrente
+
+    savedFiltersHandler?: TableSavedFilterHandler; 
+}
+
+export type TableSavedFilterHandler = {
+    savedFilters: TableUserFilter[]; //lista filtri utente salvati serverside
+
+    existFilter: (filterId: number) => boolean;
+    isFilterApplied: (filter: TableUserFilter) => boolean;
+    applyFilter: (filterId: number) => Promise<void>;
+    addFilter: (filter: TableUserFilter) => Promise<TableUserFilter>;
+    updateFilter: (filter: TableUserFilter) => Promise<void>;
+    removeFilter: (filter: TableUserFilter) => Promise<void>;
+    
+    refreshSavedFilters: () => void;
+
 }

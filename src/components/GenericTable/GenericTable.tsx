@@ -759,15 +759,16 @@ export const GenericTable =
                     savedFiltersHandler: tableContextRef.current?.filterHandler.filterConfig.enableSavedFilters ? 
                     
                     {
-                        savedFilters: tableContextRef.current?.filterHandler?.savedFilters
-
+                        savedFilters: tableContextRef.current?.filterHandler?.savedFilters,
+                        existFilter: tableContextRef.current?.filterHandler?.existFilter,
+                        isFilterApplied: tableContextRef.current?.filterHandler?.isFilterApplied,
+                        applyFilter: tableContextRef.current?.filterHandler?.applyFilter,
+                        addFilter: tableContextRef.current?.filterHandler?.addFilter,
+                        updateFilter: tableContextRef.current?.filterHandler?.updateFilter,
+                        removeFilter: tableContextRef.current?.filterHandler?.removeFilter,
+                        refreshSavedFilters: tableContextRef.current?.filterHandler?.refreshSavedFilters
                     }
-
-                    
                     : null
-
-                    
-
                 },
                 gridApi: gridApiRef.current
 
