@@ -6,24 +6,47 @@ import type {
     ColumnState
 } from "ag-grid-community";
 
-// import { GripVertical, ArrowUp, ArrowDown } from 'lucide-react';
-import type { ColumnChooserProps } from '../../types/TableColumn';
+
 // import { PermissionHelper } from '../../../../../core/auth/helpers/PermissionHelper';
 // import useAuth from '../../../../../core/auth/hooks/useAuth';
 import { useTableContext } from '../../hooks/useTableContext';
-import { FaArrowDown, FaArrowUp, FaGripVertical } from 'react-icons/fa';
-import { ThemeColor, ThemeVariant } from '../../../../utils';
+import { FaArrowDown, FaArrowUp, FaCheckSquare, FaGripVertical, FaSquare, FaToggleOn } from 'react-icons/fa';
+import { ThemeColor, ThemeVariant, toCssColor } from '../../../../utils';
 import { GenericButton } from '../../../GenericButton';
+import { SelectAll } from '../../../icons/SelectAll';
 
-export interface ColumnSettingsHandler {
+export type ColumnChooserMetadata = {
+    protectedColumns: string[];
+    systemColumns: string[];
+}
+
+interface  ColumnSettingsProps {
+    domain?: string;
+    metadata?: ColumnChooserMetadata;
+    ref: any
+}
+
+type VfoColumnState = ColumnState & {
+    headerName: string;
+    order: number;
+}
+
+export type ColumnSettingsHandler = {
     selectAll: () => void;
     resetPreferences: (savePreferences: boolean) => void;
     applyChanges: (savePreferences: boolean) => void;
 }
 
-const ColumnChooser: React.FC<ColumnChooserProps> = forwardRef((props, ref) => {
+const CSS = `:where(.vfo-column-settings) {
+    overflow-y: auto;
+}`;
+
+export const ColumnSettings: React.FC<ColumnSettingsProps> = forwardRef((props, ref) => {
+    const [areAllSelected, setAreAllSelected] = useState<boolean>(false);
     const [columns, setColumns] = useState<ColumnState[]>([]);
     const [resetPref, setResetPref] = useState<boolean>(false);
+
+    const [savePreferences, setSavePreferences] = useState<boolean>(false);
 
     // const auth = useAuth();
     const tableContext = useTableContext();
@@ -35,23 +58,54 @@ const ColumnChooser: React.FC<ColumnChooserProps> = forwardRef((props, ref) => {
     
     const gridSettingsHandler = tableContext.gridSettingsHandler;
 
+    useEffect(() => {
+
+        let allSelected = columns.some()
+
+
+    }, [columns]);
+
+    const selectAll = () => {
+        if (columns.filter((col) => { return !col.hide }).length === columns.length) 
+            setColumns(prev => prev.map(col => ({ ...col, hide: true })));
+        else
+            setColumns(prev => prev.map(col => ({ ...col, hide: false })));
+    };
+
+    const resetPreferences = (savePreferences: boolean) => {
+        setResetPref(true);
+        let defaultColumns = loadDefaultColumns();
+        setColumns(defaultColumns);
+        gridSettingsHandler.setIsModified(true);
+    }
+
+    const applyChanges = (savePreferences: boolean) => {
+
+        if (!gridApi) return;
+        // Applica le modifiche alla griglia
+        const columnState = columns.map((col) => ({
+            colId: col.colId,
+            headerName: col.headerName,
+            hide: col.hide,
+            sort: null,
+            sortIndex: null,
+            width: col.width
+        }));
+
+        gridApi.applyColumnState({
+            state: columnState,
+            applyOrder: true
+        });
+
+        gridSettingsHandler.saveGridSettings(columnState, savePreferences);
+
+    };
+
+
     useImperativeHandle(ref, () => ({
-        //funzioni esposte al componente padre
-        selectAll: () => {
-            if(columns.filter((col) => { return !col.hide }).length === columns.length)
-                setColumns(prev => prev.map(col => ({ ...col, hide: true })));
-            else
-                setColumns(prev => prev.map(col => ({ ...col, hide: false })));
-        },
-        resetPreferences: (savePreferences: boolean) => {
-            setResetPref(true);
-            let defaultColumns = loadDefaultColumns();
-            setColumns(defaultColumns);
-            gridSettingsHandler.setIsModified(true);
-        },
-        applyChanges: (savePreferences: boolean) => {
-            applyChanges(savePreferences);
-        }
+        selectAll,
+        resetPreferences,
+        applyChanges
     }));
 
     useEffect(() => {
@@ -82,27 +136,7 @@ const ColumnChooser: React.FC<ColumnChooserProps> = forwardRef((props, ref) => {
         gridSettingsHandler.setIsModified(true);
     };
 
-    const applyChanges = (savePreferences: boolean) => {
 
-        if (!gridApi) return;
-        // Applica le modifiche alla griglia
-        const columnState = columns.map((col) => ({
-            colId: col.colId,
-            headerName: col.headerName,
-            hide: col.hide,
-            sort: null,
-            sortIndex: null,
-            width: col.width
-        }));
-
-        gridApi.applyColumnState({
-            state: columnState,
-            applyOrder: true
-        });
-
-        gridSettingsHandler.saveGridSettings(columnState, savePreferences);
-
-    };
 
     const loadCurrentColumnState = useCallback(() => {
 
@@ -210,8 +244,32 @@ const ColumnChooser: React.FC<ColumnChooserProps> = forwardRef((props, ref) => {
 
     return (
         <>
+            <style href="vfo-column-settings-css" precedence="default">
+                {CSS}
+            </style>
+            <div>
 
-            <Stack gap={3} className='ids-col-chooser-container'>
+                <Row
+                    className='border-bottom m-2 mx-5 pb-2 cursor-pointer'
+                >
+                    <Col>
+                        <div className='d-flex gap-2' title='Seleziona tutto' onClick={() => {}}>
+                            <span><SelectAll size={18} color={toCssColor(ThemeColor.PRIMARY)} /></span>
+                            <Form.Check
+                                type='checkbox'
+                                checked={areAllSelected}
+                                onChange={() => { selectAll() }}
+                            />
+
+                        </div>
+                    </Col>
+                    
+                </Row>
+
+                {/* <Button onClick={selectAll} className='mx-2'>Seleziona tutto</Button> */}
+                {/* <Button title='Ripristina le colonne di default' onClick={() => { resetPreferences(savePreferences) }}>Ripristina</Button> */}
+            </div>
+            <Stack gap={3} className='vfo-column-settings'>
                 {columns.map((column, index) => (
                     <Row
                         key={column.colId}
@@ -234,7 +292,7 @@ const ColumnChooser: React.FC<ColumnChooserProps> = forwardRef((props, ref) => {
                                     onChange={() => toggleColumnVisibility(column.colId)}
                                 />
                                 <p>{column.headerName}</p>
-                               
+
                             </div>
                         </Col>
                         <Col className='text-end'>
@@ -244,21 +302,21 @@ const ColumnChooser: React.FC<ColumnChooserProps> = forwardRef((props, ref) => {
                                         type='button'
                                         buttonConfig={{
                                             color: ThemeColor.PRIMARY,
-                                            variant:ThemeVariant.OUTLINED,
+                                            variant: ThemeVariant.OUTLINED,
                                             icon: <FaArrowUp size={15} />
 
                                         }}
                                         onClick={() => moveColumn(index, index - 1)}
                                         tooltip="Sposta su"
                                         readableName="Sposta su"
-                                    />                                    
+                                    />
                                 )}
                                 {index < columns.length - 1 && (
                                     <GenericButton
                                         type='button'
                                         buttonConfig={{
                                             color: ThemeColor.PRIMARY,
-                                            variant:ThemeVariant.OUTLINED,
+                                            variant: ThemeVariant.OUTLINED,
                                             icon: <FaArrowDown size={15} />
 
                                         }}
@@ -270,16 +328,12 @@ const ColumnChooser: React.FC<ColumnChooserProps> = forwardRef((props, ref) => {
 
                             </ButtonGroup>
                         </Col>
-                       
-                        
+
+
                     </Row>
                 ))}
             </Stack>
-
-
         </>
 
     );
 });
-
-export default ColumnChooser;

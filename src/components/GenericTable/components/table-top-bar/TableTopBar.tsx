@@ -6,7 +6,7 @@ import { useTableContext } from "../../hooks/useTableContext";
 import { GenericButton, GenericButtonConfig } from "../../../GenericButton";
 import { ThemeColor, ThemeVariant } from "../../../../utils";
 import { FaCog, FaColumns, FaSave } from "react-icons/fa";
-import ColumnSettings from "../column-settings/ColumnSettings";
+import { ColumnSettings } from "../column-settings/ColumnSettings";
 import { GenericModal } from "../../../modals/GenericModal";
 
 const TableTopBar = forwardRef((props: any, ref) => {
@@ -14,15 +14,13 @@ const TableTopBar = forwardRef((props: any, ref) => {
     const tableContext = useTableContext();
     const appearance = tableContext.appearance;
 
+    const t = tableContext.t;
+
     const columnSettingsRef = useRef(null);
+    const [openColumnSettings, setOpenColumnSettings] = useState<boolean>(false);
     
     // const metadata = props?.metadata;
     // const openColumnChooser = props?.openColumnChooser;
-
-
-    const openColumnSettings = useCallback(() => {
-        // openColumnChooser(true);
-    }, []);
 
     // useImperativeHandle(ref, () => ({
     //     quickFilterText: () => quickFilterRef.current?.quickFilterText(),
@@ -46,7 +44,7 @@ const TableTopBar = forwardRef((props: any, ref) => {
                         type="button"
                         tooltip="Gestione colonne"
                         readableName="Gestione colonne"
-                        onClick={openColumnSettings}
+                        onClick={() => { setOpenColumnSettings(true); }}
                         className="m-0"
                         buttonConfig={{
 
@@ -86,25 +84,41 @@ const TableTopBar = forwardRef((props: any, ref) => {
 
                 </InputGroup>            
 
-                <ColumnSettings
-                    ref={columnSettingsRef}
-                // domain={columnChooserProps.domain}
-                // tableName={columnChooserProps.tableName}
-                // gridApi={columnChooserProps.gridApi}
-                // defaultColumnDefs={columnChooserProps.defaultColumnDefs}
-                // metadata={columnChooserProps.metadata}
-                // shouldOpenModal={columnChooserProps.shouldOpenModal}
-                // onCloseModal={() => { columnChooserProps.onCloseModal(); }}
-                >
-                </ColumnSettings>
-
                 <GenericModal 
-                    title={`Gestione colonne - ${appearance.title}`} 
-                    children={undefined} 
-                    shouldOpenModal={false} 
+                    title={`${t.name} - Impostazione colonne`} 
+                    children={<>
+                    
+                        <ColumnSettings
+                            ref={columnSettingsRef}
+                        // domain={columnChooserProps.domain}
+                        // tableName={columnChooserProps.tableName}
+                        // gridApi={columnChooserProps.gridApi}
+                        // defaultColumnDefs={columnChooserProps.defaultColumnDefs}
+                        // metadata={columnChooserProps.metadata}
+                        // shouldOpenModal={columnChooserProps.shouldOpenModal}
+                        // onCloseModal={() => { columnChooserProps.onCloseModal(); }}
+                        >
+                        </ColumnSettings>
+                    
+                    </>} 
+                    shouldOpenModal={openColumnSettings} 
                     onCloseModal={function (): void {
-                        throw new Error('Function not implemented.');
-                } }  />
+                        setOpenColumnSettings(false);
+                    }}
+                    actions={[
+                        // {
+                        //     type: "switch",
+                        //     readableName: 'Salva preferenze',
+                        //     onClick: () => { },
+                        // },
+                        {  
+                            type:"button",
+                            readableName: 'Salva',
+                            onClick: () => {},
+                        }
+                    ]}  
+                
+                />
 
                 
             

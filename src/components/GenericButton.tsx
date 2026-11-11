@@ -9,7 +9,7 @@ import { toCssColor } from "../utils";
 
 const CSS = `
 /* GENERIC BUTTON */
-:where(.vfo-btn {
+:where(.vfo-btn) {
 
   border-radius: 5px;
 
@@ -20,17 +20,17 @@ const CSS = `
   &:hover {
     filter: brightness(1.1);
   }
-})
+}
 
-:where(.vfo-btn-dark {
+:where(.vfo-btn-dark) {
   &.vfo-btn-radio {
     background-color: $primary !important;
     color: $white !important;
     border: 1px solid $primary !important;
   }
-})
+}
 
-:where(.vfo-btn-light {
+:where(.vfo-btn-light) {
     background-color: $vfo-contrast-70 !important;
     border: 1px solid;
 
@@ -133,7 +133,7 @@ const CSS = `
       // border-color: var(--vfo-yellow) !important;
     }
 
-})
+}
 `;
 
 export type GenericButtonProps = { 
