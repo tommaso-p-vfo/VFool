@@ -122,6 +122,7 @@ export const GenericTable =
                 showNavbar: true,
                 showQuickFilter: true,
                 showSummary: true,
+                showColumnSettings: true,
                 ...appearance
             });
 
@@ -816,23 +817,7 @@ export const GenericTable =
                             </>
                         )}
 
-
-                        {tableAppearance?.showNavbar && <TableTopBar 
-                                ref={topBarRef} 
-                                metadata={topBarMetadata} 
-                                gridApiRef={gridApiRef} 
-                                openColumnChooser={() => setOpenColumnChoser(true)}
-                            ></TableTopBar> }
-                        {/* <ColumnChooserModal
-                            domain={columnChooserProps.domain}
-                            tableName={columnChooserProps.tableName}
-                            gridApi={columnChooserProps.gridApi}
-                            defaultColumnDefs={columnChooserProps.defaultColumnDefs}
-                            metadata={columnChooserProps.metadata}
-                            shouldOpenModal={columnChooserProps.shouldOpenModal}
-                            onCloseModal={() => { columnChooserProps.onCloseModal(); }}
-                            >
-                        </ColumnChooserModal> */}
+                        {tableAppearance?.showNavbar && <TableTopBar ref={topBarRef} /> }
 
                         {gridDetails &&
                             <Card className="mb-1 mt-0 ms-0 w-100">

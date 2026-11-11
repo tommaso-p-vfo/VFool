@@ -112,6 +112,7 @@ export type TableApperance = {
     showNavbar?: boolean; //default true
     showQuickFilter?: boolean; //default true
     showUserFilter?: boolean; //default true
+    showColumnSettings?: boolean; //default true
     showSummary?: boolean; //default true
 
     icon?: JSX.Element;

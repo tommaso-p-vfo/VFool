@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Modal, Button, Form, Container } from 'react-bootstrap';
-import ColumnChooser, { type ColumnChooserCallbacks } from './ColumnChooser';
+import ColumnChooser, { type ColumnChooserCallbacks } from './ColumnSettings';
 import type { ColDef } from 'ag-grid-community';
 
 export type ColumnChooserMetadata = {
