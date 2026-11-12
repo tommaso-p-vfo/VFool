@@ -4,9 +4,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { ColDef, FilterModel, GridApi } from "ag-grid-community";
 
-import { type TableUserFilter } from "../../../types/TableCustomFilter";
+import { type TableUserFilter } from "../../../types/TableUserFilter";
 
-import { AG_GRID_STORAGE_KEYS } from "../../../constants/tableStorageConstants";
+import { TABLE_STORAGE_KEYS } from "../../../constants/tableStorageConstants";
 import { getFromSession } from "../../../../../utils/StorageHelper";
 
 import { SERVICE_ENDPOINT } from "../../../../../types/api/ApiEndpoints";
@@ -17,7 +17,7 @@ import type { AgGridDomainType } from "../../../contexts/TableContext";
 import { IServiceLocator } from "../../../../../types/api/IServiceLocator";
 import { ApiRequest } from "../../../../../types/api/ApiRequest";
 import { TableHelper } from "../../../helpers/TableHelper";
-import { AG_GRID_FILTER_TYPE } from "../../../constants/tableConstants";
+import { TABLE_FILTER_TYPE } from "../../../constants/tableConstants";
 import { isEmptyObject } from "../../../../../utils/Guards";
 import { QuickSearchConfig, TableFilterConfig } from "../../../types/TableAttributes";
 
@@ -303,12 +303,12 @@ export const useCustomFilterLogic = ({
             filter: {
                 userId: {
                     filterType: 'number',
-                    type: AG_GRID_FILTER_TYPE.EQUALS,
+                    type: TABLE_FILTER_TYPE.EQUALS,
                     filter: user.id
                 },
                 entityName: {
                     filterType: 'text',
-                    type: AG_GRID_FILTER_TYPE.EQUALS,
+                    type: TABLE_FILTER_TYPE.EQUALS,
                     filter: _domain
                 }
             } as FilterModel,
@@ -340,8 +340,8 @@ export const useCustomFilterLogic = ({
         if (!filterConfig?.enableSavedFilters) return;
         if (!domain?.agGridDomain) return;
 
-        let _activeFilter = getFromSession(buildPath(domain.agGridDomain, AG_GRID_STORAGE_KEYS.COLUMN_FILTER_DETAILS));
-        let definition = getFromSession(buildPath(domain.agGridDomain, AG_GRID_STORAGE_KEYS.COLUMN_FILTER_PREFERENCES));
+        let _activeFilter = getFromSession(buildPath(domain.agGridDomain, TABLE_STORAGE_KEYS.USER_FILTER_ADDITIONAL_DETAILS));
+        let definition = getFromSession(buildPath(domain.agGridDomain, TABLE_STORAGE_KEYS.USER_FILTER));
         if(!_activeFilter) {
             resetUserFilter();
         }

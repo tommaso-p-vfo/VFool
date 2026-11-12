@@ -2,7 +2,7 @@
 
 import { getTranslation } from "../../../utils/TranslationHelper";
 
-import { AG_GRID_STORAGE_KEYS } from "../constants/tableStorageConstants";
+import { TABLE_STORAGE_KEYS } from "../constants/tableStorageConstants";
 import { getFromSession, getFromLocalSession, saveInSession, saveInLocalSession } from "../../../utils/StorageHelper";
 
 import { buildPath } from '../../../utils/Path';
@@ -12,7 +12,7 @@ import type { FilterModel } from "../../../types/api/FilterModel";
 
 
 import type { CellClickedEvent, ColDef, ColumnState, GridApi, ITextFilterParams } from 'ag-grid-community';
-import { AG_GRID_COLUMN_TYPE, AG_GRID_FILTER_TYPE, COL_EMPTY_PLACEHOLDER, COL_MIN_WIDTH, DEFAULT_COLUMN_FILTER, DEFAULT_COLUMN_SORTABLE, type AgGridColumnType, type AgGridFilterType } from "../constants/tableConstants";
+import { TABLE_COLUMN_TYPE, TABLE_FILTER_TYPE, COL_EMPTY_PLACEHOLDER, COL_MIN_WIDTH, DEFAULT_COLUMN_FILTER, DEFAULT_COLUMN_SORTABLE, type AgGridColumnType, type TableFilterType } from "../constants/tableConstants";
 //TODO fix ActionsCellRenderer
 // import ActionsCellRenderer from "../components/actions/ActionCellRenderer";
 
@@ -37,9 +37,10 @@ import CopyWrapperCellRenderer from "../components/cell-renderers/CopyWrapperCel
 import BooleanCellRenderer from "../components/cell-renderers/BooleanCellRenderer";
 import ListCellRenderer from "../components/cell-renderers/ListCellRenderer";
 
-import { type TableUserFilter } from "../types/TableCustomFilter";
-import { TableCustomSetting } from "../types/TableCustomSettings";
+import { type TableUserFilter } from "../types/TableUserFilter";
+import { TableUserColumnSettings } from "../types/TableUserColumnSettings";
 import { ColumnHandlerProps, TableActionConfig, TableColumnConfig, TableTranslations } from "../types/TableAttributes";
+import { VfoColumnState } from "../components/column-settings/ColumnSettings";
 
 // import { ArrayIncludesFilter } from "../components/filters/ArrayIncludesFilter";
 
@@ -220,7 +221,7 @@ export class TableHelper {
             if (colId.endsWith('Date') ||
                 colId.endsWith('At')) {
                 typeInferred = true;
-                column.type = AG_GRID_COLUMN_TYPE.AG_GRID_DATE;
+                column.type = TABLE_COLUMN_TYPE.DATE;
                 column.sortable = DEFAULT_COLUMN_SORTABLE;
             }
             else if (colId.startsWith('has') ||
@@ -229,7 +230,7 @@ export class TableHelper {
                 colId.startsWith('enable') ||
                 colId.endsWith('Enabled') ) {
                 typeInferred = true;
-                column.type = AG_GRID_COLUMN_TYPE.BOOLEAN;
+                column.type = TABLE_COLUMN_TYPE.BOOLEAN;
                 column.sortable = DEFAULT_COLUMN_SORTABLE;
             }
             else if (colId.startsWith('total') ||
@@ -239,17 +240,17 @@ export class TableHelper {
                 colId.endsWith('Closed'))
             {
                 typeInferred = true;
-                column.type = AG_GRID_COLUMN_TYPE.BOXED_NUMBER;
+                column.type = TABLE_COLUMN_TYPE.BOXED_NUMBER;
                 column.sortable = DEFAULT_COLUMN_SORTABLE;
             }
             else if (colId.endsWith('Color')) {
                 typeInferred = true;
-                column.type = AG_GRID_COLUMN_TYPE.COLOR;
+                column.type = TABLE_COLUMN_TYPE.COLOR;
                 column.sortable = DEFAULT_COLUMN_SORTABLE;
             } 
             else if (colId.endsWith('Percentage')) {
                 typeInferred = true;
-                column.type = AG_GRID_COLUMN_TYPE.PROGRESS_BAR;
+                column.type = TABLE_COLUMN_TYPE.PROGRESS_BAR;
                 column.sortable = DEFAULT_COLUMN_SORTABLE;
             }
             else if (
@@ -257,12 +258,12 @@ export class TableHelper {
                 colId.endsWith('Id')
             ) {
                 typeInferred = true;
-                column.type = AG_GRID_COLUMN_TYPE.AG_GRID_NUMBER;
+                column.type = TABLE_COLUMN_TYPE.NUMBER;
                 column.sortable = DEFAULT_COLUMN_SORTABLE;
             } else {
                 //default
                 typeInferred = true;
-                column.type = AG_GRID_COLUMN_TYPE.AG_GRID_TEXT;
+                column.type = TABLE_COLUMN_TYPE.TEXT;
                 column.sortable = DEFAULT_COLUMN_SORTABLE;
             }
         }
@@ -378,13 +379,12 @@ export class TableHelper {
      */
     static getCurrentColumnStates = (domain: string) => {
 
-        let currentColumnStates = [] as ColumnState[];
-        let columnPreferencesPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_PREFERENCES);
+        let currentColumnStates = [] as VfoColumnState[];
 
-        let columnPref = getFromSession(columnPreferencesPath);
-        if (!isEmptyObject(columnPref)) {
+        let userColumnSettings = getFromSession<TableUserColumnSettings>(buildPath(domain, TABLE_STORAGE_KEYS.USER_COLUMN_SETTINGS));
+        if (!isEmptyObject(userColumnSettings)) {
     
-            let sessionColumnStates = columnPref.settings as ColumnState[] | null;
+            let sessionColumnStates = userColumnSettings.settings as VfoColumnState[] | null;
             if (sessionColumnStates != null && sessionColumnStates.length > 0) {
                 //refresh del browser o get rows successivo
                 //carico le preferenze temporanee salvate in sessione
@@ -397,7 +397,7 @@ export class TableHelper {
 
     }
 
-    static purgeColumnStates = (columnStates: ColumnState[], defaultColumnDefs: ColDef[]): ColumnState[] => {
+    static purgeColumnStates = (columnStates: VfoColumnState[], defaultColumnDefs: ColDef[]): ColumnState[] => {
 
         if(columnStates.length == 0) return columnStates;
 
@@ -408,7 +408,7 @@ export class TableHelper {
             return { colId: def.field, hide: def.hide ?? false, width: def.width ?? COL_MIN_WIDTH, pinned: def.pinned } as ColumnState;
         });
 
-        return [...purgedColumnStates, ...newColumns] as ColumnState[];
+        return [...purgedColumnStates, ...newColumns] as VfoColumnState[];
     }
 
     /**
@@ -417,16 +417,14 @@ export class TableHelper {
      * @param domain il dominio della tabella (es. 'users', 'products', ecc.) - usato per costruire la chiave di storage
      * @returns le preferenze correnti delle colonne salvate in localStorage - empty altrimenti 
      */
-    static getUserGridSettingsFromLocalSession = (domain: string): TableCustomSetting => {
+    static getUserColumnSettingsFromLocalSession = (domain: string): TableUserColumnSettings => {
 
-        let columnPreferencesPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_PREFERENCES);
-
-        let columnPref = getFromLocalSession(columnPreferencesPath);
-        if (!isEmptyObject(columnPref)) {            
-            return { ...columnPref };
+        let userColumnSettings = getFromLocalSession<TableUserColumnSettings>(buildPath(domain, TABLE_STORAGE_KEYS.USER_COLUMN_SETTINGS));
+        if (!isEmptyObject(userColumnSettings)) {            
+            return { ...userColumnSettings };
         }
 
-        return {} as TableCustomSetting;
+        return {} as TableUserColumnSettings;
 
     }
 
@@ -436,35 +434,35 @@ export class TableHelper {
      * @param columnStates 
      * @param saveInLocalStorage - salva anche in local - default false
      */
-    static saveCurrentColumnStates = (domain: string, columnStates: ColumnState[], isInit: boolean = false): TableCustomSetting => {
-        let columnPreferencesPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_PREFERENCES);
+    static saveCurrentColumnStates = (domain: string, columnStates: ColumnState[], isInit: boolean = false): TableUserColumnSettings => {
+        let columnPreferencesPath = buildPath(domain, TABLE_STORAGE_KEYS.USER_COLUMN_SETTINGS);
         //salvo in sessione
-        let gridSettings = {} as TableCustomSetting;
+        let columnSettings = {} as TableUserColumnSettings;
 
-        let columnPref = getFromLocalSession(columnPreferencesPath);
+        let columnPref = getFromLocalSession<TableUserColumnSettings>(columnPreferencesPath);
         if (!isEmptyObject(columnPref)) {
             
-            gridSettings = {
+            columnSettings = {
                 ...columnPref,
                 settings: columnStates,
                 _isModified: !isInit
-            } as TableCustomSetting;
+            } as TableUserColumnSettings;
         } else {
-            gridSettings = {
+            columnSettings = {
                 id: -1,
                 entityName: domain,
                 settings: columnStates,
                 _isModified: !isInit
-            } as TableCustomSetting;
+            } as TableUserColumnSettings;
         }
 
-        saveInSession(columnPreferencesPath, gridSettings);
+        saveInSession(columnPreferencesPath, columnSettings);
 
         if (isInit) {
-            saveInLocalSession(columnPreferencesPath, gridSettings);
+            saveInLocalSession(columnPreferencesPath, columnSettings);
         }
 
-        return gridSettings;
+        return columnSettings;
     }
 
     /**
@@ -473,7 +471,7 @@ export class TableHelper {
      * @param pageSize 
      */
     static getCurrentTablePageSize = (domain: string, defaultPageSize: number) => {
-        let pageSizePath = buildPath(domain, AG_GRID_STORAGE_KEYS.PAGESIZE_PREFERENCE);
+        let pageSizePath = buildPath(domain, TABLE_STORAGE_KEYS.PAGESIZE_PREFERENCE);
         //ricavo dalla sessione
         let pageSize = sessionStorage.getItem(pageSizePath);
         if(pageSize)
@@ -488,13 +486,13 @@ export class TableHelper {
      * @param pageSize 
      */
     static saveCurrentTablePageSize = (domain: string, pageSize: number) => {
-        let pageSizePath = buildPath(domain, AG_GRID_STORAGE_KEYS.PAGESIZE_PREFERENCE);
+        let pageSizePath = buildPath(domain, TABLE_STORAGE_KEYS.PAGESIZE_PREFERENCE);
         //salvo in sessione
         sessionStorage.setItem(pageSizePath, JSON.stringify(pageSize));
     }
 
     static getCurrentTablePage = (domain: string, defaultPageNumber: number) => {
-        let pageNumberPath = buildPath(domain, AG_GRID_STORAGE_KEYS.CURRENT_PAGE);
+        let pageNumberPath = buildPath(domain, TABLE_STORAGE_KEYS.CURRENT_PAGE);
         //ricavo dalla sessione
         let pageNumber = sessionStorage.getItem(pageNumberPath);
         if (pageNumber)
@@ -504,12 +502,12 @@ export class TableHelper {
     }
 
     static resetCurrentTablePage = (domain: string) => {
-        let pagePath = buildPath(domain, AG_GRID_STORAGE_KEYS.CURRENT_PAGE);
+        let pagePath = buildPath(domain, TABLE_STORAGE_KEYS.CURRENT_PAGE);
         sessionStorage.setItem(pagePath, JSON.stringify(0));
     }
 
     static saveCurrentTablePage = (domain: string, pageNumber: number) => {
-        let pagePath = buildPath(domain, AG_GRID_STORAGE_KEYS.CURRENT_PAGE);
+        let pagePath = buildPath(domain, TABLE_STORAGE_KEYS.CURRENT_PAGE);
         sessionStorage.setItem(pagePath, JSON.stringify(pageNumber));
     }
 
@@ -518,7 +516,7 @@ export class TableHelper {
      * @param domain 
      */
     static getCurrentTableFilter = (domain: string) => {
-        let filterPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_FILTER_PREFERENCES);
+        let filterPath = buildPath(domain, TABLE_STORAGE_KEYS.USER_FILTER);
         //ricavo dalla sessione
         let filter = sessionStorage.getItem(filterPath);
         if (filter)
@@ -535,7 +533,7 @@ export class TableHelper {
      */
     static getCurrentTableFilterDetails = (domain: string) => {
 
-        let filterPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_FILTER_DETAILS);
+        let filterPath = buildPath(domain, TABLE_STORAGE_KEYS.USER_FILTER_ADDITIONAL_DETAILS);
 
         let filter = sessionStorage.getItem(filterPath);
         if (filter)
@@ -550,7 +548,7 @@ export class TableHelper {
      * @param domain 
      */
     static getCurrentQuickTableFilter = (domain: string) => {
-        let quickFilterPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_CURRENT_QUICK_FILTER);
+        let quickFilterPath = buildPath(domain, TABLE_STORAGE_KEYS.QUICK_SEARCH_FILTER);
         //ricavo dalla sessione
         let filter = sessionStorage.getItem(quickFilterPath);
         if (filter)
@@ -566,11 +564,11 @@ export class TableHelper {
      */
     static saveCurrentTableFilter = (domain: string, filter: any, quickSearchText?: string) => {
 
-        let filterPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_FILTER_PREFERENCES);
+        let filterPath = buildPath(domain, TABLE_STORAGE_KEYS.USER_FILTER);
         //salvo in sessione
         sessionStorage.setItem(filterPath, JSON.stringify(filter));
 
-        let quickFilterPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_CURRENT_QUICK_FILTER);
+        let quickFilterPath = buildPath(domain, TABLE_STORAGE_KEYS.QUICK_SEARCH_FILTER);
         if (quickSearchText && quickSearchText !== '' &&  quickSearchText !== undefined) {
             sessionStorage.setItem(quickFilterPath, quickSearchText);
         }
@@ -584,7 +582,7 @@ export class TableHelper {
      */
     static saveCurrentTableFilterDetails = (domain: string, filter?: TableUserFilter) => {
 
-        let filterPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_FILTER_DETAILS);
+        let filterPath = buildPath(domain, TABLE_STORAGE_KEYS.USER_FILTER_ADDITIONAL_DETAILS);
         //salvo in sessione
         sessionStorage.setItem(filterPath, JSON.stringify({ ...filter, definition: undefined }));
 
@@ -595,12 +593,12 @@ export class TableHelper {
      * @param domain rimuove dal sessionStorage la selected row
      */
     static removeCurrentTableFilter = (domain: string) => {
-        let filterPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_FILTER_PREFERENCES);
+        let filterPath = buildPath(domain, TABLE_STORAGE_KEYS.USER_FILTER);
         //rimuovo dalla sessione
         sessionStorage.removeItem(filterPath);
 
         //pulizia dei dettagli del filtro
-        let filterDetailsPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_FILTER_DETAILS);
+        let filterDetailsPath = buildPath(domain, TABLE_STORAGE_KEYS.USER_FILTER_ADDITIONAL_DETAILS);
         sessionStorage.removeItem(filterDetailsPath);
     }
 
@@ -610,7 +608,7 @@ export class TableHelper {
      * @param domain rimuove dal sessionStorage la selected row
      */
     static removeCurrentQuickTableFilter = (domain: string) => {
-        let selectedRowPath = buildPath(domain, AG_GRID_STORAGE_KEYS.COLUMN_CURRENT_QUICK_FILTER);
+        let selectedRowPath = buildPath(domain, TABLE_STORAGE_KEYS.QUICK_SEARCH_FILTER);
         //rimuovo dalla sessione
         sessionStorage.removeItem(selectedRowPath);
     }
@@ -622,7 +620,7 @@ export class TableHelper {
  * @param domain ricava dal sessionStorage la riga selezionata(selected row)
  */
     static getSelectedRow = (domain: string) => {
-        let selected = buildPath(domain, AG_GRID_STORAGE_KEYS.SELECTED_ROW);
+        let selected = buildPath(domain, TABLE_STORAGE_KEYS.SELECTED_ROW);
         //ricavo dalla sessione
         let selectedRow = sessionStorage.getItem(selected);
         if (selectedRow)
@@ -637,7 +635,7 @@ export class TableHelper {
      * @param selectedRow 
      */
     static saveSelectedRow = (domain: string, selectedRow: number) => {
-        let selectedRowPath = buildPath(domain, AG_GRID_STORAGE_KEYS.SELECTED_ROW);
+        let selectedRowPath = buildPath(domain, TABLE_STORAGE_KEYS.SELECTED_ROW);
         //salvo in sessione
         sessionStorage.setItem(selectedRowPath, selectedRow);
     }
@@ -647,7 +645,7 @@ export class TableHelper {
      * @param domain rimuove dal sessionStorage la selected row
      */
     static removeSelectedRow = (domain: string) => {
-        let selectedRowPath = buildPath(domain, AG_GRID_STORAGE_KEYS.SELECTED_ROW);
+        let selectedRowPath = buildPath(domain, TABLE_STORAGE_KEYS.SELECTED_ROW);
         //rimuovo dalla sessione
         sessionStorage.removeItem(selectedRowPath);
     }
@@ -734,7 +732,7 @@ export class TableHelper {
             //     };
 
             //     break;
-            case AG_GRID_COLUMN_TYPE.COLOR:
+            case TABLE_COLUMN_TYPE.COLOR:
                 colDef.headerComponent = ColorHeader;
                 colDef.headerComponentParams = {
                    //...metadata here
@@ -746,7 +744,7 @@ export class TableHelper {
                 };
                 break;
             
-            case AG_GRID_COLUMN_TYPE.BOXED_COMBOBOX:
+            case TABLE_COLUMN_TYPE.BOXED_COMBOBOX:
                 //colDef.headerComponent = ColorHeader;
                 //colDef.headerComponentParams = {
                 //    //...metadata here
@@ -771,7 +769,7 @@ export class TableHelper {
                 };
             break;
             
-        case AG_GRID_COLUMN_TYPE.BOXED_TEXT:
+        case TABLE_COLUMN_TYPE.BOXED_TEXT:
                 //colDef.headerComponent = ColorHeader;
                 //colDef.headerComponentParams = {
                 //    //...metadata here
@@ -795,7 +793,7 @@ export class TableHelper {
                     boxedColorColId: boxedColorColId
                 };
                 break;
-            case AG_GRID_COLUMN_TYPE.BOXED_NUMBER:
+            case TABLE_COLUMN_TYPE.BOXED_NUMBER:
                 colDef.headerClass = 'ag-center-header';
                 colDef.cellClass = 'text-center';
                 // colDef.headerComponent = BoxedNumberHeader;
@@ -815,7 +813,7 @@ export class TableHelper {
 
                 break;
 
-            case AG_GRID_COLUMN_TYPE.HIGHLIGHTED_TEXT:
+            case TABLE_COLUMN_TYPE.HIGHLIGHTED_TEXT:
                 //colDef.headerComponent = ColorHeader;
                 //colDef.headerComponentParams = {
                 //    //...metadata here
@@ -831,7 +829,7 @@ export class TableHelper {
                     params: column.params
                 };
                 break;
-            case AG_GRID_COLUMN_TYPE.EMPHASIZED_TEXT:
+            case TABLE_COLUMN_TYPE.EMPHASIZED_TEXT:
                 //colDef.headerComponent = ColorHeader;
                 //colDef.headerComponentParams = {
                 //    //...metadata here
@@ -847,7 +845,7 @@ export class TableHelper {
                     params: column.params
                 };
                 break;
-            case AG_GRID_COLUMN_TYPE.CURRENCY_NUMBER:
+            case TABLE_COLUMN_TYPE.CURRENCY_NUMBER:
                 //colDef.headerComponent = ColorHeader;
                 //colDef.headerComponentParams = {
                 //    //...metadata here
@@ -864,7 +862,7 @@ export class TableHelper {
                     params: column.params
                 };
                 break;
-            case AG_GRID_COLUMN_TYPE.COUNTABILITY_NUMBER:
+            case TABLE_COLUMN_TYPE.COUNTABILITY_NUMBER:
 
                 colDef.headerClass = 'ag-right-aligned-header';
                 cellRendererStrategyResponse = TableHelper._getCellRendererStrategy(column, CountabilityNumberCellRenderer);
@@ -879,7 +877,7 @@ export class TableHelper {
                 };
                 break;
 
-            case AG_GRID_COLUMN_TYPE.PROGRESS_BAR:
+            case TABLE_COLUMN_TYPE.PROGRESS_BAR:
                 colDef.headerClass = 'ag-center-header';
                 colDef.cellClass = 'ag-grid-center-cell';
                 // colDef.headerComponent = BoxedNumberHeader;
@@ -896,7 +894,7 @@ export class TableHelper {
                 };
                 break;
 
-            case AG_GRID_COLUMN_TYPE.LIST:
+            case TABLE_COLUMN_TYPE.LIST:
                 colDef.headerClass = 'ag-center-header';
                 colDef.cellClass = 'text-center';
                 // colDef.headerComponent = BoxedNumberHeader;
@@ -914,7 +912,7 @@ export class TableHelper {
 
                 break;
 
-            case AG_GRID_COLUMN_TYPE.BOOLEAN:
+            case TABLE_COLUMN_TYPE.BOOLEAN:
                 colDef.headerClass = 'ag-center-header';
                 colDef.cellClass = 'text-center';
                 colDef.cellRenderer = BooleanCellRenderer;
@@ -924,7 +922,7 @@ export class TableHelper {
                 };               
                 break;
 
-            case AG_GRID_COLUMN_TYPE.AG_GRID_DATE:
+            case TABLE_COLUMN_TYPE.DATE:
                 colDef.headerClass = 'ag-center-header';
                 colDef.cellClass = 'text-center';
                 colDef.valueFormatter = (params) => {
@@ -933,7 +931,7 @@ export class TableHelper {
                     return date.toLocaleDateString('it-IT'); // Formato italiano: DD/MM/YYYY
                 }
                 break;
-            case AG_GRID_COLUMN_TYPE.AG_GRID_NUMBER:
+            case TABLE_COLUMN_TYPE.NUMBER:
                 colDef.headerClass = 'ag-center-header';
                 colDef.cellClass = 'text-center';
                 break;
@@ -995,26 +993,26 @@ export class TableHelper {
         //ENABLE FILTER CONFIG - START
         switch (type) {
             //tipo custom - devono avere un filtro AG GRID impostato
-            case AG_GRID_COLUMN_TYPE.ACTIONS:
+            case TABLE_COLUMN_TYPE.ACTIONS:
                 colDef.filter = false;
                 break;
-            case AG_GRID_COLUMN_TYPE.HIGHLIGHTED_TEXT:
-            case AG_GRID_COLUMN_TYPE.EMPHASIZED_TEXT:
-            case AG_GRID_COLUMN_TYPE.BOXED_TEXT:
-            case AG_GRID_COLUMN_TYPE.COLOR:
-                colDef.filter = enabled ? AG_GRID_COLUMN_TYPE.AG_GRID_TEXT : false;
+            case TABLE_COLUMN_TYPE.HIGHLIGHTED_TEXT:
+            case TABLE_COLUMN_TYPE.EMPHASIZED_TEXT:
+            case TABLE_COLUMN_TYPE.BOXED_TEXT:
+            case TABLE_COLUMN_TYPE.COLOR:
+                colDef.filter = enabled ? TABLE_COLUMN_TYPE.TEXT : false;
                 break;
-            case AG_GRID_COLUMN_TYPE.BOXED_NUMBER:
-            case AG_GRID_COLUMN_TYPE.CURRENCY_NUMBER:
-                colDef.filter = enabled ? AG_GRID_COLUMN_TYPE.AG_GRID_NUMBER : false;
+            case TABLE_COLUMN_TYPE.BOXED_NUMBER:
+            case TABLE_COLUMN_TYPE.CURRENCY_NUMBER:
+                colDef.filter = enabled ? TABLE_COLUMN_TYPE.NUMBER : false;
                 break;
             //tipo di ag grid ufficiale
-            case AG_GRID_COLUMN_TYPE.AG_GRID_TEXT:
-            case AG_GRID_COLUMN_TYPE.AG_GRID_NUMBER:
-            case AG_GRID_COLUMN_TYPE.AG_GRID_DATE:
+            case TABLE_COLUMN_TYPE.TEXT:
+            case TABLE_COLUMN_TYPE.NUMBER:
+            case TABLE_COLUMN_TYPE.DATE:
                 colDef.filter = enabled ? type : false;        
                 break;
-            case AG_GRID_COLUMN_TYPE.BOOLEAN:
+            case TABLE_COLUMN_TYPE.BOOLEAN:
                 colDef.filter = enabled ? BooleanFilter : false;
                 // I filtri custom non supportano floating filter
                 colDef.floatingFilter = false;
@@ -1051,13 +1049,13 @@ export class TableHelper {
 
     }
 
-    static getFilterOptions = (type: AgGridColumnType): AgGridFilterType[] => {
+    static getFilterOptions = (type: AgGridColumnType): TableFilterType[] => {
 
-        let filterOptions = [] as AgGridFilterType[];
+        let filterOptions = [] as TableFilterType[];
 
         switch (type) {
-            case AG_GRID_COLUMN_TYPE.BOOLEAN:
-            case AG_GRID_COLUMN_TYPE.LIST:
+            case TABLE_COLUMN_TYPE.BOOLEAN:
+            case TABLE_COLUMN_TYPE.LIST:
                 //filter custom already applied here. vd. BooleanFilter.tsx
                 break;
             // case AG_GRID_COLUMN_TYPE.LIST:
@@ -1069,40 +1067,40 @@ export class TableHelper {
             //             ];
             //     }
             //     break;
-            case AG_GRID_COLUMN_TYPE.AG_GRID_DATE:
+            case TABLE_COLUMN_TYPE.DATE:
                 filterOptions = [
-                    AG_GRID_FILTER_TYPE.EQUALS,
-                    AG_GRID_FILTER_TYPE.IN_RANGE,
-                    AG_GRID_FILTER_TYPE.LESS_THAN,
-                    AG_GRID_FILTER_TYPE.GREATER_THAN,
-                    AG_GRID_FILTER_TYPE.LESS_THAN_OR_EQUAL,
-                    AG_GRID_FILTER_TYPE.GREATER_THAN_OR_EQUAL
+                    TABLE_FILTER_TYPE.EQUALS,
+                    TABLE_FILTER_TYPE.IN_RANGE,
+                    TABLE_FILTER_TYPE.LESS_THAN,
+                    TABLE_FILTER_TYPE.GREATER_THAN,
+                    TABLE_FILTER_TYPE.LESS_THAN_OR_EQUAL,
+                    TABLE_FILTER_TYPE.GREATER_THAN_OR_EQUAL
                 ];
                 break;
-            case AG_GRID_COLUMN_TYPE.CURRENCY_NUMBER:
-            case AG_GRID_COLUMN_TYPE.AG_GRID_NUMBER:
-            case AG_GRID_COLUMN_TYPE.BOXED_NUMBER:
+            case TABLE_COLUMN_TYPE.CURRENCY_NUMBER:
+            case TABLE_COLUMN_TYPE.NUMBER:
+            case TABLE_COLUMN_TYPE.BOXED_NUMBER:
                 filterOptions = [
-                    AG_GRID_FILTER_TYPE.EQUALS,
-                    AG_GRID_FILTER_TYPE.IN_RANGE,
-                    AG_GRID_FILTER_TYPE.LESS_THAN,
-                    AG_GRID_FILTER_TYPE.GREATER_THAN,
-                    AG_GRID_FILTER_TYPE.LESS_THAN_OR_EQUAL,
-                    AG_GRID_FILTER_TYPE.GREATER_THAN_OR_EQUAL
+                    TABLE_FILTER_TYPE.EQUALS,
+                    TABLE_FILTER_TYPE.IN_RANGE,
+                    TABLE_FILTER_TYPE.LESS_THAN,
+                    TABLE_FILTER_TYPE.GREATER_THAN,
+                    TABLE_FILTER_TYPE.LESS_THAN_OR_EQUAL,
+                    TABLE_FILTER_TYPE.GREATER_THAN_OR_EQUAL
                 ];
                 break;
-            case AG_GRID_COLUMN_TYPE.AG_GRID_TEXT:
-            case AG_GRID_COLUMN_TYPE.BOXED_TEXT:
-            case AG_GRID_COLUMN_TYPE.HIGHLIGHTED_TEXT:
-            case AG_GRID_COLUMN_TYPE.EMPHASIZED_TEXT:
-            case AG_GRID_COLUMN_TYPE.BOXED_COMBOBOX:
+            case TABLE_COLUMN_TYPE.TEXT:
+            case TABLE_COLUMN_TYPE.BOXED_TEXT:
+            case TABLE_COLUMN_TYPE.HIGHLIGHTED_TEXT:
+            case TABLE_COLUMN_TYPE.EMPHASIZED_TEXT:
+            case TABLE_COLUMN_TYPE.BOXED_COMBOBOX:
                 filterOptions = [
-                    AG_GRID_FILTER_TYPE.CONTAINS,
-                    AG_GRID_FILTER_TYPE.NOT_CONTAINS,
-                    AG_GRID_FILTER_TYPE.EQUALS,
-                    AG_GRID_FILTER_TYPE.NOT_EQUAL,
-                    AG_GRID_FILTER_TYPE.BLANK,
-                    AG_GRID_FILTER_TYPE.NOT_BLANK,
+                    TABLE_FILTER_TYPE.CONTAINS,
+                    TABLE_FILTER_TYPE.NOT_CONTAINS,
+                    TABLE_FILTER_TYPE.EQUALS,
+                    TABLE_FILTER_TYPE.NOT_EQUAL,
+                    TABLE_FILTER_TYPE.BLANK,
+                    TABLE_FILTER_TYPE.NOT_BLANK,
                 ];
                 break;
             default:

@@ -23,7 +23,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { type CustomFilterProps, useGridFilter } from 'ag-grid-react';
 import { Button, Form, InputGroup } from 'react-bootstrap';
-import { AG_GRID_FILTER_TYPE } from '../../constants/tableConstants';
+import { TABLE_FILTER_TYPE } from '../../constants/tableConstants';
 import { useTableContext } from '../../hooks/useTableContext';
 import GenericButton from '../../../GenericButton';
 import type { ButtonConfig } from '../../types/TableFormGroup';
@@ -165,7 +165,7 @@ export const ArrayIncludesFilter = (props: ArrayIncludesFilterProps) => {
 
         const conditions = selectedValues.map(sv => ({
             filterType: 'text',
-            type: AG_GRID_FILTER_TYPE.EQUALS,
+            type: TABLE_FILTER_TYPE.EQUALS,
             filter: sv,
         }));
 
@@ -282,7 +282,7 @@ export const ArrayIncludesFilter = (props: ArrayIncludesFilterProps) => {
                                 filter: {
                                     name: {
                                         filterType: 'text',
-                                        type: AG_GRID_FILTER_TYPE.CONTAINS,
+                                        type: TABLE_FILTER_TYPE.CONTAINS,
                                         filter: searchField
                                     }
                                 } as FilterModel

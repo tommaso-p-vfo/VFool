@@ -20,18 +20,18 @@ export type ColumnChooserMetadata = {
     systemColumns: string[];
 }
 
-interface  ColumnSettingsProps {
+interface ColumnSettingsProps {
     domain?: string;
     metadata?: ColumnChooserMetadata;
     ref: any
 }
 
-type VfoColumnState = ColumnState & {
-    headerName: string;
-    order: number;
+export type VfoColumnState = ColumnState & {
+    headerName?: string;
+    order?: number;
 }
 
-export type ColumnSettingsHandler = {
+export type TableColumnSettingsHandler = {
     selectAll: () => void;
     resetPreferences: (savePreferences: boolean) => void;
     applyChanges: (savePreferences: boolean) => void;
@@ -59,10 +59,8 @@ export const ColumnSettings: React.FC<ColumnSettingsProps> = forwardRef((props, 
     const gridSettingsHandler = tableContext.gridSettingsHandler;
 
     useEffect(() => {
-
-        let allSelected = columns.some()
-
-
+        let someHidden = columns.some((c) => c.hide);
+        setAreAllSelected(!someHidden);
     }, [columns]);
 
     const selectAll = () => {

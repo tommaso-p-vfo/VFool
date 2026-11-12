@@ -3,7 +3,7 @@ import { useTableContext } from "../../hooks/useTableContext";
 import { Form } from "react-bootstrap";
 import { GenericButton, type GenericButtonConfig } from "../../../GenericButton";
 import { FaPlusCircle, FaSave } from "react-icons/fa";
-import { TableUserFilter } from "../../types/TableCustomFilter";
+import { TableUserFilter } from "../../types/TableUserFilter";
 import { ThemeColor, ThemeVariant } from "../../../../utils";
 
 export const FilterPanel = () => {

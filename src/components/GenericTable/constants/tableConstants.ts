@@ -5,25 +5,27 @@ export const COL_MIN_WIDTH = 100;
 export const COL_EMPTY_PLACEHOLDER = '-';
 
 //usato da inifite row model per il precaricamento dei dati in cache
-export const AG_GRID_ROW_BLOCK_SIZE = 50;
+export const TABLE_ROW_BLOCK_SIZE = 50;
 
-export const AG_GRID_PAGE_SIZE_SELECTOR = [5, 10, 20, 50, 100];
-export const AG_GRID_PAGE_SIZE = {
+export const TABLE_PAGE_SIZE_SELECTOR = [5, 10, 20, 50, 100];
+export const TABLE_PAGE_SIZE = {
     _5: 5,
     _10: 10,
     _20: 20,
     _50: 50,
     _100: 100,
 }
-export const AG_GRID_DEFAULT_PAGE_SIZE = 20;
+export const TABLE_DEFAULT_PAGE_SIZE = 20;
 
-export type TableColumnType = typeof AG_GRID_COLUMN_TYPE[keyof typeof AG_GRID_COLUMN_TYPE];
+export type TableColumnType = typeof TABLE_COLUMN_TYPE[keyof typeof TABLE_COLUMN_TYPE];
 
-export const AG_GRID_COLUMN_TYPE = {
-    AG_GRID_TEXT: "agTextColumnFilter", //AG GRID FILTER - THIS VALUE CAN'T CHANGE
-    AG_GRID_NUMBER: "agNumberColumnFilter", //AG GRID FILTER - THIS VALUE CAN'T CHANGE
-    AG_GRID_DATE: "agDateColumnFilter", //AG GRID FILTER - THIS VALUE CAN'T CHANGE
-    AG_GRID_SET: "agSetColumnFilter", //AG GRID FILTER - THIS VALUE CAN'T CHANGE
+export const TABLE_COLUMN_TYPE = {
+    TEXT: "agTextColumnFilter", //AG GRID FILTER - THIS VALUE CAN'T CHANGE
+    NUMBER: "agNumberColumnFilter", //AG GRID FILTER - THIS VALUE CAN'T CHANGE
+    DATE: "agDateColumnFilter", //AG GRID FILTER - THIS VALUE CAN'T CHANGE
+    SET: "agSetColumnFilter", //AG GRID FILTER - THIS VALUE CAN'T CHANGE
+
+    //customs below
     ACTIONS: "hdsActionsColumnType", //custom - colonna azioni
     BOOLEAN: "hdsBooleanColumnType", //custom
     COLOR: "hdsColorColumnType", //custom
@@ -38,7 +40,7 @@ export const AG_GRID_COLUMN_TYPE = {
     LIST: "hdsList", //custom
 }
 
-export const AG_GRID_FILTER_TYPE = {
+export const TABLE_FILTER_TYPE = {
     // ===== TEXT FILTER TYPES =====
     CONTAINS: "contains",
     NOT_CONTAINS: "notContains",
@@ -81,9 +83,9 @@ export const AG_GRID_FILTER_TYPE = {
     FLOATING_FILTER: "floatingFilter"
 } as const;
 
-export type AgGridFilterType = typeof AG_GRID_FILTER_TYPE[keyof typeof AG_GRID_FILTER_TYPE];
+export type TableFilterType = typeof TABLE_FILTER_TYPE[keyof typeof TABLE_FILTER_TYPE];
 
-export const AG_GRID_FILTER_TYPE_LABEL: Record<string, string> = {
+export const TABLE_FILTER_TYPE_LABEL: Record<string, string> = {
     contains: "Contiene",
     notContains: "Non contiene",
     equals: "Uguale a",
@@ -104,4 +106,4 @@ export const AG_GRID_FILTER_TYPE_LABEL: Record<string, string> = {
 };
 
 export const getFilterTypeLabel = (filterType: string): string =>
-    AG_GRID_FILTER_TYPE_LABEL[filterType] ?? filterType;
+    TABLE_FILTER_TYPE_LABEL[filterType] ?? filterType;

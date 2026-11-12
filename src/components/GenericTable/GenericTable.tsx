@@ -41,10 +41,8 @@ import { SERVICE_ENDPOINT } from "../../types/api/ApiEndpoints";
 // import TableTopBar from "./components/table-top-bar/TableTopBar";
 
 import type { ColumnHandlerProps, TableActionConfig, TableAdditionalDetails, TableApperance, TableAttributes, TableColumnConfig, TableHandler, TableSummaryConfig, TableTranslations } from "./types/TableAttributes";
-import { type TableUserFilter } from "./types/TableCustomFilter";
-import { TableCustomSetting } from "./types/TableCustomSettings";
-
-import type { ColumnState } from "./types/TableColumn";
+import { type TableUserFilter } from "./types/TableUserFilter";
+import { type TableUserColumnSettings } from "./types/TableUserColumnSettings";
 
 import { LoadingOverlay } from "../LoadingOverlay";
 import { buildPath } from "../../utils/Path";
@@ -53,11 +51,11 @@ import { getTranslation } from "../../utils/TranslationHelper";
 import { isEmptyObject, isFunction } from "../../utils/Guards";
 import { formatAs } from "../../utils/Format";
 
-import { AG_GRID_STORAGE_KEYS } from "./constants/tableStorageConstants";
+import { TABLE_STORAGE_KEYS } from "./constants/tableStorageConstants";
 import { 
-    AG_GRID_DEFAULT_PAGE_SIZE, 
-    AG_GRID_PAGE_SIZE_SELECTOR, 
-    AG_GRID_ROW_BLOCK_SIZE 
+    TABLE_DEFAULT_PAGE_SIZE, 
+    TABLE_PAGE_SIZE_SELECTOR, 
+    TABLE_ROW_BLOCK_SIZE 
 } from "./constants/tableConstants";
 
 import { type ApiRequest } from "../../types/api/ApiRequest";
@@ -78,6 +76,7 @@ import { useTableContext } from "./hooks/useTableContext";
 import { ThemeColor, toCssColor } from "../../utils/Color";
 import TableTopBar from "./components/table-top-bar/TableTopBar";
 import { useCustomFilterLogic } from "./components/custom-filter/hooks/useCustomFiltersLogic";
+import { VfoColumnState } from "./components/column-settings/ColumnSettings";
 
 
 //ag grid - modulo community per caricamento dinamico dei dati
@@ -158,7 +157,7 @@ export const GenericTable =
         const [userFilter, setUserFilter] = useState<TableUserFilter>();
 
         //PREFERENZE COLONNA CORRENTI
-        const [gridSettings, setGridSettings] = useState<TableCustomSetting>();
+        const [userColumnSettings, setUserColumnSettings] = useState<TableUserColumnSettings>();
 
         //SOMMARIO - totali tabella ecc.
         const [summary, setSummary] = useState<any|undefined>(undefined);
@@ -315,8 +314,8 @@ export const GenericTable =
 
             if (params.finished) {
                 if (gridApiRef?.current) {
-                    let _gridSettings = TableHelper.saveCurrentColumnStates(agGridDomainRef.current, gridApiRef.current.getColumnState());
-                    setGridSettings(_gridSettings);
+                    let _userColumnSettings = TableHelper.saveCurrentColumnStates(agGridDomainRef.current, gridApiRef.current.getColumnState());
+                    setUserColumnSettings(_userColumnSettings);
                 }
                     
             }
@@ -327,8 +326,8 @@ export const GenericTable =
             if (!USER_SOURCES.has(e.source)) return;
 
             if (gridApiRef?.current) {
-                let _gridSettings = TableHelper.saveCurrentColumnStates(agGridDomainRef.current, gridApiRef.current.getColumnState());
-                setGridSettings(_gridSettings);
+                let _userColumnSettings = TableHelper.saveCurrentColumnStates(agGridDomainRef.current, gridApiRef.current.getColumnState());
+                setUserColumnSettings(_userColumnSettings);
             }
 
         }, []);
@@ -338,8 +337,8 @@ export const GenericTable =
             if (!USER_SOURCES.has(e.source)) return;
 
             if (gridApiRef?.current) {
-                let _gridSettings = TableHelper.saveCurrentColumnStates(agGridDomainRef.current, gridApiRef.current.getColumnState());
-                setGridSettings(_gridSettings);
+                let _userColumnSettings = TableHelper.saveCurrentColumnStates(agGridDomainRef.current, gridApiRef.current.getColumnState());
+                setUserColumnSettings(_userColumnSettings);
             }
 
         }, []);
@@ -349,8 +348,8 @@ export const GenericTable =
             if (!USER_SOURCES.has(e.source)) return;
 
             if (gridApiRef?.current) {
-                let _gridSettings = TableHelper.saveCurrentColumnStates(agGridDomainRef.current, gridApiRef.current.getColumnState());
-                setGridSettings(_gridSettings);
+                let _userColumnSettings = TableHelper.saveCurrentColumnStates(agGridDomainRef.current, gridApiRef.current.getColumnState());
+                setUserColumnSettings(_userColumnSettings);
                 TableHelper.resetCurrentTablePage(agGridDomainRef.current);
             }
 
@@ -426,7 +425,7 @@ export const GenericTable =
 
             const saved = Number(
                 sessionStorage.getItem(
-                    buildPath(agGridDomainRef.current, AG_GRID_STORAGE_KEYS.CURRENT_PAGE)
+                    buildPath(agGridDomainRef.current, TABLE_STORAGE_KEYS.CURRENT_PAGE)
                 ) ?? 0
             );
 
@@ -585,16 +584,16 @@ export const GenericTable =
             if (!columnDefs || columnDefs.length === 0) return undefined;
 
             const _defaultColumnDefs = columnDefs;
-            let columnState = [] as ColumnState[];
+            let columnState = [] as VfoColumnState[];
 
             // preferenze sessione corrente
             const currentColumnStates = TableHelper.getCurrentColumnStates(agGridDomainRef.current);
             if (currentColumnStates?.length > 0) {
                 const purged = TableHelper.purgeColumnStates(currentColumnStates, _defaultColumnDefs);
-                const currentGridSettings = getFromSession(buildPath(domain.agGridDomain, AG_GRID_STORAGE_KEYS.COLUMN_PREFERENCES));
-                if(currentGridSettings) {
-                    setGridSettings({ 
-                        ...currentGridSettings,
+                const currentUserColumnSettings = getFromSession<TableUserColumnSettings>(buildPath(domain.agGridDomain, TABLE_STORAGE_KEYS.USER_COLUMN_SETTINGS));
+                if(currentUserColumnSettings) {
+                    setUserColumnSettings({ 
+                        ...currentUserColumnSettings,
                         settings: purged
                     });
                 }
@@ -604,18 +603,18 @@ export const GenericTable =
 
             // preferenze localStorage
             if (columnState.length === 0) {
-                const localUGS = TableHelper.getUserGridSettingsFromLocalSession(agGridDomainRef.current);
+                const localUGS = TableHelper.getUserColumnSettingsFromLocalSession(agGridDomainRef.current);
                 if (!isEmptyObject(localUGS)) {
                     const purged = TableHelper.purgeColumnStates(localUGS.settings as ColumnState[], _defaultColumnDefs);
 
                     let _gridSettings = TableHelper.saveCurrentColumnStates(agGridDomainRef.current, purged, true);
-                    setGridSettings(_gridSettings);
+                    setUserColumnSettings(_gridSettings);
                     columnState = purged;
                 }
             }
 
             const savedFilter = TableHelper.getCurrentTableFilter(agGridDomainRef.current);
-            const savedPageSize = TableHelper.getCurrentTablePageSize(agGridDomainRef.current, dataConnector?.defaultPage?.pageSize ?? AG_GRID_DEFAULT_PAGE_SIZE);
+            const savedPageSize = TableHelper.getCurrentTablePageSize(agGridDomainRef.current, dataConnector?.defaultPage?.pageSize ?? TABLE_DEFAULT_PAGE_SIZE);
 
             const state: GridState = {
                 pagination: { pageSize: savedPageSize },
@@ -781,24 +780,29 @@ export const GenericTable =
             domain && (
                 <TableProvider 
                     ref={tableContextRef}
+
+                    //config iniziale da GenericTable props
                     appearance={tableAppearance}
                     dataConnector={dataConnector}
                     translations={t}
                     columnsConfig={columnsConfig}
                     filterConfig={filterConfig}
                     
+                    //state per gestione filtri utente
                     userFilter={userFilter} 
                     setUserFilter={setUserFilter}
+
+                    //state per gestione preferenze colonne
+                    userColumnSettings={userColumnSettings} 
+                    setUserColumnSettings={setUserSettings}
+                    defaultColumnDefinitions={columnDefs}
                     
-                    columnDefinitions={columnDefs}
 
                     // metadata={metadata} 
                     serviceLocator={serviceLocator}
                     domain={{ agGridDomain: agGridDomainRef.current, serviceLocatorDomain: serviceLocatorDomainRef.current }} 
                     gridApi={gridApiState} 
                     isGridReady={isGridReady} 
-                    gridSettings={gridSettings} 
-                    setGridSettings={setGridSettings}
                     summaryHandler={{ config: summaryConfig, data: summary } as SummaryHandler}
   
                     isLoadingGridData={loading}
@@ -844,13 +848,13 @@ export const GenericTable =
 
                             //infinite row model
                             rowModelType={"infinite"}
-                            cacheBlockSize={AG_GRID_ROW_BLOCK_SIZE} //numero di righe per blocco. Una chiamata al server per ogni blocco
+                            cacheBlockSize={TABLE_ROW_BLOCK_SIZE} //numero di righe per blocco. Una chiamata al server per ogni blocco
                             maxBlocksInCache={4} // Numero massimo di blocchi nella cache per la tabella
 
                             pagination={true}
                             paginationPageSize={pageSelectorSize}
                             paginationAutoPageSize={false}
-                            paginationPageSizeSelector={AG_GRID_PAGE_SIZE_SELECTOR}
+                            paginationPageSizeSelector={TABLE_PAGE_SIZE_SELECTOR}
 
                             rowSelection={{
                                 mode: 'singleRow',          // oppure 'multiRow'

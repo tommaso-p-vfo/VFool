@@ -4,7 +4,7 @@ import { JSX } from "react/jsx-runtime";
 import { ThemeColor, ThemeVariant } from "../../../utils";
 import { GridApi } from "ag-grid-community";
 import { TableColumnType } from "../constants/tableConstants";
-import { TableUserFilter } from "./TableCustomFilter";
+import { TableUserFilter } from "./TableUserFilter";
 import { QuickSearchInternalHandler } from "../components/custom-filter/hooks/useCustomFiltersLogic";
 
 /**
@@ -218,9 +218,13 @@ export type QuickSearchConfig = {
 }
 
 export type TableFilterConfig = {
-    enableSavedFilters?: boolean; // default false - abilita il CRUD lato server - deve essere implementato lato service locator con service: <domain>.tableSavedUserFilter.list
+    enableSavedFilters?: boolean; // default false - abilita il CRUD lato server - deve essere implementato lato service locator con service: users.tableSavedUserFilter.list
     baseFilter?: FilterModel; //carica la griglia applicando il seguente filterModel - va in AND con userFilter ed è trasparente all'utente
     quickSearch?: QuickSearchConfig;
+}
+
+export type ColumnSettingsConfig = {
+    enableSavedColumnSettings?: boolean; // default false - abilita il CRUD lato server - deve essere implementato lato service locator con service: users.tableSavedUserColumnSettings.list
 }
 
 export type TableFilterHandler = {

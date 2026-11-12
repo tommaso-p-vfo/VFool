@@ -16,20 +16,17 @@ import type {
 } from "ag-grid-community";
 
 import { removeFromSession } from "../../../utils/StorageHelper";
-import { AG_GRID_STORAGE_KEYS } from "../constants/tableStorageConstants";
+import { TABLE_STORAGE_KEYS } from "../constants/tableStorageConstants";
 
-import { type TableUserFilter } from "../types/TableCustomFilter";
-import { TableCustomSetting } from "../types/TableCustomSettings";
-
-// TODO fix useCustomFiltersLogic e useGridSettingsLogic
-// import { useCustomFilterLogic, type TableCustomFilterHandler } from "../components/custom-filter/hooks/useCustomFiltersLogic";
-// import { useGridSettingsLogic, type GridSettingsHandler } from "../components/column-preferences/hooks/useGridSettingsLogic";
+import { type TableUserFilter } from "../types/TableUserFilter";
+import { type TableUserColumnSettings } from "../types/TableUserColumnSettings";
 
 import type { PageRequest } from "../../../types/api/PageTypes";
-import { AG_GRID_COLUMN_TYPE } from "../constants/tableConstants";
-import { TableTranslation } from "../types/TableTranslation";
+import { TABLE_COLUMN_TYPE } from "../constants/tableConstants";
 import { TableApperance, TableColumnConfig, TableDataConnector, TableFilterConfig, TableFilterHandler, TableSummaryConfig, TableTranslations } from "../types/TableAttributes";
 import { TableFilterInternalHandler, useCustomFilterLogic } from "../components/custom-filter/hooks/useCustomFiltersLogic";
+import { TableColumnSettingsHandler } from "../components/column-settings/ColumnSettings";
+import { useColumnSettingsLogic } from "../components/column-settings/hooks/useColumnSettingsLogic";
 
 export type AgGridDomainType = {
 
@@ -62,6 +59,7 @@ export type TableSavedFilterHandler = {
 export type TableContextHandler = {
     appearance?: TableApperance;
     filterHandler?: TableFilterHandler;
+    columnSettingsHandler?: TableColumnSettingsHandler;
 
     savedFiltersHandler?: TableSavedFilterHandler;
 
@@ -74,10 +72,11 @@ export type TableContextHandler = {
 export interface TableInternalContextHandler {
     appearance?: TableApperance;
     filterHandler: TableFilterInternalHandler;
+    columnSettingsHandler: TableColumnSettingsHandler;
 
     domain: AgGridDomainType | undefined;
     serviceLocator: IServiceLocator;
-    t: TableTranslation;
+    t: TableTranslations;
 
     //colonne definite al caricamento della griglia
     //indipendenti dal columnState corrente
@@ -93,9 +92,6 @@ export interface TableInternalContextHandler {
     isGridReady: boolean;
     data: any;
     
-    
-    //TODO fix types
-    gridSettingsHandler: any; // GridSettingsHandler;
     summaryHandler?: SummaryHandler; 
     isLoadingGridData: boolean; //items loading from server
 }
@@ -113,16 +109,17 @@ interface TableProviderProps {
     userFilter: TableUserFilter | undefined;
     setUserFilter: (filter?: TableUserFilter) => void; 
 
-    gridApi: GridApi | null;
-
+    
+    userColumnSettings: TableUserColumnSettings |undefined;
+    setUserColumnSettings: (columnSettings?: TableUserColumnSettings) => void;
     defaultColumnDefinitions?: ColDef[]; 
-
+    
+    
+    gridApi: GridApi | null;
     serviceLocator: IServiceLocator;
     // metadata: TableMetadata<any>;
     domain?: AgGridDomainType|undefined;
     isGridReady: boolean;
-    gridSettings: TableCustomSetting |undefined;
-    setGridSettings: (gridSettings?: TableCustomSetting) => void;
     
     summaryHandler?: SummaryHandler;
 
@@ -143,13 +140,15 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
 
     defaultColumnDefinitions,
 
+    userSettings, 
+    setUserSettings, 
+
+
     serviceLocator, 
     // metadata, 
     domain, 
     gridApi, 
     isGridReady, 
-    gridSettings, 
-    setGridSettings, 
     summaryHandler, 
     isLoadingGridData 
 }: TableProviderProps, ref) => {
@@ -163,8 +162,7 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
         setUserFilter 
     });
     
-    //TODO fix useGridSettingsLogic
-    const gridSettingsHandler = {}; //useGridSettingsLogic(domain, gridSettings, setGridSettings, serviceLocator);
+    const columnSettingsHandler = useColumnSettingsLogic(userSettings, setUserSettings);
 
     const [comboboxMap, setComboboxMap] = useState<Map<string, TableComboboxOption[]>>(new Map());  //AG_GRID_COLUMN_TYPE.COMBOBOX se hanno domain
 
@@ -175,7 +173,7 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
 
     const [isLoadingData, setIsLoadingData] = useState(false);
 
-    const t = translations ?? {} as TableTranslation;
+    const t = translations ?? {} as TableTranslations;
 
     useEffect(() => {
       
@@ -195,7 +193,7 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
         if (prevServiceLocatorDomain !== newServiceLocatorDomain) {
             // se cambio dominio/table,
             // pulisco le preferenze di pagina salvate in sessione per evitare di ritrovarmi su pagine non esistenti
-            removeFromSession(buildPath(_domain.agGridDomain, AG_GRID_STORAGE_KEYS.CURRENT_PAGE));
+            removeFromSession(buildPath(_domain.agGridDomain, TABLE_STORAGE_KEYS.CURRENT_PAGE));
         }
 
     }, [_domain]);
@@ -209,7 +207,7 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
             const map = new Map<string, { id: number, name: string, raw: any }[]>();
 
             for (const [key, column] of Object.entries(columnsConfig)) {
-                if (column && column.type === AG_GRID_COLUMN_TYPE.LIST) {
+                if (column && column.type === TABLE_COLUMN_TYPE.LIST) {
                     if (!column.domain) continue;
 
                     // sort: { colId: 'name', sort:'DESC'}
@@ -244,7 +242,7 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
             const map = new Map<string, TableComboboxOption[]>();
 
             for (const [key, column] of Object.entries(columnsConfig)) {
-                if (column && column.type === AG_GRID_COLUMN_TYPE.BOXED_COMBOBOX) {
+                if (column && column.type === TABLE_COLUMN_TYPE.BOXED_COMBOBOX) {
                     if (!column.domain) continue;
 
                     const request = { service: buildPath(column.domain, SERVICE_ENDPOINT.LIST) } as ApiRequest;
@@ -306,13 +304,14 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
         },
 
         filterHandler,        
+        columnSettingsHandler,
 
         domain,
         serviceLocator,
         t,
-
+        
         defaultColumnDefinitions,
-
+        
         // metadata,
         comboboxMap,
         listsMap,
@@ -320,16 +319,16 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
         gridApi,
         isGridReady,
         data,
-
+        
         fetchLists,
         
-        gridSettingsHandler,
         summaryHandler,
         isLoadingGridData
     }), [
-
+        
         appearance,
         filterHandler,
+        columnSettingsHandler, 
 
         domain,
          serviceLocator,
@@ -345,7 +344,6 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
          isGridReady, 
          data, 
           
-         gridSettingsHandler, 
          summaryHandler, 
          isLoadingGridData
         ]);

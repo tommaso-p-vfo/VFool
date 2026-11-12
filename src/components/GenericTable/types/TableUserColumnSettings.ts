@@ -29,4 +29,4 @@ export type TableCustomSettingUiState = {
 /**
  * Impostazioni griglia usate dai componenti: dati API + stato UI.
  */
-export type TableCustomSetting = TableCustomSettingDto & TableCustomSettingUiState;
+export type TableUserColumnSettings = TableCustomSettingDto & TableCustomSettingUiState;

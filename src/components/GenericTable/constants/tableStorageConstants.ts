@@ -11,15 +11,14 @@
  *     PENDING_CONTRACT: 'pendingContract',
  * } as const;
  */
-export const AG_GRID_STORAGE_KEYS = {
-    // --- Tabella (GenericTable / ColumnChooser) ---
-    /** Preferenze colonne dell'utente salvate tramite ColumnChooser. */
-    COLUMN_PREFERENCES: 'columnPreferences',
-    /** Impostazioni della griglia dell'utente (ordine, larghezze, visibilità). */
+export const TABLE_STORAGE_KEYS = {
+    USER_COLUMN_SETTINGS: 'userColumnSettings',
     COLUMN_DETAILS: 'columnDetails',
-    COLUMN_FILTER_PREFERENCES: 'columnFilterPreferences',
-    COLUMN_FILTER_DETAILS: 'columnFilterDetails',
-    COLUMN_CURRENT_QUICK_FILTER: 'columnCurrentQuickFilter',
+    
+    QUICK_SEARCH_FILTER: 'quickSearchFilter',
+    USER_FILTER: 'userFilter',
+    USER_FILTER_ADDITIONAL_DETAILS: 'columnFilterAdditionalDetails',
+
     PAGESIZE_PREFERENCE: 'pageSizePreference',
     SELECTED_ROW: 'selectedRow',
     CURRENT_PAGE: 'currentPage',
@@ -39,7 +38,7 @@ export const AG_GRID_STORAGE_KEYS = {
 } as const;
 
 /** Nome di una chiave di storage di VFool (es. `'COLUMN_PREFERENCES'`). */
-export type AgGridStorageKeyName = keyof typeof AG_GRID_STORAGE_KEYS;
+export type TableStorageKeyName = keyof typeof TABLE_STORAGE_KEYS;
 
 /** Valore di una chiave di storage di VFool (es. `'columnPreferences'`). */
-export type AgGridStorageKey = (typeof AG_GRID_STORAGE_KEYS)[AgGridStorageKeyName];
+export type TableStorageKey = (typeof TABLE_STORAGE_KEYS)[TableStorageKeyName];
