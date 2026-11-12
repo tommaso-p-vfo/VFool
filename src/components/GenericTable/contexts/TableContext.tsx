@@ -4,11 +4,9 @@ import { IServiceLocator } from '../../../types/api/IServiceLocator';
 import { type ApiRequest } from "../../../types/api/ApiRequest";
 import { buildPath } from "../../../utils/Path";
 
-import type { TableMetadata } from "../types/TableMetadata";
-import type { TableComboboxOption } from "../components/cell-renderers/components/TableCombobox";
 
+import type { TableComboboxOption } from "../components/cell-renderers/components/TableCombobox";
 import { SERVICE_ENDPOINT } from "../../../types/api/ApiEndpoints";
-import { type FilterModel } from "../../../types/api/FilterModel";
 
 import type {
     ColDef,
@@ -25,8 +23,7 @@ import type { PageRequest } from "../../../types/api/PageTypes";
 import { TABLE_COLUMN_TYPE } from "../constants/tableConstants";
 import { TableApperance, TableColumnConfig, TableDataConnector, TableFilterConfig, TableFilterHandler, TableSummaryConfig, TableTranslations } from "../types/TableAttributes";
 import { TableFilterInternalHandler, useCustomFilterLogic } from "../components/custom-filter/hooks/useCustomFiltersLogic";
-import { TableColumnSettingsHandler } from "../components/column-settings/ColumnSettings";
-import { useColumnSettingsLogic } from "../components/column-settings/hooks/useColumnSettingsLogic";
+import { TableColumnSettingsHandler, TableInternalColumnSettingsHandler, useColumnSettingsLogic } from "../components/column-settings/hooks/useColumnSettingsLogic";
 
 export type AgGridDomainType = {
 
@@ -72,16 +69,14 @@ export type TableContextHandler = {
 export interface TableInternalContextHandler {
     appearance?: TableApperance;
     filterHandler: TableFilterInternalHandler;
-    columnSettingsHandler: TableColumnSettingsHandler;
+    columnSettingsHandler: TableInternalColumnSettingsHandler;
 
     domain: AgGridDomainType | undefined;
     serviceLocator: IServiceLocator;
     t: TableTranslations;
 
-    //colonne definite al caricamento della griglia
-    //indipendenti dal columnState corrente
-    //utile per reset
-    defaultColumnDefinitions?: ColDef[];
+
+
     
     // metadata: TableMetadata<any> | undefined;
     comboboxMap: Map<string, TableComboboxOption[]>;
@@ -109,7 +104,6 @@ interface TableProviderProps {
     userFilter: TableUserFilter | undefined;
     setUserFilter: (filter?: TableUserFilter) => void; 
 
-    
     userColumnSettings: TableUserColumnSettings |undefined;
     setUserColumnSettings: (columnSettings?: TableUserColumnSettings) => void;
     defaultColumnDefinitions?: ColDef[]; 
@@ -138,10 +132,9 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
     userFilter, 
     setUserFilter, 
 
+    userColumnSettings, 
+    setUserColumnSettings, 
     defaultColumnDefinitions,
-
-    userSettings, 
-    setUserSettings, 
 
 
     serviceLocator, 
@@ -162,7 +155,14 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
         setUserFilter 
     });
     
-    const columnSettingsHandler = useColumnSettingsLogic(userSettings, setUserSettings);
+    const columnSettingsHandler = useColumnSettingsLogic(
+        serviceLocator,
+        domain?.agGridDomain ?? '', 
+        gridApi, 
+        userColumnSettings, 
+        setUserColumnSettings, 
+        defaultColumnDefinitions
+    );
 
     const [comboboxMap, setComboboxMap] = useState<Map<string, TableComboboxOption[]>>(new Map());  //AG_GRID_COLUMN_TYPE.COMBOBOX se hanno domain
 
@@ -303,7 +303,7 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
             ...appearance
         },
 
-        filterHandler,        
+        filterHandler,
         columnSettingsHandler,
 
         domain,
@@ -328,7 +328,7 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
         
         appearance,
         filterHandler,
-        columnSettingsHandler, 
+        columnSettingsHandler,
 
         domain,
          serviceLocator,

@@ -21,8 +21,6 @@ export type ColumnChooserMetadata = {
 }
 
 interface ColumnSettingsProps {
-    domain?: string;
-    metadata?: ColumnChooserMetadata;
     ref: any
 }
 
@@ -31,214 +29,62 @@ export type VfoColumnState = ColumnState & {
     order?: number;
 }
 
-export type TableColumnSettingsHandler = {
-    selectAll: () => void;
-    resetPreferences: (savePreferences: boolean) => void;
-    applyChanges: (savePreferences: boolean) => void;
-}
-
 const CSS = `:where(.vfo-column-settings) {
     overflow-y: auto;
 }`;
 
 export const ColumnSettings: React.FC<ColumnSettingsProps> = forwardRef((props, ref) => {
-    const [areAllSelected, setAreAllSelected] = useState<boolean>(false);
-    const [columns, setColumns] = useState<ColumnState[]>([]);
-    const [resetPref, setResetPref] = useState<boolean>(false);
+    // const [areAllSelected, setAreAllSelected] = useState<boolean>(false);
+    // const [columns, setColumns] = useState<ColumnState[]>([]);
 
-    const [savePreferences, setSavePreferences] = useState<boolean>(false);
+
+    // const [savePreferences, setSavePreferences] = useState<boolean>(false);
 
     // const auth = useAuth();
     const tableContext = useTableContext();
-    const gridApi = tableContext.gridApi;
-
-    const defaultColumnDefs = useMemo(() => { 
-        return tableContext.defaultColumnDefinitions ?? [];
-    }, [tableContext.defaultColumnDefinitions]);
-    
-    const gridSettingsHandler = tableContext.gridSettingsHandler;
-
-    useEffect(() => {
-        let someHidden = columns.some((c) => c.hide);
-        setAreAllSelected(!someHidden);
-    }, [columns]);
-
-    const selectAll = () => {
-        if (columns.filter((col) => { return !col.hide }).length === columns.length) 
-            setColumns(prev => prev.map(col => ({ ...col, hide: true })));
-        else
-            setColumns(prev => prev.map(col => ({ ...col, hide: false })));
-    };
-
-    const resetPreferences = (savePreferences: boolean) => {
-        setResetPref(true);
-        let defaultColumns = loadDefaultColumns();
-        setColumns(defaultColumns);
-        gridSettingsHandler.setIsModified(true);
-    }
-
-    const applyChanges = (savePreferences: boolean) => {
-
-        if (!gridApi) return;
-        // Applica le modifiche alla griglia
-        const columnState = columns.map((col) => ({
-            colId: col.colId,
-            headerName: col.headerName,
-            hide: col.hide,
-            sort: null,
-            sortIndex: null,
-            width: col.width
-        }));
-
-        gridApi.applyColumnState({
-            state: columnState,
-            applyOrder: true
-        });
-
-        gridSettingsHandler.saveGridSettings(columnState, savePreferences);
-
-    };
-
+    const { 
+        columns,
+        setColumns, 
+        areAllSelected, 
+        selectAll, 
+        resetColumnSettings, 
+        loadCurrentColumnState, 
+        applyChanges,
+        isModified
+    } = tableContext.columnSettingsHandler;
 
     useImperativeHandle(ref, () => ({
         selectAll,
-        resetPreferences,
-        applyChanges
-    }));
+        resetColumnSettings,
+        applyChanges,
+        isModified
+    }), [selectAll, resetColumnSettings, applyChanges, isModified]);
 
     useEffect(() => {
-        //init column chooser
-        if (gridApi && defaultColumnDefs) {
-            loadCurrentColumnState();
-        }
-    }, [defaultColumnDefs, gridApi]);
+        //init
+        loadCurrentColumnState();
+    }, []);
 
-    const toggleColumnVisibility = (colId: string) => {
-        setColumns(prev =>
-            prev.map(col =>
+    const toggleColumnVisibility = useCallback((colId: string) => {
+
+        let _columns = columns.map(col =>
                 col.colId === colId
                     ? { ...col, hide: !col.hide }
                     : col
-            )
-        );
-        gridSettingsHandler.setIsModified(true);
-    };
+            );
+        setColumns(_columns);
+    }, [columns]);
 
-    const moveColumn = (fromIndex: number, toIndex: number) => {
-        setColumns(prev => {
-            const newColumns = [...prev];
-            const [moved] = newColumns.splice(fromIndex, 1);
-            newColumns.splice(toIndex, 0, moved);
-            return newColumns.map((col, index) => ({ ...col, order: index }));
-        });
-        gridSettingsHandler.setIsModified(true);
-    };
+    const moveColumn = useCallback((fromIndex: number, toIndex: number) => {
 
+        const newColumns = [...columns];
+        const [moved] = newColumns.splice(fromIndex, 1);
+        newColumns.splice(toIndex, 0, moved);
+        let _columns = newColumns.map((col, index) => ({ ...col, order: index }));
+        setColumns(_columns);
+    }, [columns]);
 
-
-    const loadCurrentColumnState = useCallback(() => {
-
-        let columnStates = [] as ColumnState[];
-
-        //hdsColDefsMap - struttura dati di sostegno per setting column state
-        let hdsColDefsMap = new Map();
-        defaultColumnDefs?.forEach((col, index) => {
-            hdsColDefsMap.set(col.field,
-                {
-                    headerName: col.headerName || col.field || `Column ${index}`,
-                    hide: col.hide
-                });
-        });
-
-        gridApi?.getColumnState().forEach((col: ColumnState) => {
-            let hdsColDef = hdsColDefsMap.get(col.colId);
-            if (!checkAddColumnState(col, hdsColDef))
-            {
-                return;
-            }
-            columnStates.push(col);
-        });
-
-        //set header names
-        columnStates.forEach((col) => {
-            col.headerName = hdsColDefsMap.get(col.colId)?.headerName ?? col.colId;
-        });
-        
-        setColumns(columnStates.sort((a, b) => a.order - b.order));
-    }, [defaultColumnDefs]);
-
-    const loadDefaultColumns = useCallback(() => {
-
-        let columnStates = [] as ColumnState[];
-
-        defaultColumnDefs?.forEach((col, index) => {
-
-            if (!checkAddColumnState(col, null)) {
-                return;
-            }
-
-            const colState = {
-                colId: col.field || col.colId || `col-${index}`,
-                headerName: col.headerName || col.field || `Column ${index}`,
-                hide: col.hide,
-                order: index,
-                width: col.width
-            } as ColumnState;
-            columnStates.push(colState);
-
-        });
-
-        let orderedDefColumnStates = columnStates?.sort((a, b) => a.order - b.order);
-        setColumns(orderedDefColumnStates);
-
-        return orderedDefColumnStates;
-
-    }, [defaultColumnDefs]);
-
-    /**
-     * Determina quali colonne mostrare in elenco
-     * 
-     * @param col 
-     * @param hdsColDef 
-     * @returns 
-     */
-    const checkAddColumnState = useCallback((col: ColumnState | ColDef, hdsColDef?: any): boolean => {
-
-        let _colId = "colId" in col ? col.colId : "field" in col ? col.field : "";
-
-        if (_colId?.startsWith('_')) {
-            // internal system columns - colonne aggiunte alla entity per system purposes
-            // es. colonna delle azioni -> _actions
-            // skip
-            return false;
-        }
-
-        //TODO protected e system columns
-        // let systemColumns = metadata.systemColumns;
-        // if(systemColumns.includes(_colId)) {
-        //     // system columns - presenti nella entity ma da non mostrare all'utente - utili solo per sistema
-        //     // es. agentId per filtrare i preventivi utente (per agente associato all'utente)
-        //     // skip
-        //     return false;
-        // }
-
-        // let user = auth.user;
-        // if (PermissionHelper.isAdmin(user))
-        //     return true;
-
-        // let protectedColumns = metadata?.protectedColumns;
-        // if (protectedColumns.includes(_colId)) {
-        //     // protectedColumns columns - presenti nella entity ma da non mostrare all'utente - utili solo per sistema
-        //     // es. agentId per filtrare i preventivi utente (per agente associato all'utente)
-        //     // skip
-        //     return false;
-        // }
-        
-        return true;
-
-    }, []);
-
-    if (!gridApi || !defaultColumnDefs) return <div><p>Scelta colonne non disponibile</p></div>;
+    if (!columns) return <div><p>Scelta colonne non disponibile</p></div>;
 
     return (
         <>

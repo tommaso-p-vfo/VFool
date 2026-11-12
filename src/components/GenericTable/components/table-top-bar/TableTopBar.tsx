@@ -8,6 +8,7 @@ import { ThemeColor, ThemeVariant } from "../../../../utils";
 import { FaCog, FaColumns, FaSave } from "react-icons/fa";
 import { ColumnSettings } from "../column-settings/ColumnSettings";
 import { GenericModal } from "../../../modals/GenericModal";
+import { TableInternalColumnSettingsHandler } from "../column-settings/hooks/useColumnSettingsLogic";
 
 const TableTopBar = forwardRef((props: any, ref) => {
 
@@ -16,7 +17,7 @@ const TableTopBar = forwardRef((props: any, ref) => {
 
     const t = tableContext.t;
 
-    const columnSettingsRef = useRef(null);
+    const columnSettingsRef = useRef<TableInternalColumnSettingsHandler>(null);
     const [openColumnSettings, setOpenColumnSettings] = useState<boolean>(false);
     
     // const metadata = props?.metadata;
@@ -114,7 +115,9 @@ const TableTopBar = forwardRef((props: any, ref) => {
                         {  
                             type:"button",
                             readableName: 'Salva',
-                            onClick: () => {},
+                            onClick: () => {  
+                                columnSettingsRef.current?.applyChanges();
+                            },
                         }
                     ]}  
                 

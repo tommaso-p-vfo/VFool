@@ -770,6 +770,11 @@ export const GenericTable =
                     }
                     : null
                 },
+                columnSettingsHandler: {
+                    // selectAll,
+                    // applyChanges,
+                    // resetPreferences
+                },
                 gridApi: gridApiRef.current
 
             } as TableContextHandler
@@ -794,7 +799,7 @@ export const GenericTable =
 
                     //state per gestione preferenze colonne
                     userColumnSettings={userColumnSettings} 
-                    setUserColumnSettings={setUserSettings}
+                    setUserColumnSettings={setUserColumnSettings}
                     defaultColumnDefinitions={columnDefs}
                     
 
