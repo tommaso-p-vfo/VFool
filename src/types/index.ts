@@ -1,3 +1,6 @@
+export type { ErrorCodeName, ErrorCode, VfoError, IErrorReporter } from './VfoError';
+export { type VfoResponse } from './VfoResponse';
+
 export * from './BulkItem';
 export * from './DataFormat';
 export * from './IComponentRegistry';

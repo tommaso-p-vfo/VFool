@@ -1,5 +1,5 @@
 import { TableContextHandler, TableInternalContextHandler } from "../contexts/TableContext";
-import { FilterModel, IComponentRegistry, IServiceLocator, PageRequest } from "../../../types";
+import { FilterModel, IComponentRegistry, IErrorReporter, IServiceLocator, PageRequest } from "../../../types";
 import { JSX } from "react/jsx-runtime";
 import { ThemeColor, ThemeVariant } from "../../../utils";
 import { GridApi } from "ag-grid-community";
@@ -20,6 +20,7 @@ export interface TableAttributes<T> {
     dataConnector: TableDataConnector;
     appearance?: TableApperance;
     translations?: TableTranslations;
+    errorReporter?: IErrorReporter;
 
     filterConfig?: TableFilterConfig;
     columnsConfig?: { [colName: string]: TableColumnConfig; }; // TODO _actions: boolean; }

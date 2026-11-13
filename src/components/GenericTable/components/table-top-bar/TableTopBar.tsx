@@ -9,6 +9,8 @@ import { FaCog, FaColumns, FaSave } from "react-icons/fa";
 import { ColumnSettings } from "../column-settings/ColumnSettings";
 import { GenericModal } from "../../../modals/GenericModal";
 import { TableInternalColumnSettingsHandler } from "../column-settings/hooks/useColumnSettingsLogic";
+import { consoleErrorReporter, createError } from "../../../../utils/ErrorHelper";
+import { ErrorCodes } from "../../../../types/VfoError";
 
 const TableTopBar = forwardRef((props: any, ref) => {
 
@@ -115,9 +117,13 @@ const TableTopBar = forwardRef((props: any, ref) => {
                         {  
                             type:"button",
                             readableName: 'Salva',
-                            onClick: () => {  
-                                columnSettingsRef.current?.applyChanges();
+                            onClick: async () => {  
+                                let response = await columnSettingsRef.current?.applyChanges();
+                                if(response?.success) {
+                                    setOpenColumnSettings(false);
+                                }
                             },
+                            disabled: !columnSettingsRef.current?.isModified
                         }
                     ]}  
                 

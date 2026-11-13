@@ -13,6 +13,9 @@ import { ApiRequest, IServiceLocator } from "../../../../../types";
 import { VFO_DOMAIN, VFO_SUBDOMAIN } from "../../../../../utils/ApiHelper";
 import { SERVICE_ENDPOINT } from "../../../../../types/api/ApiEndpoints";
 import { VfoColumnState } from "../ColumnSettings";
+import { VfoResponse } from "../../../../../types/VfoResponse";
+import { vfoCall } from "../../../../../utils/ErrorHelper";
+import { IErrorReporter } from "../../../../../types/VfoError";
 
 // export type TableInternalColumnSettingsHandler = {
 //     saveColumnSettings: (columnState: ColumnState[], saveOnServer: boolean) => void;
@@ -40,11 +43,12 @@ export type TableInternalColumnSettingsHandler = {
     loadCurrentColumnState: () => void; //popola columns
     selectAll: () => void;
     resetColumnSettings: () => void; 
-    applyChanges: (saveOnServer?: boolean) => Promise<void>; //default false
+    applyChanges: (saveOnServer?: boolean) => Promise<VfoResponse>; //default false
 
 }
 
 export const useColumnSettingsLogic = (
+    errorReporter: IErrorReporter,
     serviceLocator: IServiceLocator,
     domain: string,
     gridApi: GridApi | null,
@@ -230,27 +234,32 @@ export const useColumnSettingsLogic = (
         }
     }, [userSettings, domain, isModified]);
 
-    const applyChanges = useCallback(async (saveOnServer: boolean) => {
+    const applyChanges = useCallback(async (saveOnServer: boolean): Promise<VfoResponse> => {
 
-        console.log('applyChanges ' + JSON.stringify(columns) + ' - ga ' + JSON.stringify(gridApi));
+        return await vfoCall(async () => {
 
-        if (!gridApi) return;
-        // Applica le modifiche alla griglia
-        const columnState = columns.map((col) => ({
-            colId: col.colId,
-            headerName: col.headerName,
-            hide: col.hide,
-            sort: null,
-            sortIndex: null,
-            width: col.width
-        }));
+            throw new Error('fake error test');
 
-        gridApi.applyColumnState({
-            state: columnState,
-            applyOrder: true
-        });
+            if (!gridApi) return Promise.resolve({ success: true });
 
-        await _saveColumnSettings(columnState, saveOnServer);
+            // Applica le modifiche alla griglia
+            const columnState = columns.map((col) => ({
+                colId: col.colId,
+                headerName: col.headerName,
+                hide: col.hide,
+                sort: null,
+                sortIndex: null,
+                width: col.width
+            }));
+
+            gridApi.applyColumnState({
+                state: columnState,
+                applyOrder: true
+            });
+
+            await _saveColumnSettings(columnState, saveOnServer);
+
+        }, "APPLY_COLUMN_SETTINGS_FAILED", errorReporter);
 
     }, [gridApi, _saveColumnSettings, columns]);
 

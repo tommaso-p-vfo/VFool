@@ -102,6 +102,7 @@ export const GenericTable =
         filterConfig,
         summaryConfig, 
         translations, 
+        errorReporter,
         ref 
     }: TableAttributes<T> & { ref?: React.Ref<TableHandler> }) => {
 
@@ -785,11 +786,12 @@ export const GenericTable =
             domain && (
                 <TableProvider 
                     ref={tableContextRef}
-
+                    
                     //config iniziale da GenericTable props
                     appearance={tableAppearance}
                     dataConnector={dataConnector}
                     translations={t}
+                    errorReporter={errorReporter}
                     columnsConfig={columnsConfig}
                     filterConfig={filterConfig}
                     
