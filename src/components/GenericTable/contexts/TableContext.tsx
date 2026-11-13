@@ -24,8 +24,9 @@ import { TABLE_COLUMN_TYPE } from "../constants/tableConstants";
 import { TableApperance, TableColumnConfig, TableDataConnector, TableFilterConfig, TableFilterHandler, TableSummaryConfig, TableTranslations } from "../types/TableAttributes";
 import { TableFilterInternalHandler, useCustomFilterLogic } from "../components/custom-filter/hooks/useCustomFiltersLogic";
 import { TableColumnSettingsHandler, TableInternalColumnSettingsHandler, useColumnSettingsLogic } from "../components/column-settings/hooks/useColumnSettingsLogic";
-import { IErrorReporter } from "../../../types/VfoError";
+import { IErrorReporter } from "../../../types/VfoErrors";
 import { consoleErrorReporter } from "../../../utils/ErrorHelper";
+import { IReporter } from "../../../contexts/reporter/types/IReporter";
 
 export type AgGridDomainType = {
 
@@ -102,7 +103,6 @@ interface TableProviderProps {
     filterConfig?: TableFilterConfig;
     columnsConfig?: { [colName: string]: TableColumnConfig; };
     appearance?: TableApperance;
-    errorReporter?: IErrorReporter;
     
     userFilter: TableUserFilter | undefined;
     setUserFilter: (filter?: TableUserFilter) => void; 
@@ -110,7 +110,6 @@ interface TableProviderProps {
     userColumnSettings: TableUserColumnSettings |undefined;
     setUserColumnSettings: (columnSettings?: TableUserColumnSettings) => void;
     defaultColumnDefinitions?: ColDef[]; 
-    
     
     gridApi: GridApi | null;
     serviceLocator: IServiceLocator;
@@ -128,7 +127,6 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
     appearance,
     dataConnector,
     translations,
-    errorReporter,
 
     columnsConfig,
     filterConfig,
@@ -150,8 +148,6 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
     isLoadingGridData 
 }: TableProviderProps, ref) => {
 
-    const _errorReporter = errorReporter ?? consoleErrorReporter;
-
     const filterHandler = useCustomFilterLogic({
         filterConfig,
         serviceLocator,
@@ -162,7 +158,6 @@ const TableProvider = forwardRef<TableInternalContextHandler, TableProviderProps
     });
     
     const columnSettingsHandler = useColumnSettingsLogic(
-        _errorReporter,
         serviceLocator,
         domain?.agGridDomain ?? '', 
         gridApi, 

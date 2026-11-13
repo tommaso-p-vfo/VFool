@@ -102,7 +102,7 @@ export const GenericTable =
         filterConfig,
         summaryConfig, 
         translations, 
-        errorReporter,
+        reporter,
         ref 
     }: TableAttributes<T> & { ref?: React.Ref<TableHandler> }) => {
 
@@ -791,7 +791,7 @@ export const GenericTable =
                     appearance={tableAppearance}
                     dataConnector={dataConnector}
                     translations={t}
-                    errorReporter={errorReporter}
+                    reporter={reporter}
                     columnsConfig={columnsConfig}
                     filterConfig={filterConfig}
                     

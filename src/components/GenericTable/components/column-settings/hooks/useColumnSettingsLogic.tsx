@@ -9,13 +9,13 @@ import { buildPath } from "../../../../../utils/Path";
 import { TableUserColumnSettings } from "../../../types/TableUserColumnSettings";
 import { TABLE_STORAGE_KEYS } from "../../../constants/tableStorageConstants";
 import { saveInLocalSession, saveInSession } from "../../../../../utils/StorageHelper";
-import { ApiRequest, IServiceLocator } from "../../../../../types";
+import { ApiRequest, IServiceLocator, VfoCallers, VfoResponse } from "../../../../../types";
 import { VFO_DOMAIN, VFO_SUBDOMAIN } from "../../../../../utils/ApiHelper";
 import { SERVICE_ENDPOINT } from "../../../../../types/api/ApiEndpoints";
 import { VfoColumnState } from "../ColumnSettings";
-import { VfoResponse } from "../../../../../types/VfoResponse";
-import { vfoCall } from "../../../../../utils/ErrorHelper";
-import { IErrorReporter } from "../../../../../types/VfoError";
+import { useReporter } from "../../../../../contexts/reporter/ReporterContext";
+import { vfoCall } from "../../../../../utils/Caller";
+import { ErrorCodes } from "../../../../../types/VfoErrors";
 
 // export type TableInternalColumnSettingsHandler = {
 //     saveColumnSettings: (columnState: ColumnState[], saveOnServer: boolean) => void;
@@ -48,7 +48,6 @@ export type TableInternalColumnSettingsHandler = {
 }
 
 export const useColumnSettingsLogic = (
-    errorReporter: IErrorReporter,
     serviceLocator: IServiceLocator,
     domain: string,
     gridApi: GridApi | null,
@@ -56,6 +55,8 @@ export const useColumnSettingsLogic = (
     setUserSettings: (userSettings?: TableUserColumnSettings) => void,
     defaultColumnDefinitions?: ColDef[]
 ) => {
+
+    const reporterContext = useReporter();
 
     const isModified = useMemo(() => userSettings?._isModified ?? false, [userSettings]);
     const setIsModified = useCallback((mod: boolean) => {
@@ -201,9 +202,7 @@ export const useColumnSettingsLogic = (
 
     const _saveColumnSettings = useCallback(async (columnState: ColumnState[], saveOnServer: boolean = false) => {
 
-        
         let isNew = !userSettings || (userSettings.id <= 0 || userSettings.id === undefined); 
-        console.log('_saveColumnSettings ' + JSON.stringify(columnState) + ' - saveOnServer ' + saveOnServer + ' - userSettings: ' + JSON.stringify(userSettings));
         
         let _userSettings = {
             ...userSettings,
@@ -238,8 +237,6 @@ export const useColumnSettingsLogic = (
 
         return await vfoCall(async () => {
 
-            throw new Error('fake error test');
-
             if (!gridApi) return Promise.resolve({ success: true });
 
             // Applica le modifiche alla griglia
@@ -259,7 +256,7 @@ export const useColumnSettingsLogic = (
 
             await _saveColumnSettings(columnState, saveOnServer);
 
-        }, "APPLY_COLUMN_SETTINGS_FAILED", errorReporter);
+        }, VfoCallers.APPLY_COLUMN_SETTINGS, ErrorCodes.APPLY_COLUMN_SETTINGS_FAILED, reporterContext);
 
     }, [gridApi, _saveColumnSettings, columns]);
 

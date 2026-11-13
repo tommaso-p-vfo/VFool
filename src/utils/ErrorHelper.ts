@@ -1,5 +1,5 @@
-import { ErrorCodeName, ErrorCodes, IErrorReporter, VfoError } from "../types/VfoError";
-import { VfoResponse } from "../types/VfoResponse";
+import { IErrorReporter } from "../contexts/reporter/types/IReporter";
+import { ErrorCode, ErrorCodeName, ErrorCodeNames, ErrorCodes, VfoError } from "../types/VfoErrors";
 
 /**
  * Crea un {@link VfoError}. Le proprietà opzionali non passate vengono omesse
@@ -43,24 +43,8 @@ export const consoleErrorReporter: IErrorReporter = (error) => {
 export const silentErrorReporter: IErrorReporter = (error) => {
 };
 
-export const vfoCall = async (f: (p?: unknown) => Promise<unknown>, errorCodeName?: ErrorCodeName, errorReporter?: IErrorReporter): Promise<VfoResponse> => {
 
-    try {
-        await f();
-        return { success: true } as VfoResponse;
-    }
-    catch (e: unknown) {
-        const message = e instanceof Error ? e.message : String(e ?? 'vfoCall error');
-        const res = {
-            success: false,
-            error: createError(errorCodeName ?? "GENERIC_ERROR", message, { error: e })
-        };
-        if (errorReporter) errorReporter(res.error);
-        return res; 
-    }
-    finally {
-
-    }
-
-
+export const getErrorCodeName = (errorCode?: ErrorCode): ErrorCodeName => {
+    return errorCode !== undefined ? ErrorCodeNames[errorCode] : "GENERIC_ERROR";
 }
+    

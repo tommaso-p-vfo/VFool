@@ -1,11 +1,12 @@
-import { TableContextHandler, TableInternalContextHandler } from "../contexts/TableContext";
-import { FilterModel, IComponentRegistry, IErrorReporter, IServiceLocator, PageRequest } from "../../../types";
+import { TableContextHandler } from "../contexts/TableContext";
+import { FilterModel, IComponentRegistry, IServiceLocator, PageRequest } from "../../../types";
 import { JSX } from "react/jsx-runtime";
 import { ThemeColor, ThemeVariant } from "../../../utils";
 import { GridApi } from "ag-grid-community";
 import { TableColumnType } from "../constants/tableConstants";
 import { TableUserFilter } from "./TableUserFilter";
 import { QuickSearchInternalHandler } from "../components/custom-filter/hooks/useCustomFiltersLogic";
+import { IReporter } from "../../../contexts/reporter/types/IReporter";
 
 /**
  * Interfaccia per definire gli attributi di una tabella attraverso React
@@ -20,7 +21,7 @@ export interface TableAttributes<T> {
     dataConnector: TableDataConnector;
     appearance?: TableApperance;
     translations?: TableTranslations;
-    errorReporter?: IErrorReporter;
+    reporter?: IReporter;
 
     filterConfig?: TableFilterConfig;
     columnsConfig?: { [colName: string]: TableColumnConfig; }; // TODO _actions: boolean; }

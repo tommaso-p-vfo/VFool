@@ -17,6 +17,11 @@ export const ErrorCodes = {
 /** Nome di un codice di errore (es. `'DATASOURCE_FETCH_FAILED'`). */
 export type ErrorCodeName = keyof typeof ErrorCodes;
 
+/** Mappa inversa: codice numerico → nome. */
+export const ErrorCodeNames = Object.fromEntries(
+    Object.entries(ErrorCodes).map(([name, code]) => [code, name])
+) as { [K in ErrorCodeName as (typeof ErrorCodes)[K]]: K };
+
 /** Valore numerico di un codice di errore (es. `1001`). */
 export type ErrorCode = (typeof ErrorCodes)[ErrorCodeName];
 
@@ -31,8 +36,3 @@ export type VfoError = {
     cause?: unknown;
 };
 
-/**
- * Callback che l'app fornisce per ricevere gli errori della libreria
- * (toast, logging, Sentry, ecc.).
- */
-export type IErrorReporter = (error: VfoError) => void;

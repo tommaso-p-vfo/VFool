@@ -10,7 +10,7 @@ import { ColumnSettings } from "../column-settings/ColumnSettings";
 import { GenericModal } from "../../../modals/GenericModal";
 import { TableInternalColumnSettingsHandler } from "../column-settings/hooks/useColumnSettingsLogic";
 import { consoleErrorReporter, createError } from "../../../../utils/ErrorHelper";
-import { ErrorCodes } from "../../../../types/VfoError";
+import { ErrorCodes } from "../../../../types/VfoErrors";
 
 const TableTopBar = forwardRef((props: any, ref) => {
 
