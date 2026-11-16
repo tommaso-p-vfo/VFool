@@ -1,5 +1,5 @@
 export type { ErrorCodeName, ErrorCode, VfoError } from './VfoErrors';
-export type { VfoCallers, VfoResponse } from './VfoCallers';
+export { VfoCallers, type VfoResponse } from './VfoCallers';
 
 export * from './BulkItem';
 export * from './DataFormat';

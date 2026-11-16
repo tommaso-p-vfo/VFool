@@ -1,4 +1,5 @@
 import { IErrorReporter } from "../contexts/reporter/types/IReporter";
+import { VfoCaller } from "../types/VfoCallers";
 import { ErrorCode, ErrorCodeName, ErrorCodeNames, ErrorCodes, VfoError } from "../types/VfoErrors";
 
 /**
@@ -34,17 +35,16 @@ export function isVfoError(value: unknown): value is VfoError {
     );
 }
 
-/** Reporter di default: scrive l'errore in console. */
-export const consoleErrorReporter: IErrorReporter = (error) => {
-    console.error(`[VFO UI KIT - ${error.code}] ${error.codeName}: ${error.message}`, error.params ?? '', error.cause ?? '');
-};
-
-/** Reporter no stream: ignora l'errore */
-export const silentErrorReporter: IErrorReporter = (error) => {
-};
-
-
 export const getErrorCodeName = (errorCode?: ErrorCode): ErrorCodeName => {
     return errorCode !== undefined ? ErrorCodeNames[errorCode] : "GENERIC_ERROR";
 }
+
+/** Reporter di default: scrive l'errore in console. */
+export const consoleErrorReporter: IErrorReporter = (caller: VfoCaller, error: VfoError) => {
+    console.error(`[VFO UI KIT - ${caller}] (${error.code}) ${error.codeName}: ${error.message}`, error.params ?? '', error.cause ?? '');
+};
+
+/** Reporter no stream: ignora l'errore */
+export const silentErrorReporter: IErrorReporter = (caller, error) => {
+};
     

@@ -235,7 +235,9 @@ export const useColumnSettingsLogic = (
 
     const applyChanges = useCallback(async (saveOnServer: boolean): Promise<VfoResponse> => {
 
-        return await vfoCall(async () => {
+        return await vfoCall(VfoCallers.APPLY_COLUMN_SETTINGS, async () => {
+
+            throw new Error('unexpected!');
 
             if (!gridApi) return Promise.resolve({ success: true });
 
@@ -256,7 +258,7 @@ export const useColumnSettingsLogic = (
 
             await _saveColumnSettings(columnState, saveOnServer);
 
-        }, VfoCallers.APPLY_COLUMN_SETTINGS, ErrorCodes.APPLY_COLUMN_SETTINGS_FAILED, reporterContext);
+        }, reporterContext, ErrorCodes.APPLY_COLUMN_SETTINGS_FAILED);
 
     }, [gridApi, _saveColumnSettings, columns]);
 

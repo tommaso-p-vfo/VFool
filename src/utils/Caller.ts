@@ -1,7 +1,7 @@
 import { IReporter } from "../contexts/reporter/types/IReporter";
 import { ErrorCode } from "../types";
 import { VfoCaller, VfoResponse } from "../types/VfoCallers";
-import { createError, getErrorCodeName } from "./ErrorHelper";
+import { createError, getErrorCodeName } from "./ReporterHelper";
 
 export const vfoCall = async (
     caller: VfoCaller,

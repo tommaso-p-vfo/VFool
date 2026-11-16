@@ -9,7 +9,7 @@ import { FaCog, FaColumns, FaSave } from "react-icons/fa";
 import { ColumnSettings } from "../column-settings/ColumnSettings";
 import { GenericModal } from "../../../modals/GenericModal";
 import { TableInternalColumnSettingsHandler } from "../column-settings/hooks/useColumnSettingsLogic";
-import { consoleErrorReporter, createError } from "../../../../utils/ErrorHelper";
+import { consoleErrorReporter, createError } from "../../../../utils/ReporterHelper";
 import { ErrorCodes } from "../../../../types/VfoErrors";
 
 const TableTopBar = forwardRef((props: any, ref) => {

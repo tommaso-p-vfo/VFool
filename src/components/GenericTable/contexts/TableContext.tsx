@@ -25,7 +25,7 @@ import { TableApperance, TableColumnConfig, TableDataConnector, TableFilterConfi
 import { TableFilterInternalHandler, useCustomFilterLogic } from "../components/custom-filter/hooks/useCustomFiltersLogic";
 import { TableColumnSettingsHandler, TableInternalColumnSettingsHandler, useColumnSettingsLogic } from "../components/column-settings/hooks/useColumnSettingsLogic";
 import { IErrorReporter } from "../../../types/VfoErrors";
-import { consoleErrorReporter } from "../../../utils/ErrorHelper";
+import { consoleErrorReporter } from "../../../utils/ReporterHelper";
 import { IReporter } from "../../../contexts/reporter/types/IReporter";
 
 export type AgGridDomainType = {
