@@ -20,6 +20,7 @@ export type VfoCaller = (typeof VfoCallers)[keyof typeof VfoCallers];
  * utile per interazione esterna tramite con IReporter
  */
 export const VfoMethods = {
+    APPLY: 'APPLY',
     SAVE: 'SAVE',
     READ: 'READ'
 };

@@ -240,7 +240,7 @@ export const useColumnSettingsLogic = (
 
     const applyChanges = useCallback(async (saveOnServer: boolean): Promise<VfoResponse> => {
 
-        return await vfoCall(VfoCallers.COLUMN_SETTINGS, VfoMethods.SAVE, async () => {
+        return await vfoCall(VfoCallers.COLUMN_SETTINGS, saveOnServer ? VfoMethods.SAVE : VfoMethods.APPLY, async () => {
 
             if (!gridApi) return Promise.resolve({ success: true });
 
