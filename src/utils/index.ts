@@ -4,4 +4,4 @@ export { encodeId, decodeId } from './IdEncoding';
 
 export { toBulkItem, getUpdatedFieldValues } from './Bulk';
 export * from './Color';
-export * from './ReporterHelper';
+export * from './ErrorHelper';

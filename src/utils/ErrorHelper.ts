@@ -1,6 +1,46 @@
 import { IErrorReporter } from "../contexts/reporter/types/IReporter";
-import { VfoCaller } from "../types/VfoCallers";
+import { VfoCaller, VfoCallers, VfoMethods } from "../types/VfoCallers";
 import { ErrorCode, ErrorCodeName, ErrorCodeNames, ErrorCodes, VfoError } from "../types/VfoErrors";
+
+const _getVfoError = (
+    caller: VfoCaller,
+    method: string, 
+    codeName?: ErrorCodeName
+) => {
+
+    if(codeName)
+        return { code: ErrorCodes[codeName], codeName };
+
+    switch(caller) {
+
+        case VfoCallers.COLUMN_SETTINGS:
+
+            if (method === VfoMethods.READ)
+                return _getErrorCodeInfo(ErrorCodes.LOAD_COLUMN_SETTINGS_FAILED);
+            if (method === VfoMethods.SAVE)
+                return _getErrorCodeInfo(ErrorCodes.APPLY_COLUMN_SETTINGS_FAILED);
+
+            
+            break;
+
+        default:
+            return _createGenericError(caller, method);
+
+    }
+
+    return _createGenericError(caller, method);
+}
+
+const _createGenericError = (caller: VfoCaller, method: string,) => {
+    return { code: ErrorCodes.GENERIC_ERROR, codeName: getErrorCodeName() };
+}
+
+const _getErrorCodeInfo = (code: ErrorCode) => {
+    return {
+        code: code,
+        codeName: getErrorCodeName(code)
+    }
+}
 
 /**
  * Crea un {@link VfoError}. Le proprietà opzionali non passate vengono omesse
@@ -10,12 +50,17 @@ import { ErrorCode, ErrorCodeName, ErrorCodeNames, ErrorCodes, VfoError } from "
  * reportError(createError('DATASOURCE_FETCH_FAILED', 'Caricamento dati fallito', { entityName }, err));
  */
 export function createError(
-    codeName: ErrorCodeName,
+    caller: VfoCaller,
+    method: string,
     message: string,
     params?: Record<string, unknown>,
     cause?: unknown,
+    codeName?: ErrorCodeName
 ): VfoError {
-    const error: VfoError = { code: ErrorCodes[codeName], codeName, message };
+
+    const err = _getVfoError(caller, method, codeName);
+
+    const error: VfoError = { code: err.code, codeName: err.codeName, message };
     if (params !== undefined) error.params = params;
     if (cause !== undefined) error.cause = cause;
     return error;

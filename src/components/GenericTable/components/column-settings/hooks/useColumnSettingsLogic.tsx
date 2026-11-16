@@ -9,7 +9,7 @@ import { buildPath } from "../../../../../utils/Path";
 import { TableUserColumnSettings } from "../../../types/TableUserColumnSettings";
 import { TABLE_STORAGE_KEYS } from "../../../constants/tableStorageConstants";
 import { saveInLocalSession, saveInSession } from "../../../../../utils/StorageHelper";
-import { ApiRequest, IServiceLocator, VfoCallers, VfoResponse } from "../../../../../types";
+import { ApiRequest, IServiceLocator, VfoCallers, VfoMethods, VfoResponse } from "../../../../../types";
 import { VFO_DOMAIN, VFO_SUBDOMAIN } from "../../../../../utils/ApiHelper";
 import { SERVICE_ENDPOINT } from "../../../../../types/api/ApiEndpoints";
 import { VfoColumnState } from "../ColumnSettings";
@@ -162,37 +162,42 @@ export const useColumnSettingsLogic = (
 
     }, [defaultColumnDefinitions]);
 
-    const loadCurrentColumnState = useCallback(() => {
+    const loadCurrentColumnState = useCallback(async () => {
 
-        if (!gridApi || !defaultColumnDefinitions) return;
-    
-        let columnStates = [] as VfoColumnState[];
+        return await vfoCall(VfoCallers.COLUMN_SETTINGS, VfoMethods.READ, async () => {
 
-        //hdsColDefsMap - struttura dati di sostegno per setting column state
-        let hdsColDefsMap = new Map();
-        defaultColumnDefinitions?.forEach((col, index) => {
-            hdsColDefsMap.set(col.field,
-                {
-                    headerName: col.headerName || col.field || `Column ${index}`,
-                    hide: col.hide
-                });
-        });
-
-        gridApi?.getColumnState().forEach((col: ColumnState) => {
-            let hdsColDef = hdsColDefsMap.get(col.colId);
-            if (!_checkAddColumnState(col, hdsColDef))
-            {
-                return;
-            }
-            columnStates.push(col);
-        });
-
-        //set header names
-        columnStates.forEach((col) => {
-            col.headerName = hdsColDefsMap.get(col.colId)?.headerName ?? col.colId;
-        });
+            if (!gridApi || !defaultColumnDefinitions) return;
         
-        _setColumns(columnStates.sort((a, b) => a.order - b.order));
+            let columnStates = [] as VfoColumnState[];
+
+            //hdsColDefsMap - struttura dati di sostegno per setting column state
+            let hdsColDefsMap = new Map();
+            defaultColumnDefinitions?.forEach((col, index) => {
+                hdsColDefsMap.set(col.field,
+                    {
+                        headerName: col.headerName || col.field || `Column ${index}`,
+                        hide: col.hide
+                    });
+            });
+
+            gridApi?.getColumnState().forEach((col: ColumnState) => {
+                let hdsColDef = hdsColDefsMap.get(col.colId);
+                if (!_checkAddColumnState(col, hdsColDef))
+                {
+                    return;
+                }
+                columnStates.push(col);
+            });
+
+            //set header names
+            columnStates.forEach((col) => {
+                col.headerName = hdsColDefsMap.get(col.colId)?.headerName ?? col.colId;
+            });
+            
+            _setColumns(columnStates.sort((a, b) => a.order - b.order));
+
+        }, reporterContext);
+
     }, [defaultColumnDefinitions, gridApi]);
 
     const resetColumnSettings = useCallback(() => {
@@ -235,9 +240,7 @@ export const useColumnSettingsLogic = (
 
     const applyChanges = useCallback(async (saveOnServer: boolean): Promise<VfoResponse> => {
 
-        return await vfoCall(VfoCallers.APPLY_COLUMN_SETTINGS, async () => {
-
-            throw new Error('unexpected!');
+        return await vfoCall(VfoCallers.COLUMN_SETTINGS, VfoMethods.SAVE, async () => {
 
             if (!gridApi) return Promise.resolve({ success: true });
 
@@ -258,7 +261,7 @@ export const useColumnSettingsLogic = (
 
             await _saveColumnSettings(columnState, saveOnServer);
 
-        }, reporterContext, ErrorCodes.APPLY_COLUMN_SETTINGS_FAILED);
+        }, reporterContext);
 
     }, [gridApi, _saveColumnSettings, columns]);
 

@@ -1,4 +1,5 @@
 import { VfoError } from "./VfoErrors";
+import { VfoSuccess } from "./VfoSuccess";
 
 /**
  * VFO UI KIT
@@ -7,16 +8,31 @@ import { VfoError } from "./VfoErrors";
  * utile per interazione esterna tramite con IReporter
  */
 export const VfoCallers = {
-    APPLY_COLUMN_SETTINGS: 'APPLY_COLUMN_SETTINGS'
+    COLUMN_SETTINGS: 'COLUMN_SETTINGS'
 };
 
 export type VfoCaller = (typeof VfoCallers)[keyof typeof VfoCallers];
+
+/**
+ * VFO UI KIT
+ * nomi dei metodi generici gestiti dalla libreria
+ * vengono usati per loggare univocamente i servizi
+ * utile per interazione esterna tramite con IReporter
+ */
+export const VfoMethods = {
+    SAVE: 'SAVE',
+    READ: 'READ'
+};
+
+export type VfoMethod = (typeof VfoMethods)[keyof typeof VfoMethods];
 
 /**
  * risposta dei servizi che resta interno alla libreria
  */
 export type VfoResponse = {
     caller: VfoCaller;
+    method: VfoMethod;
     success: boolean;
-    error?: VfoError;
+    successInfo?: VfoSuccess;
+    errorInfo?: VfoError;
 }
