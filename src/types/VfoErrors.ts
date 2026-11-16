@@ -13,6 +13,7 @@ export const ErrorCodes = {
     // 2xxx – column settings
     APPLY_COLUMN_SETTINGS_FAILED: 2001,
     LOAD_COLUMN_SETTINGS_FAILED: 2002,
+    RESET_COLUMN_SETTINGS_FAILED: 2003,
 } as const;
 
 /** Nome di un codice di errore (es. `'DATASOURCE_FETCH_FAILED'`). */

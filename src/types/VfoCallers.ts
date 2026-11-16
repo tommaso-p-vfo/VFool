@@ -21,7 +21,11 @@ export type VfoCaller = (typeof VfoCallers)[keyof typeof VfoCallers];
  */
 export const VfoMethods = {
     APPLY: 'APPLY',
+    RESET: 'RESET',
     SAVE: 'SAVE',
+    APPLY_AND_SAVE: 'APPLY_AND_SAVE',
+    RESET_AND_SAVE: 'RESET_AND_SAVE',
+    
     READ: 'READ'
 };
 

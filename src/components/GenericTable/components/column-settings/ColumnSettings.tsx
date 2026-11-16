@@ -96,7 +96,7 @@ export const ColumnSettings: React.FC<ColumnSettingsProps> = forwardRef((props, 
                 <Row
                     className='border-bottom m-2 mx-5 pb-2 cursor-pointer'
                 >
-                    <Col>
+                    <Col className='col-1'>
                         <div className='d-flex gap-2' title='Seleziona tutto' onClick={() => {}}>
                             <span><SelectAll size={18} color={toCssColor(ThemeColor.PRIMARY)} /></span>
                             <Form.Check
@@ -105,6 +105,16 @@ export const ColumnSettings: React.FC<ColumnSettingsProps> = forwardRef((props, 
                                 onChange={() => { selectAll() }}
                             />
 
+                        </div>
+                    </Col>
+                    <Col>
+                        <div className='d-flex gap-2 text-start small fw-bold' title='Nome colonna'>
+                            Nome colonna
+                        </div>
+                    </Col>
+                    <Col>
+                        <div className='d-flex gap-2 text-end'>
+                            <Button title='Ripristina le colonne di default' onClick={() => { resetColumnSettings(); }}>Ripristina</Button>        
                         </div>
                     </Col>
                     
@@ -127,7 +137,7 @@ export const ColumnSettings: React.FC<ColumnSettingsProps> = forwardRef((props, 
                         }}
                         className='border-bottom m-2 mx-5 pb-2 cursor-pointer'
                     >
-                        <Col>
+                        <Col className='col-1'>
                             <div className='d-flex gap-2' onClick={() => toggleColumnVisibility(column.colId)}>
                                 <span><FaGripVertical size={18} /></span>
                                 <Form.Check

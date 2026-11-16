@@ -24,9 +24,6 @@ import { TABLE_COLUMN_TYPE } from "../constants/tableConstants";
 import { TableApperance, TableColumnConfig, TableDataConnector, TableFilterConfig, TableFilterHandler, TableSummaryConfig, TableTranslations } from "../types/TableAttributes";
 import { TableFilterInternalHandler, useCustomFilterLogic } from "../components/custom-filter/hooks/useCustomFiltersLogic";
 import { TableColumnSettingsHandler, TableInternalColumnSettingsHandler, useColumnSettingsLogic } from "../components/column-settings/hooks/useColumnSettingsLogic";
-import { IErrorReporter } from "../../../types/VfoErrors";
-import { consoleErrorReporter } from "../../../utils/ErrorHelper";
-import { IReporter } from "../../../contexts/reporter/types/IReporter";
 
 export type AgGridDomainType = {
 

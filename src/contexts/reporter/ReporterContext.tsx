@@ -1,6 +1,5 @@
 import { createContext, ReactNode, useContext } from "react";
-import { IReporter, ISuccessReporter } from "./types/IReporter";
-import { consoleErrorReporter } from "../../utils";
+import { consoleErrorReporter, IReporter, ISuccessReporter } from "./types/IReporter";
 
 const ReporterContext = createContext<IReporter | null>(null);
 

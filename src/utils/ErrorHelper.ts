@@ -1,4 +1,3 @@
-import { IErrorReporter } from "../contexts/reporter/types/IReporter";
 import { VfoCaller, VfoCallers, VfoMethods } from "../types/VfoCallers";
 import { ErrorCode, ErrorCodeName, ErrorCodeNames, ErrorCodes, VfoError } from "../types/VfoErrors";
 
@@ -17,8 +16,10 @@ const _getVfoError = (
 
             if (method === VfoMethods.READ)
                 return _getErrorCodeInfo(ErrorCodes.LOAD_COLUMN_SETTINGS_FAILED);
-            if (method === VfoMethods.SAVE)
+            if (method === VfoMethods.APPLY || method === VfoMethods.APPLY_AND_SAVE)
                 return _getErrorCodeInfo(ErrorCodes.APPLY_COLUMN_SETTINGS_FAILED);
+            if (method === VfoMethods.RESET || method === VfoMethods.RESET_AND_SAVE)
+                return _getErrorCodeInfo(ErrorCodes.RESET_COLUMN_SETTINGS_FAILED);
 
             
             break;
@@ -83,13 +84,4 @@ export function isVfoError(value: unknown): value is VfoError {
 export const getErrorCodeName = (errorCode?: ErrorCode): ErrorCodeName => {
     return errorCode !== undefined ? ErrorCodeNames[errorCode] : "GENERIC_ERROR";
 }
-
-/** Reporter di default: scrive l'errore in console. */
-export const consoleErrorReporter: IErrorReporter = (caller: VfoCaller, error: VfoError) => {
-    console.error(`[VFO UI KIT - ${caller}] (${error.code}) ${error.codeName}: ${error.message}`, error.params ?? '', error.cause ?? '');
-};
-
-/** Reporter no stream: ignora l'errore */
-export const silentErrorReporter: IErrorReporter = (caller, error) => {
-};
     

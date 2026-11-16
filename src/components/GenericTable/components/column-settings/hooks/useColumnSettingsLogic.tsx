@@ -200,9 +200,15 @@ export const useColumnSettingsLogic = (
 
     }, [defaultColumnDefinitions, gridApi]);
 
-    const resetColumnSettings = useCallback(() => {
-        let defaultColumns = _loadDefaultColumns();
-        setColumns(defaultColumns);
+    const resetColumnSettings = useCallback(async () => {
+
+        return await vfoCall(VfoCallers.COLUMN_SETTINGS, VfoMethods.RESET, async () => {
+
+            let defaultColumns = _loadDefaultColumns();
+            setColumns(defaultColumns);
+
+        }, reporterContext);
+
     }, [_loadDefaultColumns]);
 
     const _saveColumnSettings = useCallback(async (columnState: ColumnState[], saveOnServer: boolean = false) => {
@@ -240,7 +246,7 @@ export const useColumnSettingsLogic = (
 
     const applyChanges = useCallback(async (saveOnServer: boolean): Promise<VfoResponse> => {
 
-        return await vfoCall(VfoCallers.COLUMN_SETTINGS, saveOnServer ? VfoMethods.SAVE : VfoMethods.APPLY, async () => {
+        return await vfoCall(VfoCallers.COLUMN_SETTINGS, saveOnServer ? VfoMethods.APPLY_AND_SAVE : VfoMethods.APPLY, async () => {
 
             if (!gridApi) return Promise.resolve({ success: true });
 
