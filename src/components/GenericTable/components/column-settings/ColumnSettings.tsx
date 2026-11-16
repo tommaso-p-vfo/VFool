@@ -116,15 +116,14 @@ export const ColumnSettings: React.FC<ColumnSettingsProps> = forwardRef((props, 
                         <ButtonGroup>
                             <GenericButton
                                 type='button'
-                                buttonConfig={{
-                                    color: ThemeColor.PRIMARY,
-                                    variant: ThemeVariant.OUTLINED,
-                                    icon: <FaUndo size={15} />
-
-                                }}
+                                icon={<FaUndo size={15} />}
+                                variant={ThemeVariant.FILLED}
+                                color={ThemeColor.PRIMARY}
+                                backgroundColor={ThemeColor.PRIMARY_CONTRAST}
+    
                                 onClick={resetColumnSettings}
                                 tooltip="Ripristina le colonne di default"
-                                readableName="Ripristina le colonne di default"
+                                readableName="Ripristina"
                             />
                         </ButtonGroup>
                     </Col>
