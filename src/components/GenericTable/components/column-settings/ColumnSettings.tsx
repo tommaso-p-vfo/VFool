@@ -122,7 +122,7 @@ export const ColumnSettings: React.FC<ColumnSettingsProps> = forwardRef((props, 
                                     icon: <FaUndo size={15} />
 
                                 }}
-                                onClick={() => resetColumnSettings}
+                                onClick={resetColumnSettings}
                                 tooltip="Ripristina le colonne di default"
                                 readableName="Ripristina le colonne di default"
                             />
