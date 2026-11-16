@@ -10,7 +10,7 @@ import type {
 // import { PermissionHelper } from '../../../../../core/auth/helpers/PermissionHelper';
 // import useAuth from '../../../../../core/auth/hooks/useAuth';
 import { useTableContext } from '../../hooks/useTableContext';
-import { FaArrowDown, FaArrowUp, FaCheckSquare, FaGripVertical, FaSquare, FaToggleOn } from 'react-icons/fa';
+import { FaArrowDown, FaArrowUp, FaCheckSquare, FaGripVertical, FaSquare, FaToggleOn, FaUndo } from 'react-icons/fa';
 import { ThemeColor, ThemeVariant, toCssColor } from '../../../../utils';
 import { GenericButton } from '../../../GenericButton';
 import { SelectAll } from '../../../icons/SelectAll';
@@ -112,10 +112,21 @@ export const ColumnSettings: React.FC<ColumnSettingsProps> = forwardRef((props, 
                             Nome colonna
                         </div>
                     </Col>
-                    <Col>
-                        <div className='d-flex gap-2 text-end'>
-                            <Button title='Ripristina le colonne di default' onClick={() => { resetColumnSettings(); }}>Ripristina</Button>        
-                        </div>
+                    <Col className='text-end'>
+                        <ButtonGroup>
+                            <GenericButton
+                                type='button'
+                                buttonConfig={{
+                                    color: ThemeColor.PRIMARY,
+                                    variant: ThemeVariant.OUTLINED,
+                                    icon: <FaUndo size={15} />
+
+                                }}
+                                onClick={() => resetColumnSettings}
+                                tooltip="Ripristina le colonne di default"
+                                readableName="Ripristina le colonne di default"
+                            />
+                        </ButtonGroup>
                     </Col>
                     
                 </Row>
