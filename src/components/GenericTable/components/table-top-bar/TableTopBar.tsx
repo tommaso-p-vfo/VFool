@@ -44,16 +44,13 @@ const TableTopBar = forwardRef((props: any, ref) => {
                     <GenericButton
                         type="button"
                         tooltip="Gestione colonne"
-                        readableName="Gestione colonne"
+                        label="Gestione colonne"
                         onClick={() => { setOpenColumnSettings(true); }}
                         className="m-0"
-                        buttonConfig={{
-
-                            variant: ThemeVariant.OUTLINED,
-                            color: ThemeColor.PRIMARY,
-                            // backgroundColor: ThemeColor.PRIMARY,
-                            icon: <div style={{ position: 'relative', display: 'inline-block' }}>
-                                <FaColumns />
+                        variant={ThemeVariant.OUTLINED}
+                        color={ThemeColor.PRIMARY}
+                        icon={<div style={{ position: 'relative', display: 'inline-block' }}>
+                            <FaColumns />
                                 <FaCog style={{
                                     position: 'absolute',
                                     bottom: -2,
@@ -61,26 +58,21 @@ const TableTopBar = forwardRef((props: any, ref) => {
                                     fontSize: '0.6em'
                                 }} />
                             </div>
-                        } as GenericButtonConfig}
+                        }
                     />
 
                     <GenericButton
                         type="button"
-                        readableName="Salva preferenze"
+                        label="Salva preferenze"
                         tooltip="Salva preferenze"
                         onClick={() => {
                             // gridSettingsHandler.saveGridSettings(gridApiRef.current.getColumnState(), true);
                         }}
                         className="m-0 px-2 no-border-left"
-                        disabled={false} //!gridSettingsHandler.isModified}
-                        buttonConfig={{
-
-                            variant: ThemeVariant.OUTLINED,
-                            color: ThemeColor.PRIMARY,
-                            // backgroundColor: ThemeColor.PRIMARY,
-                            icon: <FaSave size={12} />
-
-                        } as GenericButtonConfig}
+                        disabled={() => { return false; }} //!gridSettingsHandler.isModified}
+                        variant={ThemeVariant.OUTLINED}
+                        color={ThemeColor.PRIMARY}
+                        icon={<FaSave size={12} />}
                     />
 
                 </InputGroup>            
@@ -114,14 +106,14 @@ const TableTopBar = forwardRef((props: any, ref) => {
                         // },
                         {  
                             type:"button",
-                            readableName: 'Salva',
+                            label: 'Salva',
                             onClick: async () => {  
                                 let response = await columnSettingsRef.current?.applyChanges();
                                 if(response?.success) {
                                     setOpenColumnSettings(false);
                                 }
                             },
-                            disabled: !columnSettingsRef.current?.isModified
+                            disabled: () => { return !columnSettingsRef.current?.isModified; } 
                         }
                     ]}  
                 

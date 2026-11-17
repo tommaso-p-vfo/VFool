@@ -1,3 +1,6 @@
+export interface RGBA { r: number; g: number; b: number; a: number } // r,g,b 0-255, a 0-1
+interface HSL { h: number; s: number; l: number } // h 0-360, s/l 0-1
+
 /** Colori del tema disponibili nei componenti. */
 export const ThemeColor = {
     PRIMARY: 'primary',
@@ -93,10 +96,7 @@ export function withAlpha(color: ThemeColor, alpha = 1): string {
  * Se non è raggiungibile mantenendo la tinta, ripiega su nero/bianco.
  */
 
-export interface RGBA { r: number; g: number; b: number; a: number } // r,g,b 0-255, a 0-1
-interface HSL { h: number; s: number; l: number } // h 0-360, s/l 0-1
-
-export interface ContrastOptions {
+export type ContrastOptions = {
     /** Rapporto di contrasto WCAG minimo. Default 4.5 (AA). Usa 7 per AAA. */
     minContrast?: number;
     /** 'tinted' mantiene la tinta, 'blackWhite' restituisce solo #000/#fff. Default 'tinted'. */
@@ -128,6 +128,7 @@ function parseHue(v: string): number {
 
 export function parseCssColor(input: string): RGBA | null {
     const str = input.trim().toLowerCase();
+    // console.log(input);
 
     // #rgb, #rgba, #rrggbb, #rrggbbaa
     const hex = str.match(/^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/);
@@ -168,6 +169,13 @@ export function parseCssColor(input: string): RGBA | null {
         return { r, g, b, a: parseAlpha(p[3]) };
     }
 
+    const custom = str.match(/^var\(\s*(--[\w-]+)\s*(?:,\s*(.+))?\)$/);
+    if (custom) {
+        const p = resolveCssColor(str);
+        console.log(p);
+        return p;
+    }
+
     // Colori nominali (es. "lightgreen") e altri formati: delega al browser se disponibile
     if (typeof document !== 'undefined') {
         const ctx = document.createElement('canvas').getContext('2d');
@@ -181,6 +189,25 @@ export function parseCssColor(input: string): RGBA | null {
             const b = ctx.fillStyle;
             if (a === b) return a.startsWith('#') || a.startsWith('rgb') ? parseCssColor(a) : null;
         }
+    }
+
+    return null;
+}
+
+/** Risolve "var(--x)" (anche annidate o con fallback) e restituisce sempre un hex */
+export function resolveCssColor(
+    value: string | undefined,
+    el: Element = document.documentElement
+): RGBA | null {
+    if (!value || typeof window === 'undefined') return null;
+
+    let _color = value.trim();
+    const m = _color.match(/^var\(\s*(--[\w-]+)\s*(?:,\s*(.+))?\)$/);
+    if (m) {
+        const resolved = getComputedStyle(el).getPropertyValue(m[1]).trim();
+        const color = toRgba(resolved) || resolveCssColor(m[2], el) || '';
+        if (!color) return null;
+        return color;
     }
 
     return null;
@@ -211,6 +238,25 @@ export function hslToRgb({ h, s, l }: HSL): RGBA {
         h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] :
             h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
     return { r: (r + m) * 255, g: (g + m) * 255, b: (b + m) * 255, a: 1 };
+}
+
+export function toRgba(color: string): RGBA | undefined {
+    let ctx = document.createElement('canvas').getContext('2d');
+    if (!ctx) return undefined;
+
+    ctx.fillStyle = '#000';
+    ctx.fillStyle = color;
+    const out = String(ctx.fillStyle); // "#rrggbb" | "rgba(r, g, b, a)"
+
+    if (out.startsWith('#')) {
+        const n = parseInt(out.slice(1), 16);
+        return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255, a: 1 };
+    }
+
+    const p = out.match(/[\d.]+/g);
+    if (!p || p.length < 3) return undefined;
+    const [r, g, b] = p.map(Number);
+    return { r, g, b, a: parseAlpha(p[3]) };
 }
 
 // ---------- Contrasto WCAG ----------

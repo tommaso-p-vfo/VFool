@@ -1,27 +1,40 @@
-import { useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from "react";
+import { CSSProperties, useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from "react";
 import { Button } from "react-bootstrap";
 
 //TODO fix IdsVariant
 // import { IdsVariant } from "../../types/system/IdsVariant";
 
 import { InfoButton } from "./InfoButton";
-import { ThemeColor, ThemeColorName, ThemeVariant, ThemeVariantName, toCssColor } from "../utils";
+import { getContrastColor, ThemeColor, ThemeColorName, ThemeVariant, ThemeVariantName, toCssColor } from "../utils";
 
 const CSS = `
 /* GENERIC BUTTON */
 :where(.vfo-btn) {
-
-  border-radius: 5px;
-
-  &.active {
-    filter: brightness(1.2); // schiarisce del 20%
-  }
-
-  &:hover {
-    filter: brightness(1.1);
-  }
+    border-radius: 5px;
 }
 
+button.vfo-btn {
+    color: var(--vfo-color);
+    background-color: var(--vfo-bg);
+    border-color: var(--vfo-bg);
+    transition: background-color .15s, color .15s;
+
+    &.active {
+        /* filter: brightness(1.2); // schiarisce del 20% */
+    }
+}
+
+.vfo-btn.filled:hover:not(:disabled) {
+    color: var(--vfo-color);
+    background-color: color-mix(in srgb, var(--vfo-bg) 75%, transparent);
+    border-color: var(--vfo-bg);
+}
+
+.vfo-btn.outlined:hover:not(:disabled) {
+    color: var(--vfo-bg);
+    background-color: var(--vfo-color);
+    border-color: var(--vfo-bg);
+}
 
 `;
 
@@ -33,8 +46,7 @@ export type GenericButtonProps = {
     color?: ThemeColorName;
     backgroundColor?: ThemeColorName;
     
-    /** readableName - titolo del bottone visibil nel contenuto */
-    readableName: string;
+    label?: string;
     tooltip?: string;
     
     onClick: (event?: any) => void;
@@ -79,8 +91,10 @@ export const GenericButton = (props : GenericButtonProps ) => {
   const { 
     type, 
     onClick, 
-    readableName, 
+    label, 
     tooltip, 
+
+    icon,
 
     color,
     backgroundColor,
@@ -107,16 +121,30 @@ export const GenericButton = (props : GenericButtonProps ) => {
 
   }, [disabled, data]);
 
-  const _color = useMemo<string>(() => {
-    
-    if(!variant || variant === ThemeVariant.FILLED) {
-      return backgroundColor ?? 
-    } else { //outlined
-      return color;
-    }
+    const _variant = useMemo<string>(() => {
+        return variant ?? ThemeVariant.FILLED;
+    }, [variant]);
 
+    const _color = useMemo<string>(() => {
+        const _c = color ? toCssColor(color) : toCssColor(ThemeColor.PRIMARY);
 
-  }, [color, variant]);
+        if (!_variant || _variant === ThemeVariant.FILLED) {
+            return getContrastColor(_c);
+        } else { //outlined
+            return _c;
+        }
+    }, [color, _variant]);
+
+    const _bgColor = useMemo<string>(() => {
+
+        const _bgc = backgroundColor ? toCssColor(backgroundColor) : null;
+        
+        if (!_variant || _variant === ThemeVariant.FILLED) {
+            return _bgc ?? getContrastColor(_color);
+        } else { //outlined
+            return _bgc ?? getContrastColor(_color); 
+        }
+    }, [_color, backgroundColor, _variant]);
 
     // const [colorClass, setColorClass] = useState<string>('primary');
     // const [bgColor, setBgColor] = useState<string>(toCssColor(ThemeColor.PRIMARY));
@@ -170,7 +198,7 @@ export const GenericButton = (props : GenericButtonProps ) => {
         <style href="vfo-generic-button" precedence="default">
             {CSS}
         </style>
-        {buttonConfig && infoButtonConfig &&
+        {infoButtonConfig &&
             <InfoButton
                 htmlContent={infoButtonConfig.htmlContent}
                 placement='right-end'
@@ -181,7 +209,7 @@ export const GenericButton = (props : GenericButtonProps ) => {
 
 
       {/* // p-1 pb-2 d-flex align-items-center justify-content-center w-100 overflow-hidden */}
-         <div className="w-100">
+         <div className="d-flex">
         
             <Button
                 type={type}
@@ -189,13 +217,20 @@ export const GenericButton = (props : GenericButtonProps ) => {
                 onClick={onClick}
                 disabled={_disabled}
                 hidden={_hide}
-                className={`vfo-btn cursor-pointer ${variant} ${className}`}
-                style={{ color, backgroundColor: bgColor, borderColor: borderColor, maxHeight: 50 }}
+                className={`vfo-btn cursor-pointer ${_variant.toLocaleLowerCase()} ${className}`}
+                style={{ 
+                    '--vfo-color': _color,
+                    '--vfo-bg': _bgColor,
+                    // color: _color, 
+                    // backgroundColor: _bgColor, 
+                    // borderColor: _bgColor, 
+                    maxHeight: 50 
+                } as CSSProperties}
                 ref={btnRef}
             >
-                <span className="flex-shrink-0">{buttonConfig?.icon}</span>
+                <span className="flex-shrink-0">{icon}</span>
                 {showLabel && (
-                    <span className="ms-1 text-truncate">{tooltip}</span>
+                    <span className="ms-1 text-truncate">{label}</span>
                 )}
             </Button>
             </div>

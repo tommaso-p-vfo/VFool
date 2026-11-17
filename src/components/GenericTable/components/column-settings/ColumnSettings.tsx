@@ -119,11 +119,11 @@ export const ColumnSettings: React.FC<ColumnSettingsProps> = forwardRef((props, 
                                 icon={<FaUndo size={15} />}
                                 variant={ThemeVariant.FILLED}
                                 color={ThemeColor.PRIMARY}
-                                backgroundColor={ThemeColor.PRIMARY_CONTRAST}
+                                // backgroundColor={ThemeColor.PRIMARY_CONTRAST}
     
                                 onClick={resetColumnSettings}
                                 tooltip="Ripristina le colonne di default"
-                                readableName="Ripristina"
+                                label="Ripristina"
                             />
                         </ButtonGroup>
                     </Col>
@@ -164,29 +164,23 @@ export const ColumnSettings: React.FC<ColumnSettingsProps> = forwardRef((props, 
                                 {index > 0 && (
                                     <GenericButton
                                         type='button'
-                                        buttonConfig={{
-                                            color: ThemeColor.PRIMARY,
-                                            variant: ThemeVariant.OUTLINED,
-                                            icon: <FaArrowUp size={15} />
-
-                                        }}
+                                        color={ThemeColor.PRIMARY}
+                                        variant={ThemeVariant.OUTLINED}
+                                        icon={<FaArrowUp size={15} />}
                                         onClick={() => moveColumn(index, index - 1)}
                                         tooltip="Sposta su"
-                                        readableName="Sposta su"
+                                        label="Sposta su"
                                     />
                                 )}
                                 {index < columns.length - 1 && (
                                     <GenericButton
                                         type='button'
-                                        buttonConfig={{
-                                            color: ThemeColor.PRIMARY,
-                                            variant: ThemeVariant.OUTLINED,
-                                            icon: <FaArrowDown size={15} />
-
-                                        }}
+                                        color={ThemeColor.PRIMARY}
+                                        variant={ThemeVariant.OUTLINED}
+                                        icon={<FaArrowDown size={15} />}
                                         onClick={() => moveColumn(index, index + 1)}
                                         tooltip="Sposta giù"
-                                        readableName="Sposta giù"
+                                        label="Sposta giù"
                                     />
                                 )}
 
