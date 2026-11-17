@@ -172,7 +172,7 @@ export function parseCssColor(input: string): RGBA | null {
     const custom = str.match(/^var\(\s*(--[\w-]+)\s*(?:,\s*(.+))?\)$/);
     if (custom) {
         const p = resolveCssColor(str);
-        console.log(p);
+        // console.log(p);
         return p;
     }
 

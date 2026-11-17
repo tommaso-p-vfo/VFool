@@ -1,4 +1,4 @@
-import { CSSProperties, useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from "react";
+import { CSSProperties, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from "react";
 import { Button } from "react-bootstrap";
 
 //TODO fix IdsVariant
@@ -7,6 +7,7 @@ import { Button } from "react-bootstrap";
 import { InfoButton } from "./InfoButton";
 import { getContrastColor, ThemeColor, ThemeColorName, ThemeVariant, ThemeVariantName, toCssColor } from "../utils";
 import { useStyler } from "../contexts/styler/StylerContext";
+import { isNullEmptyOrUndefined } from "../utils/Guards";
 
 const CSS = `
 /* GENERIC BUTTON */
@@ -72,6 +73,8 @@ export type GenericButtonProps = {
       tooltip: string;
     };
 
+    maxWidth?: number; //larghezza di tutto il componente
+    size?: 'small'|'regular'; //
     shrinkable?: boolean; //permette al bottone di ridimensionarsi sulla base dello spazio
     showAsIcon?: boolean; //visualizza il bottone come icona
 }
@@ -114,21 +117,23 @@ export const GenericButton = (props : GenericButtonProps ) => {
     checkboxConfig, 
     buttonConfig, 
     className, 
-    infoButtonConfig 
+    infoButtonConfig,
+    
+    customContent,
+    showAsIcon,
+    shrinkable,
+    maxWidth
+    
   } = props;
 
     const styler = useStyler();
 
     const _hide = useMemo<boolean>(() => {
-
-    return hide ? hide(data) : false;
-
-    }, [disabled, data]);
+        return hide ? hide(data) : false;
+    }, [hide, data]);
 
     const _disabled = useMemo<boolean>(() => {
-
-    return disabled ? disabled(data) : false;
-
+        return disabled ? disabled(data) : false;
     }, [disabled, data]);
 
     const _variant = useMemo<string>(() => {
@@ -156,94 +161,86 @@ export const GenericButton = (props : GenericButtonProps ) => {
         }
     }, [_color, backgroundColor, _variant]);
 
-    // const [colorClass, setColorClass] = useState<string>('primary');
-    // const [bgColor, setBgColor] = useState<string>(toCssColor(ThemeColor.PRIMARY));
-    // const [color, setColor] = useState<string>(toCssColor(ThemeColor.PRIMARY_CONTRAST));
-    // const [borderColor, setBorderColor] = useState<string>(toCssColor(ThemeColor.PRIMARY_CONTRAST));
-        
-    // const shrink = buttonConfig?.shrink ?? false;
     // Soglia: larghezza minima per mostrare il testo (in px)
     const LABEL_MIN_WIDTH = 150;
+
     const btnRef = useRef<HTMLButtonElement>(null);
-    const [showLabel, setShowLabel] = useState(false);
+    const wrapperRef = useRef<HTMLDivElement>(null);
 
+    const hasLabel = !isNullEmptyOrUndefined(label);
+    const canShrink = (shrinkable ?? true) && !showAsIcon && hasLabel;
+
+    const [naturalWidth, setNaturalWidth] = useState<number | null>(null);
+    const [showLabel, setShowLabel] = useState<boolean>(!showAsIcon && hasLabel);
+
+    // 1. Quando cambia il contenuto: azzera la misura e mostra tutto
+    useLayoutEffect(() => {
+        setNaturalWidth(null);
+        setShowLabel(!showAsIcon && hasLabel);
+    }, [label, icon, showAsIcon, hasLabel]);
+
+    // 2. Misura la larghezza naturale (wrapper ancora "auto"), prima del paint
+    useLayoutEffect(() => {
+        if (naturalWidth !== null || !btnRef.current) return;
+        setNaturalWidth(Math.ceil(btnRef.current.getBoundingClientRect().width));
+    }, [naturalWidth]);
+
+    // 3. Osserva il wrapper, la cui larghezza ora NON dipende da showLabel
     useEffect(() => {
-      if (!btnRef.current) return;
+        const el = wrapperRef.current;
+        if (!canShrink || naturalWidth === null || !el) return;
 
-      const observer = new ResizeObserver(([entry]) => {
-          setShowLabel(entry.contentRect.width >= LABEL_MIN_WIDTH);
-      });
+        const ro = new ResizeObserver(([entry]) => {
+            setShowLabel(entry.contentRect.width >= naturalWidth - 1); // tolleranza subpixel
+        });
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, [canShrink, naturalWidth]);
 
-      observer.observe(btnRef.current);
-      return () => observer.disconnect();
-    }, []);
-    
-    // useEffect(() => {
-        
-    //     // setVariant(buttonConfig?.variant ? buttonConfig?.variant == IdsVariant.DARK ? 'vfo-btn-dark' : 'vfo-btn-light' : '');
-    //     if (buttonConfig?.backgroundColor) {
-    //         let colorObj = toCssColor(buttonConfig?.backgroundColor);
-    //         setBgColor(colorObj);
-    //     }
-        
-    //     if (buttonConfig?.color) {
-            
-    //         let colorObj = toCssColor(buttonConfig?.color);
-            
-    //         // setColorClass(buttonConfig?.color);
-    //         setColor(colorObj);
-    //     }
-        
-    //     if(buttonConfig?.borderColor) {
-    //         let colorObj = toCssColor(buttonConfig?.borderColor);
-    //         setBorderColor(colorObj);
-    //     } else if (buttonConfig?.color) {
-    //         let colorObj = toCssColor(buttonConfig?.color);
-    //         setBorderColor(colorObj);
-    //     }
-
-    // }, [buttonConfig]);
+    const wrapperStyle: CSSProperties | undefined =
+        canShrink && naturalWidth !== null
+            ? { width: naturalWidth, maxWidth: '100%', minWidth: 0 }
+            : undefined;
 
     return (<>
-        <style href="vfo-generic-button" precedence="default">
+        <style href="vfo-generic-button" precedence="default" style={wrapperStyle}>
             {CSS}
         </style>
-        {infoButtonConfig &&
-            <InfoButton
-                htmlContent={infoButtonConfig.htmlContent}
-                placement='right-end'
-                className='mb-3 position-absolute top-0 vfo-right-10'
-                tooltip={infoButtonConfig.tooltip ?? ''}
-            />
-        }
+        <div ref={wrapperRef} className="d-flex">
+            {infoButtonConfig &&
+                <InfoButton
+                    htmlContent={infoButtonConfig.htmlContent}
+                    placement='right-end'
+                    className='mb-3 position-absolute top-0 vfo-right-10'
+                    tooltip={infoButtonConfig.tooltip ?? ''}
+                />
+            }
 
-
-      {/* // p-1 pb-2 d-flex align-items-center justify-content-center w-100 overflow-hidden */}
-         <div className="d-flex">
-        
             <Button
+                ref={btnRef}
                 type={type}
                 title={tooltip}
                 onClick={onClick}
                 disabled={_disabled}
                 hidden={_hide}
                 className={`vfo-btn cursor-pointer ${_variant.toLocaleLowerCase()} ${className}`}
-                style={{ 
+                style={{
                     '--vfo-color': _color,
                     '--vfo-bg': _bgColor,
-                    // color: _color, 
-                    // backgroundColor: _bgColor, 
-                    // borderColor: _bgColor, 
-                    maxHeight: 50 
+                    maxHeight: 50,
+                    minWidth: 0,
+                    maxWidth: '100%'
                 } as CSSProperties}
-                ref={btnRef}
             >
                 <span className="flex-shrink-0">{icon}</span>
                 {showLabel && (
                     <span className="ms-1 text-truncate">{label}</span>
                 )}
             </Button>
-            </div>
+         
+        
+
+        </div>
         
 
         {/* {buttonConfig && !shrink && 

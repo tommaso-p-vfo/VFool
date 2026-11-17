@@ -5,7 +5,7 @@ export * from './components/GenericTable';
 export { LoadingOverlay } from './components/LoadingOverlay';
 // export * from './components/ProgressBar';
 // export * from './components/InfoButon';
-// export * from './components/GenericButton';
+export { type GenericButtonProps, GenericButton } from './components/GenericButton';
 export { GenericModal, type GenericModalProps, type GenericModalHandler } from './components/modals/GenericModal';
 
 export * from './utils';
