@@ -165,6 +165,7 @@ export const ColumnSettings: React.FC<ColumnSettingsProps> = forwardRef((props, 
                                     <GenericButton
                                         type='button'
                                         color={ThemeColor.PRIMARY}
+                                        backgroundColor={ThemeColor.PRIMARY_CONTRAST}
                                         variant={ThemeVariant.OUTLINED}
                                         icon={<FaArrowUp size={15} />}
                                         onClick={() => moveColumn(index, index - 1)}

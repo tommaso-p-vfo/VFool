@@ -6,6 +6,7 @@ import { Button } from "react-bootstrap";
 
 import { InfoButton } from "./InfoButton";
 import { getContrastColor, ThemeColor, ThemeColorName, ThemeVariant, ThemeVariantName, toCssColor } from "../utils";
+import { useStyler } from "../contexts/styler/StylerContext";
 
 const CSS = `
 /* GENERIC BUTTON */
@@ -30,9 +31,16 @@ button.vfo-btn {
     border-color: var(--vfo-bg);
 }
 
+.vfo-btn.outlined:not(.no-border) {
+    border-color: var(--vfo-color);
+}
+
 .vfo-btn.outlined:hover:not(:disabled) {
     color: var(--vfo-bg);
     background-color: var(--vfo-color);
+}
+
+.vfo-btn.outlined:hover:not(:disabled):not(.no-border) {
     border-color: var(--vfo-bg);
 }
 
@@ -109,17 +117,19 @@ export const GenericButton = (props : GenericButtonProps ) => {
     infoButtonConfig 
   } = props;
 
-  const _hide = useMemo<boolean>(() => {
+    const styler = useStyler();
+
+    const _hide = useMemo<boolean>(() => {
 
     return hide ? hide(data) : false;
 
-  }, [disabled, data]);
+    }, [disabled, data]);
 
-  const _disabled = useMemo<boolean>(() => {
+    const _disabled = useMemo<boolean>(() => {
 
     return disabled ? disabled(data) : false;
 
-  }, [disabled, data]);
+    }, [disabled, data]);
 
     const _variant = useMemo<string>(() => {
         return variant ?? ThemeVariant.FILLED;
@@ -129,7 +139,7 @@ export const GenericButton = (props : GenericButtonProps ) => {
         const _c = color ? toCssColor(color) : toCssColor(ThemeColor.PRIMARY);
 
         if (!_variant || _variant === ThemeVariant.FILLED) {
-            return getContrastColor(_c);
+            return getContrastColor(_c, styler.contrastOptions);
         } else { //outlined
             return _c;
         }
@@ -140,9 +150,9 @@ export const GenericButton = (props : GenericButtonProps ) => {
         const _bgc = backgroundColor ? toCssColor(backgroundColor) : null;
         
         if (!_variant || _variant === ThemeVariant.FILLED) {
-            return _bgc ?? getContrastColor(_color);
+            return _bgc ?? getContrastColor(_color, styler.contrastOptions);
         } else { //outlined
-            return _bgc ?? getContrastColor(_color); 
+            return _bgc ?? getContrastColor(_color, styler.contrastOptions); 
         }
     }, [_color, backgroundColor, _variant]);
 
